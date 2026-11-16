@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #1b1f24;
+    --muted: #57606a;
+    --line: #d0d7de;
+    --control-line: #6e7781;
+    --bg: #f6f8fa;
+    --surface: #ffffff;
+    --accent: #0b57d0;
+    --accent-dark: #08429e;
+    --danger: #b42318;
+    --danger-bg: #fef3f2;
+    --ok: #1a6b34;
+    --new: #eaf2ff;
+    --control-h: 40px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  .vh {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+
+  header.top { background: var(--surface); border-bottom: 1px solid var(--line); padding: 16px 0; }
+  #team-label { margin: 0; min-height: 1.45em; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  h1 { margin: 0; font-size: 24px; line-height: 1.25; }
+  h1:focus { outline: none; }
+  h2 { margin: 0; font-size: 18px; line-height: 1.3; }
+
+  main { padding: 24px 0 64px; }
+  section.panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 20px; margin-bottom: 20px;
+  }
+  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+  .section-head p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  label, legend { font-weight: 600; font-size: 14px; }
+  label { display: block; margin-bottom: 4px; }
+  input[type="text"], input[type="email"], select {
+    width: 100%; height: var(--control-h); padding: 0 10px;
+    font: inherit; font-size: 16px; color: var(--text);
+    background: var(--surface); border: 1px solid var(--control-line); border-radius: 6px;
+  }
+  input[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
+
+  button {
+    min-height: var(--control-h); padding: 0 14px;
+    font: inherit; font-weight: 600; font-size: 15px; color: var(--text);
+    background: var(--surface); border: 1px solid var(--control-line); border-radius: 6px;
+    cursor: pointer; white-space: nowrap;
+  }
+  button:hover { background: #eef1f4; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-dark); }
+  button.danger { color: var(--danger); border-color: var(--danger); }
+  button.danger:hover { background: var(--danger-bg); }
+  button.small { min-height: 32px; padding: 0 10px; font-size: 14px; }
+  button[aria-disabled="true"] { opacity: 0.7; cursor: progress; }
+
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .error { color: var(--danger); font-size: 14px; margin: 6px 0 0; }
+  .error::before { content: "! "; font-weight: 700; }
+  .status { color: var(--muted); font-size: 14px; }
+  .status.ok { color: var(--ok); }
+
+  /* Page load states */
+  .page-state { padding: 32px 0; }
+  .page-state p { margin: 0 0 12px; }
+
+  /* Invite form */
+  #invite-form { margin-bottom: 20px; }
+  .invite-row { display: flex; gap: 12px; align-items: flex-end; }
+  .invite-row .f-email { flex: 1 1 auto; min-width: 0; }
+  .invite-row .f-role { flex: 0 0 150px; }
+  #invite-status { margin: 6px 0 0; min-height: 0; }
+
+  /* Removed notice */
+  .notice {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    padding: 10px 12px; margin-bottom: 12px;
+    border: 1px solid var(--line); border-left: 4px solid var(--control-line); border-radius: 6px;
+    font-size: 15px;
+  }
+  .notice p { margin: 0; flex: 1 1 240px; overflow-wrap: anywhere; }
+  .notice .btns { display: flex; gap: 8px; }
+
+  /* Members table */
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th {
+    text-align: left; font-size: 13px; font-weight: 600; color: var(--muted);
+    padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line);
+  }
+  td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th.c-role, td.c-role { width: 250px; }
+  th.c-active, td.c-active { width: 130px; }
+  th.c-act, td.c-act { width: 96px; padding-right: 0; text-align: right; }
+  .m-name { font-weight: 600; overflow-wrap: anywhere; }
+  .m-email { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  td.c-active, td.c-role .role-static { line-height: var(--control-h); }
+  td.c-name { padding-top: 9px; }
+  .role-line { display: flex; align-items: center; gap: 10px; }
+  .role-line select { width: 130px; flex: none; }
+  .cell-label { margin: 0; }
+  .m-only { display: none; }
+  .inline-error { margin-top: 6px; }
+  .inline-error .error { margin: 0 0 6px; }
+  tr.is-new td { animation: flash 2.4s ease-out; }
+  @keyframes flash { from { background: var(--new); } to { background: transparent; } }
+
+  .empty { padding: 20px 0 4px; border-top: 1px solid var(--line); }
+  .empty p { margin: 0 0 12px; }
+
+  /* Rename */
+  .name-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .name-row input { flex: 1 1 260px; max-width: 420px; }
+
+  /* Notifications */
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { padding: 0; margin-bottom: 4px; font-weight: 400; font-size: 15px; color: var(--muted); }
+  .notif { border-bottom: 1px solid var(--line); padding: 2px 0; }
+  .notif:last-child { border-bottom: 0; }
+  .notif-line { display: flex; align-items: center; gap: 12px; }
+  .notif label {
+    display: flex; align-items: center; gap: 12px; flex: 1 1 auto;
+    margin: 0; min-height: 44px; font-weight: 400; font-size: 16px; cursor: pointer;
+  }
+  .notif input[type="checkbox"] { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--accent); }
+  .notif .inline-error { margin: 0 0 10px 32px; }
+
+  /* Dialog */
+  dialog {
+    width: min(460px, calc(100vw - 32px)); padding: 20px;
+    border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: var(--surface);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  }
+  dialog::backdrop { background: rgba(20, 24, 28, 0.55); }
+  dialog h2 { overflow-wrap: anywhere; }
+  dialog p { margin: 10px 0 0; }
+  .dialog-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .dialog-btns button { white-space: normal; overflow-wrap: anywhere; }
+
+  @media (max-width: 680px), (pointer: coarse) {
+    :root { --control-h: 44px; }
+    button.small { min-height: 44px; }
+  }
+
+  @media (max-width: 680px) {
+    .wrap { padding: 0 16px; }
+    main { padding-top: 16px; }
+    section.panel { padding: 16px; }
+    .invite-row { flex-direction: column; align-items: stretch; }
+    .invite-row .f-role { flex: none; }
+
+    table, tbody, tr, td { display: block; width: auto; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); }
+    tr { padding: 14px 0; border-top: 1px solid var(--line); }
+    td, th.c-role, td.c-role, th.c-active, td.c-active, th.c-act, td.c-act { width: auto; border: 0; padding: 0; text-align: left; }
+    td.c-role { margin-top: 10px; }
+    td.c-active { line-height: 1.45; margin-top: 8px; font-size: 14px; color: var(--muted); }
+    td.c-role .role-static { line-height: 1.45; }
+    td.c-act { margin-top: 10px; }
+    td.c-act:empty { display: none; }
+    .cell-label { position: static; width: auto; height: auto; margin: 0 0 4px; overflow: visible; clip: auto; clip-path: none; white-space: normal; }
+    .m-only { display: inline; }
+    .role-line select { width: 160px; }
+    .empty { border-top: 0; padding-top: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    tr.is-new td { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p id="team-label"></p>
+    <h1 id="page-title" tabindex="-1">Team settings</h1>
+  </div>
+</header>
+
+<div id="live" class="vh" role="status" aria-live="polite"></div>
+
+<main>
+  <div class="wrap">
+
+    <div id="loading" class="page-state">
+      <p>Loading team settings...</p>
+    </div>
+
+    <div id="load-error" class="page-state" hidden>
+      <p>The team settings could not be loaded. Check your connection and try again.</p>
+      <button type="button" id="load-retry" class="primary">Try again</button>
+    </div>
+
+    <div id="content" hidden>
+
+      <section class="panel" aria-labelledby="members-h">
+        <div class="section-head">
+          <h2 id="members-h">Members</h2>
+          <p id="seats"></p>
+        </div>
+
+        <form id="invite-form" novalidate>
+          <div class="invite-row">
+            <div class="f-email">
+              <label for="invite-email">Email address to invite</label>
+              <input id="invite-email" name="invite-email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="f-role">
+              <label for="invite-role">Role</label>
+              <select id="invite-role" name="invite-role">
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" id="invite-submit" class="primary">Send invite</button>
+          </div>
+          <p id="invite-error" class="error" hidden></p>
+          <p id="invite-status" class="status" hidden></p>
+        </form>
+
+        <div id="removed-notice" class="notice" tabindex="-1" hidden>
+          <p id="removed-text"></p>
+          <div class="btns">
+            <button type="button" id="removed-reinvite" class="small">Invite again</button>
+            <button type="button" id="removed-dismiss" class="small">Dismiss</button>
+          </div>
+        </div>
+
+        <table id="members-table" role="table" aria-labelledby="members-h">
+          <thead role="rowgroup">
+            <tr role="row">
+              <th role="columnheader" scope="col" class="c-name">Name</th>
+              <th role="columnheader" scope="col" class="c-role">Role</th>
+              <th role="columnheader" scope="col" class="c-active">Last active</th>
+              <th role="columnheader" scope="col" class="c-act"><span class="vh">Remove</span></th>
+            </tr>
+          </thead>
+          <tbody id="members-body" role="rowgroup"></tbody>
+        </table>
+
+        <div id="members-empty" class="empty" hidden>
+          <p>No one is on this team yet.</p>
+          <button type="button" id="empty-invite">Invite someone</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="rename-h">
+        <div class="section-head">
+          <h2 id="rename-h">Rename team</h2>
+        </div>
+        <form id="name-form" novalidate>
+          <label for="team-name">Team name</label>
+          <div class="name-row">
+            <input id="team-name" name="team-name" type="text" autocomplete="off">
+            <button type="submit" id="name-submit">Save name</button>
+            <span id="name-status" class="status"></span>
+          </div>
+          <p id="name-error" class="error" hidden></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="notif-h">
+        <div class="section-head">
+          <h2 id="notif-h">Email notifications</h2>
+        </div>
+        <fieldset>
+          <legend>Email the team about</legend>
+          <div id="notif-list"></div>
+        </fieldset>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<dialog id="remove-dialog" aria-labelledby="rd-title" aria-describedby="rd-body">
+  <h2 id="rd-title"></h2>
+  <p id="rd-body">They lose access at once. You can invite them again later.</p>
+  <p id="rd-error" class="error" hidden></p>
+  <div class="dialog-btns">
+    <button type="button" id="rd-keep">Keep on team</button>
+    <button type="button" id="rd-confirm" class="danger"></button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const ROLE_LABEL = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+  const NOTIF_LABEL = {
+    weekly_digest: 'Weekly digest',
+    new_member: 'New members joining',
+    billing: 'Billing',
+    mentions: 'Mentions',
+  };
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const RETRY_HINT = 'Check your connection and try again.';
+  const dateFmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+  let team = null;      // { name, seats }
+  let members = [];     // local copy of the member list
+
+  /* ---------- helpers ---------- */
+
+  function el(tag, attrs, ...kids) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v === false || v == null) continue;
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (v === true) node.setAttribute(k, '');
+      else node.setAttribute(k, v);
+    }
+    for (const kid of kids) if (kid != null) node.append(kid);
+    return node;
+  }
+
+  const live = $('live');
+  let liveTimer = null;
+  function announce(msg) {
+    live.textContent = '';
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => { live.textContent = msg; }, 60);
+  }
+
+  // Busy buttons stay focusable; clicks are ignored by the caller's own guard.
+  function setBusy(btn, busyLabel) {
+    btn.dataset.label = btn.textContent;
+    btn.textContent = busyLabel;
+    btn.setAttribute('aria-disabled', 'true');
+  }
+  function clearBusy(btn) {
+    if (btn.dataset.label != null) btn.textContent = btn.dataset.label;
+    delete btn.dataset.label;
+    btn.removeAttribute('aria-disabled');
+  }
+
+  function prettyKey(key) {
+    const s = String(key).replace(/_/g, ' ');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // Saves a single value. The latest choice wins; a failure puts the last saved value back.
+  function createSaver(initial, send, onState) {
+    let saved = initial, desired = initial, busy = false;
+    async function run() {
+      busy = true;
+      while (desired !== saved) {
+        const v = desired;
+        onState('saving', v);
+        try {
+          await send(v);
+          saved = v;
+        } catch (e) {
+          desired = saved;
+          busy = false;
+          onState('failed', v, saved);
+          return;
+        }
+      }
+      busy = false;
+      onState('saved', saved);
+    }
+    return {
+      set(v) {
+        desired = v;
+        if (busy) return;
+        if (desired !== saved) run(); else onState('idle', saved);
+      },
+    };
+  }
+
+  // Inline "Saving / Saved / failed, try again" feedback for one control.
+  function createFeedback(statusEl, errorBox) {
+    let timer = null;
+    const errorText = el('p', { class: 'error' });
+    const retryBtn = el('button', { type: 'button', class: 'small', text: 'Try again' });
+    let onRetry = null;
+    retryBtn.addEventListener('click', () => { if (onRetry) onRetry(); });
+    errorBox.append(errorText, retryBtn);
+    errorBox.hidden = true;
+    function clear() {
+      clearTimeout(timer);
+      statusEl.textContent = '';
+      statusEl.classList.remove('ok');
+      errorBox.hidden = true;
+    }
+    return {
+      clear,
+      saving() { clear(); statusEl.textContent = 'Saving...'; },
+      saved() {
+        clear();
+        statusEl.textContent = 'Saved';
+        statusEl.classList.add('ok');
+        timer = setTimeout(clear, 4000);
+      },
+      failed(msg, retry) {
+        clear();
+        errorText.textContent = msg;
+        onRetry = retry;
+        errorBox.hidden = false;
+      },
+    };
+  }
+
+  /* ---------- load ---------- */
+
+  async function load(fromRetry) {
+    $('load-error').hidden = true;
+    $('content').hidden = true;
+    $('loading').hidden = false;
+    announce('Loading team settings');
+    let data;
+    try {
+      data = await api.getTeam();
+    } catch (e) {
+      $('loading').hidden = true;
+      $('load-error').hidden = false;
+      announce('The team settings could not be loaded. ' + RETRY_HINT);
+      if (fromRetry) $('load-retry').focus();
+      return;
+    }
+    team = { name: data.name, seats: data.seats };
+    members = data.members;
+    renderAll(data);
+    $('loading').hidden = true;
+    $('content').hidden = false;
+    announce('Team settings loaded');
+    if (fromRetry) $('page-title').focus();
+  }
+  $('load-retry').addEventListener('click', () => load(true));
+
+  function renderAll(data) {
+    showTeamName();
+    $('team-name').value = team.name;
+    const body = $('members-body');
+    body.textContent = '';
+    for (const m of members) body.append(buildRow(m));
+    updateMemberCount();
+    const list = $('notif-list');
+    list.textContent = '';
+    for (const key of Object.keys(data.notifications)) list.append(buildNotif(key, !!data.notifications[key]));
+  }
+
+  function showTeamName() {
+    $('team-label').textContent = team.name;
+    document.title = 'Team settings - ' + team.name;
+  }
+
+  function updateMemberCount() {
+    $('seats').textContent = members.length + ' of ' + team.seats + ' seats used';
+    const none = members.length === 0;
+    $('members-table').hidden = none;
+    $('members-empty').hidden = !none;
+  }
+
+  /* ---------- member rows ---------- */
+
+  function buildRow(m) {
+    const tr = el('tr', { role: 'row', id: 'row-' + m.id });
+
+    const nameCell = el('td', { role: 'cell', class: 'c-name' },
+      el('div', { class: 'm-name', text: m.name }),
+      el('div', { class: 'm-email', text: m.email }));
+
+    const roleCell = el('td', { role: 'cell', class: 'c-role' });
+    if (m.role === 'owner') {
+      roleCell.append(el('div', { class: 'role-static' },
+        el('span', { class: 'm-only', text: 'Role: ' }), ROLE_LABEL.owner));
+    } else {
+      const selId = 'role-' + m.id;
+      const select = el('select', { id: selId },
+        el('option', { value: 'member', text: 'Member' }),
+        el('option', { value: 'admin', text: 'Admin' }));
+      select.value = m.role;
+      const status = el('span', { class: 'status' });
+      const errorBox = el('div', { class: 'inline-error' });
+      const fb = createFeedback(status, errorBox);
+      const saver = createSaver(m.role, (role) => api.changeRole(m.id, role), (state, value, saved) => {
+        if (state === 'saving') {
+          fb.saving();
+        } else if (state === 'saved') {
+          m.role = value;
+          select.value = value;
+          fb.saved();
+          announce(m.name + ' is now ' + (value === 'admin' ? 'an admin' : 'a member') + '.');
+        } else if (state === 'failed') {
+          select.value = saved;
+          const msg = 'Could not change the role to ' + ROLE_LABEL[value] + '. ' + m.name + ' is still ' +
+            (saved === 'admin' ? 'an admin' : 'a member') + '. ' + RETRY_HINT;
+          fb.failed(msg, () => { select.value = value; select.focus(); saver.set(value); });
+          announce(msg);
+        } else {
+          fb.clear();
+        }
+      });
+      select.addEventListener('change', () => saver.set(select.value));
+      roleCell.append(
+        el('label', { for: selId, class: 'cell-label vh' }, 'Role', el('span', { class: 'vh', text: ' for ' + m.name })),
+        el('div', { class: 'role-line' }, select, status),
+        errorBox);
+    }
+
+    const activeCell = el('td', { role: 'cell', class: 'c-active' }, el('span', { class: 'm-only', text: 'Last active: ' }));
+    if (m.lastActive) {
+      activeCell.append(el('time', { datetime: m.lastActive, text: dateFmt.format(new Date(m.lastActive)) }));
+    } else {
+      activeCell.append('Never');
+    }
+
+    const actCell = el('td', { role: 'cell', class: 'c-act' });
+    if (m.role !== 'owner') {
+      const btn = el('button', { type: 'button', class: 'remove-btn' }, 'Remove', el('span', { class: 'vh', text: ' ' + m.name }));
+      btn.addEventListener('click', () => openRemoveDialog(m, btn));
+      actCell.append(btn);
+    }
+
+    tr.append(nameCell, roleCell, activeCell, actCell);
+    return tr;
+  }
+
+  /* ---------- invite ---------- */
+
+  const inviteEmail = $('invite-email');
+  const inviteRole = $('invite-role');
+  const inviteBtn = $('invite-submit');
+  const inviteError = $('invite-error');
+  const inviteStatus = $('invite-status');
+  let inviting = false;
+
+  function clearInviteMessages() {
+    inviteError.hidden = true;
+    inviteStatus.hidden = true;
+    inviteEmail.removeAttribute('aria-invalid');
+    inviteEmail.removeAttribute('aria-describedby');
+  }
+  // An error about the address itself: tie it to the field and move focus there.
+  function inviteFieldError(msg) {
+    inviteError.textContent = msg;
+    inviteError.hidden = false;
+    inviteEmail.setAttribute('aria-invalid', 'true');
+    inviteEmail.setAttribute('aria-describedby', 'invite-error');
+    inviteEmail.focus();
+    announce(msg);
+  }
+  // An error about the request as a whole.
+  function inviteFormError(msg) {
+    inviteError.textContent = msg;
+    inviteError.hidden = false;
+    announce(msg);
+  }
+
+  async function submitInvite() {
+    if (inviting) return;
+    clearInviteMessages();
+    const email = inviteEmail.value.trim().toLowerCase();
+    const role = inviteRole.value;
+    if (!email) return inviteFieldError('Enter an email address.');
+    if (!EMAIL_RE.test(email)) return inviteFieldError('Enter a full email address, like name@example.com.');
+    if (members.some((m) => m.email.toLowerCase() === email)) return inviteFieldError(email + ' is already on the team.');
+    const seatsMsg = 'All ' + team.seats + ' seats are in use. Remove someone to free a seat.';
+    if (members.length >= team.seats) return inviteFormError(seatsMsg);
+
+    inviting = true;
+    setBusy(inviteBtn, 'Sending invite...');
+    announce('Sending invite');
+    try {
+      const m = await api.inviteMember(email, role);
+      members.push(m);
+      const row = buildRow(m);
+      row.classList.add('is-new');
+      $('members-body').append(row);
+      updateMemberCount();
+      inviteEmail.value = '';
+      inviteRole.value = 'member';
+      $('removed-notice').hidden = true;
+      const done = 'Invite sent to ' + m.email + ' as ' + (m.role === 'admin' ? 'an admin' : 'a member') + '.';
+      inviteStatus.textContent = done;
+      inviteStatus.className = 'status ok';
+      inviteStatus.hidden = false;
+      announce(done);
+    } catch (e) {
+      if (e.code === 'VALIDATION') inviteFieldError('Enter a full email address, like name@example.com.');
+      else if (e.code === 'EXISTS') inviteFieldError(email + ' is already on the team.');
+      else if (e.code === 'SEATS') inviteFormError(seatsMsg);
+      else inviteFormError('The invite to ' + email + ' was not sent. ' + RETRY_HINT);
+    } finally {
+      inviting = false;
+      clearBusy(inviteBtn);
+    }
+  }
+
+  $('invite-form').addEventListener('submit', (ev) => { ev.preventDefault(); submitInvite(); });
+  inviteEmail.addEventListener('input', () => { if (!inviting) clearInviteMessages(); });
+  $('empty-invite').addEventListener('click', () => inviteEmail.focus());
+
+  /* ---------- remove ---------- */
+
+  const dialog = $('remove-dialog');
+  const rdConfirm = $('rd-confirm');
+  const rdKeep = $('rd-keep');
+  const rdError = $('rd-error');
+  let removing = false;
+  let removeTarget = null;   // { member, opener }
+  let lastRemoved = null;
+
+  function openRemoveDialog(m, opener) {
+    removeTarget = { member: m, opener };
+    $('rd-title').textContent = 'Remove ' + m.name + ' from ' + team.name + '?';
+    rdConfirm.textContent = 'Remove ' + m.name;
+    rdError.hidden = true;
+    dialog.showModal();
+    rdKeep.focus();
+  }
+
+  function closeRemoveDialog() {
+    if (removing) return;
+    dialog.close();
+  }
+
+  rdKeep.addEventListener('click', closeRemoveDialog);
+  dialog.addEventListener('cancel', (ev) => { if (removing) ev.preventDefault(); });
+  dialog.addEventListener('click', (ev) => { if (ev.target === dialog) closeRemoveDialog(); });
+  dialog.addEventListener('close', () => {
+    if (dialog.open) return;   // reopened before this event arrived
+    const t = removeTarget;
+    if (!removing) removeTarget = null;
+    if (t && t.opener.isConnected) t.opener.focus();
+  });
+
+  rdConfirm.addEventListener('click', async () => {
+    if (removing || !removeTarget) return;
+    const m = removeTarget.member;
+    removing = true;
+    rdError.hidden = true;
+    setBusy(rdConfirm, 'Removing...');
+    announce('Removing ' + m.name);
+    try {
+      await api.removeMember(m.id);
+    } catch (e) {
+      removing = false;
+      clearBusy(rdConfirm);
+      const msg = m.name + ' was not removed and still has access. ' + RETRY_HINT;
+      rdError.textContent = msg;
+      rdError.hidden = false;
+      if (!dialog.open) { dialog.showModal(); rdConfirm.focus(); }
+      announce(msg);
+      return;
+    }
+    removing = false;
+    clearBusy(rdConfirm);
+    members = members.filter((x) => x.id !== m.id);
+    const row = $('row-' + m.id);
+    if (row) row.remove();
+    updateMemberCount();
+    lastRemoved = m;
+    const msg = m.name + ' was removed and no longer has access.';
+    $('removed-text').textContent = msg;
+    $('removed-reinvite').textContent = '';
+    $('removed-reinvite').append('Invite again', el('span', { class: 'vh', text: ' ' + m.email }));
+    $('removed-notice').hidden = false;
+    if (!inviting) clearInviteMessages();
+    dialog.close();
+    $('removed-notice').focus();
+    announce(msg);
+  });
+
+  $('removed-dismiss').addEventListener('click', () => {
+    $('removed-notice').hidden = true;
+    inviteEmail.focus();
+  });
+  $('removed-reinvite').addEventListener('click', () => {
+    if (!lastRemoved || inviting) return;
+    inviteEmail.value = lastRemoved.email;
+    inviteRole.value = lastRemoved.role === 'admin' ? 'admin' : 'member';
+    $('removed-notice').hidden = true;
+    inviteEmail.focus();
+    submitInvite();
+  });
+
+  /* ---------- rename ---------- */
+
+  const nameInput = $('team-name');
+  const nameBtn = $('name-submit');
+  const nameStatus = $('name-status');
+  const nameError = $('name-error');
+  let renaming = false;
+
+  function clearNameMessages() {
+    nameStatus.textContent = '';
+    nameStatus.classList.remove('ok');
+    nameError.hidden = true;
+    nameInput.removeAttribute('aria-invalid');
+    nameInput.removeAttribute('aria-describedby');
+  }
+  function nameSaved() {
+    nameStatus.textContent = 'Saved';
+    nameStatus.classList.add('ok');
+  }
+  function nameFieldError(msg) {
+    nameError.textContent = msg;
+    nameError.hidden = false;
+    nameInput.setAttribute('aria-invalid', 'true');
+    nameInput.setAttribute('aria-describedby', 'name-error');
+    nameInput.focus();
+    announce(msg);
+  }
+
+  $('name-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (renaming) return;
+    clearNameMessages();
+    const name = nameInput.value.trim();
+    if (!name) return nameFieldError('Enter a team name.');
+    if (name === team.name) {
+      nameInput.value = name;
+      nameSaved();
+      announce('Team name saved.');
+      return;
+    }
+    renaming = true;
+    setBusy(nameBtn, 'Saving...');
+    announce('Saving team name');
+    try {
+      const res = await api.renameTeam(name);
+      team.name = res.name;
+      nameInput.value = res.name;
+      showTeamName();
+      nameSaved();
+      announce('Team renamed to ' + res.name + '.');
+    } catch (e) {
+      if (e.code === 'VALIDATION') {
+        nameFieldError('Enter a team name.');
+      } else {
+        const msg = 'The name was not saved. The team is still called ' + team.name + '. ' + RETRY_HINT;
+        nameError.textContent = msg;
+        nameError.hidden = false;
+        announce(msg);
+      }
+    } finally {
+      renaming = false;
+      clearBusy(nameBtn);
+    }
+  });
+  nameInput.addEventListener('input', () => { if (!renaming) clearNameMessages(); });
+
+  window.addEventListener('beforeunload', (ev) => {
+    if (team && nameInput.value.trim() !== team.name) { ev.preventDefault(); ev.returnValue = ''; }
+  });
+
+  /* ---------- notifications ---------- */
+
+  function buildNotif(key, on) {
+    const label = NOTIF_LABEL[key] || prettyKey(key);
+    const id = 'notif-' + key;
+    const box = el('input', { type: 'checkbox', id });
+    box.checked = on;
+    const status = el('span', { class: 'status' });
+    const errorBox = el('div', { class: 'inline-error' });
+    const fb = createFeedback(status, errorBox);
+    const saver = createSaver(on, (v) => api.setNotification(key, v), (state, value, saved) => {
+      if (state === 'saving') {
+        fb.saving();
+      } else if (state === 'saved') {
+        box.checked = value;
+        fb.saved();
+        announce(label + ' emails turned ' + (value ? 'on' : 'off') + '.');
+      } else if (state === 'failed') {
+        box.checked = saved;
+        const msg = 'Could not turn ' + (value ? 'on' : 'off') + ' ' + label + ' emails. They are still ' +
+          (saved ? 'on' : 'off') + '. ' + RETRY_HINT;
+        fb.failed(msg, () => { box.checked = value; box.focus(); saver.set(value); });
+        announce(msg);
+      } else {
+        fb.clear();
+      }
+    });
+    box.addEventListener('change', () => saver.set(box.checked));
+    return el('div', { class: 'notif' },
+      el('div', { class: 'notif-line' }, el('label', { for: id }, box, label), status),
+      errorBox);
+  }
+
+  load(false);
+})();
+</script>
+</body>
+</html>

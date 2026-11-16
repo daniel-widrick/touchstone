@@ -1,0 +1,359 @@
+{
+  "verdicts": [
+    {
+      "id": "TASK-001",
+      "verdict": "pass",
+      "evidence": "lines 275-371: 11 copy buttons; lines 433-455 one delegated click handler copies the matching code text and sets the label to Copied or shows a fallback message"
+    },
+    {
+      "id": "TASK-002",
+      "verdict": "na",
+      "evidence": "no records, counts, metrics or charts; only fixed documentation text from the brief"
+    },
+    {
+      "id": "TASK-004",
+      "verdict": "na",
+      "evidence": "one-screen page; all steps (lines 269-362) are visible together"
+    },
+    {
+      "id": "TASK-005",
+      "verdict": "na",
+      "evidence": "no inputs or forms anywhere in the file"
+    },
+    {
+      "id": "TASK-007",
+      "verdict": "na",
+      "evidence": "no preselected values, dialogs or default buttons"
+    },
+    {
+      "id": "TASK-008",
+      "verdict": "pass",
+      "evidence": "lines 273-277 and each .cmd block: the command sits beside its own Copy button, one click copies (lines 440-448), no other screen or dialog"
+    },
+    {
+      "id": "TASK-012",
+      "verdict": "pass",
+      "evidence": "lines 260-389: requirements, install, repository, backup, list, restore, schedule, problems, next pages all map to brief notes; toc (245-258) is navigation for them; no extra sections"
+    },
+    {
+      "id": "ACT-007",
+      "verdict": "pass",
+      "evidence": "lines 167-179: every button uses the same neutral outlined .copy style; no button is styled primary, so at most one holds"
+    },
+    {
+      "id": "ACT-008",
+      "verdict": "na",
+      "evidence": "the interface itself offers no destructive action; buttons only copy text"
+    },
+    {
+      "id": "ACT-010",
+      "verdict": "na",
+      "evidence": "no disabled controls in the markup or script"
+    },
+    {
+      "id": "ACT-011",
+      "verdict": "na",
+      "evidence": "no title attributes, tooltips or hover cards"
+    },
+    {
+      "id": "COPY-001",
+      "verdict": "pass",
+      "evidence": "lines 237-388: text is about harbour and its commands; no mention of implementation, the request, mock data or unfinished features"
+    },
+    {
+      "id": "COPY-002",
+      "verdict": "pass",
+      "evidence": "line 311: the one warning (passphrase cannot be recovered) sits directly under the init command where the passphrase is chosen; lines 330, 351 are facts at their commands"
+    },
+    {
+      "id": "COPY-003",
+      "verdict": "fail",
+      "evidence": "line 243: 'This page takes you from install to a first backup, a restore and a nightly schedule.' narrates the page itself and repeats the contents list at lines 247-257"
+    },
+    {
+      "id": "COPY-004",
+      "verdict": "pass",
+      "evidence": "lines 294, 304, 324, 356: section intro lines add facts (what is printed, what a repository is, which folder) and do not restate their headings"
+    },
+    {
+      "id": "COPY-006",
+      "verdict": "pass",
+      "evidence": "lines 242-388: no slogans, superlatives, greetings or exclamation marks; statements name versions, sizes, commands and times"
+    },
+    {
+      "id": "COPY-007",
+      "verdict": "pass",
+      "evidence": "lines 275-371: each button reads 'Copy' with visually hidden object text such as 'the macOS install command'; each sits inside the block it copies"
+    },
+    {
+      "id": "COPY-009",
+      "verdict": "pass",
+      "evidence": "lines 304, 340: 'repository' and 'snapshot' are defined in user terms; codes shown are the literal commands and error strings the reader sees in the terminal"
+    },
+    {
+      "id": "COPY-011",
+      "verdict": "pass",
+      "evidence": "lines 453-454: 'Could not copy. The text is selected: press Ctrl+C to copy it.' states the problem and next step, no codes"
+    },
+    {
+      "id": "COPY-012",
+      "verdict": "pass",
+      "evidence": "lines 453-454: message is neutral, no 'failed', 'invalid', 'oops', exclamation marks or capitals"
+    },
+    {
+      "id": "STATE-001",
+      "verdict": "na",
+      "evidence": "no list, table, feed or search that can be empty"
+    },
+    {
+      "id": "STATE-002",
+      "verdict": "na",
+      "evidence": "no view that can be empty or fail to load"
+    },
+    {
+      "id": "STATE-003",
+      "verdict": "na",
+      "evidence": "fully static page; no server reads or writes"
+    },
+    {
+      "id": "STATE-004",
+      "verdict": "na",
+      "evidence": "the only action is a clipboard write that completes at once"
+    },
+    {
+      "id": "STATE-005",
+      "verdict": "na",
+      "evidence": "no asynchronous data, loading or empty states"
+    },
+    {
+      "id": "STATE-007",
+      "verdict": "na",
+      "evidence": "only fixed text; no variable-length data is rendered"
+    },
+    {
+      "id": "STATE-010",
+      "verdict": "na",
+      "evidence": "no edits held on the page"
+    },
+    {
+      "id": "FORM-004",
+      "verdict": "na",
+      "evidence": "no form fields"
+    },
+    {
+      "id": "FORM-005",
+      "verdict": "na",
+      "evidence": "no form fields"
+    },
+    {
+      "id": "FORM-006",
+      "verdict": "na",
+      "evidence": "no form or validation"
+    },
+    {
+      "id": "FORM-007",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-008",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-009",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-013",
+      "verdict": "na",
+      "evidence": "no form or submit button"
+    },
+    {
+      "id": "FORM-014",
+      "verdict": "na",
+      "evidence": "no form with a server effect"
+    },
+    {
+      "id": "FB-001",
+      "verdict": "pass",
+      "evidence": "line 181: .copy:active changes background on press; lines 440-442 set the label to 'Copied' as soon as the clipboard promise resolves"
+    },
+    {
+      "id": "FB-002",
+      "verdict": "pass",
+      "evidence": "lines 442-448 show 'Copied' on success; lines 449-454 state the failure in the block and select the text"
+    },
+    {
+      "id": "FB-003",
+      "verdict": "pass",
+      "evidence": "line 442: 'Copied' is the only success message and reports a clipboard change the user cannot otherwise see"
+    },
+    {
+      "id": "FB-004",
+      "verdict": "pass",
+      "evidence": "lines 449-454: the copy error is written in place into .cmd-msg with no timer; it is cleared only on a later successful copy (line 441). Only the 'Copied' label times out (446-448)"
+    },
+    {
+      "id": "FB-006",
+      "verdict": "na",
+      "evidence": "no action removes, archives or changes anything"
+    },
+    {
+      "id": "FB-007",
+      "verdict": "na",
+      "evidence": "no irreversible action in the interface"
+    },
+    {
+      "id": "FB-008",
+      "verdict": "na",
+      "evidence": "no confirmation dialogs"
+    },
+    {
+      "id": "FB-009",
+      "verdict": "na",
+      "evidence": "no optimistic updates or background requests"
+    },
+    {
+      "id": "NAV-008",
+      "verdict": "na",
+      "evidence": "no modal dialogs"
+    },
+    {
+      "id": "NAV-011",
+      "verdict": "na",
+      "evidence": "no modal dialogs"
+    },
+    {
+      "id": "DATA-001",
+      "verdict": "pass",
+      "evidence": "lines 242-267: h1 and one lead paragraph, then requirements and install; the toc is a small side column (lines 101-108) or a compact link grid on narrow screens (208-218)"
+    },
+    {
+      "id": "DATA-002",
+      "verdict": "pass",
+      "evidence": "lines 236-243: a one-line site header, the h1 and a two-sentence lead sized to content; no hero, greeting or full-height panel"
+    },
+    {
+      "id": "DATA-003",
+      "verdict": "na",
+      "evidence": "no summary numbers, stat cards or charts"
+    },
+    {
+      "id": "DATA-010",
+      "verdict": "na",
+      "evidence": "no filtering, search or sorting"
+    },
+    {
+      "id": "ACC-001",
+      "verdict": "pass",
+      "evidence": "lines 234, 248-256, 275-371, 385-387: all interactive elements are native a and button elements; skip link at 234; focus outline at line 57; no focus traps"
+    },
+    {
+      "id": "ACC-008",
+      "verdict": "pass",
+      "evidence": "lines 193-197, 311: the warning uses red but its bold text states the meaning; lines 182-190, 453: the error is red text that states the problem in words"
+    },
+    {
+      "id": "ACC-013",
+      "verdict": "pass",
+      "evidence": "line 392: role=status region exists on load and is filled at 443-444; lines 276 etc: role=alert paragraphs exist in each block on load and receive the error at 453"
+    },
+    {
+      "id": "ACC-014",
+      "verdict": "na",
+      "evidence": "nothing expands or collapses"
+    },
+    {
+      "id": "RESP-005",
+      "verdict": "pass",
+      "evidence": "lines 202-229: under 860px main is one column, toc becomes a link grid, .cmd stacks the button under the code; pre wraps (163-164) so no horizontal overflow"
+    },
+    {
+      "id": "NAV-002",
+      "verdict": "na",
+      "evidence": "single delivered page; the only navigation is an in-page contents list of anchors (245-258), no product sections to be in"
+    },
+    {
+      "id": "NAV-005",
+      "verdict": "na",
+      "evidence": "one view with no tabs, filters, pagination or selected record; section anchors are plain hash links"
+    },
+    {
+      "id": "NAV-006",
+      "verdict": "na",
+      "evidence": "single-view page"
+    },
+    {
+      "id": "NAV-007",
+      "verdict": "pass",
+      "evidence": "lines 382-389: page ends with links to three next docs pages; contents links at 247-257"
+    },
+    {
+      "id": "NAV-010",
+      "verdict": "na",
+      "evidence": "no dialogs or overlays"
+    },
+    {
+      "id": "NAV-012",
+      "verdict": "na",
+      "evidence": "numbered sections on one scrolling page, not a stepped flow"
+    },
+    {
+      "id": "RESP-004",
+      "verdict": "pass",
+      "evidence": "lines 219-228: under 860px toc links, .copy buttons and next-page links all get min-height 44px; .copy min-width 5rem (line 169)"
+    },
+    {
+      "id": "RESP-006",
+      "verdict": "pass",
+      "evidence": "lines 101-107: sticky toc occupies its own 13rem grid column beside the content, so it covers nothing; line 209 makes it static under 860px"
+    },
+    {
+      "id": "PAGE-001",
+      "verdict": "pass",
+      "evidence": "lines 242-243: 'Getting started with harbour' then 'harbour makes encrypted, de-duplicated backups of folders to a local disk or to any S3-compatible storage', which says what it is and for whom"
+    },
+    {
+      "id": "PAGE-002",
+      "verdict": "na",
+      "evidence": "documentation article with no main call to action"
+    },
+    {
+      "id": "PAGE-003",
+      "verdict": "na",
+      "evidence": "no images, illustrations or video"
+    },
+    {
+      "id": "PAGE-004",
+      "verdict": "na",
+      "evidence": "no testimonials, customer names, usage figures or prices; version 2.4 and 60 MB come from the brief"
+    },
+    {
+      "id": "PAGE-005",
+      "verdict": "na",
+      "evidence": "no pricing section"
+    },
+    {
+      "id": "PAGE-006",
+      "verdict": "na",
+      "evidence": "no images or video"
+    },
+    {
+      "id": "PAGE-007",
+      "verdict": "na",
+      "evidence": "no announcement strip"
+    },
+    {
+      "id": "PAGE-008",
+      "verdict": "pass",
+      "evidence": "lines 273-373: all 11 command blocks have a Copy button with an object name; lines 440-448 copy the text and change the label to 'Copied' plus a status announcement"
+    },
+    {
+      "id": "VIS-013",
+      "verdict": "pass",
+      "evidence": "lines 17, 57-58: one blue accent used for links and focus outlines; --danger (line 18) is used only for the warning and error text; everything else neutral"
+    }
+  ]
+}

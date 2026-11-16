@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import contacts</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --text: #1b2330; --muted: #5b6676; --line: #d9dee6;
+    --accent: #1d5fc4; --accent-text: #ffffff; --accent-soft: #e8f0fc;
+    --bad: #b3261e; --bad-soft: #fdecea; --ok: #18794e; --ok-soft: #e6f5ee; --warn: #8a5300; --warn-soft: #fff3dc;
+    --focus: #1d5fc4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181f; --card: #1d232d; --text: #e8ecf2; --muted: #a3adbb; --line: #364050;
+      --accent: #7fb0ff; --accent-text: #0d1726; --accent-soft: #24344f;
+      --bad: #ff9a92; --bad-soft: #472321; --ok: #6fd6a4; --ok-soft: #1c3a2c; --warn: #ffcc80; --warn-soft: #43351a;
+      --focus: #9cc2ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 4px; }
+  h2 { font-size: 1.3rem; line-height: 1.25; margin: 0 0 8px; }
+  h2:focus { outline: none; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.9rem; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.92em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  [hidden] { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .steps { list-style: none; display: flex; gap: 8px; padding: 0; margin: 16px 0 16px; flex-wrap: wrap; }
+  .steps li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.95rem; padding-right: 12px; }
+  .steps .num {
+    width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-flex;
+    align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; background: var(--card);
+  }
+  .steps li[aria-current] { color: var(--text); font-weight: 600; }
+  .steps li[aria-current] .num { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .steps li.done .num { border-color: var(--ok); color: var(--ok); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  @media (max-width: 520px) { .card { padding: 16px 14px; } }
+
+  label.field { display: block; font-weight: 600; margin-bottom: 4px; }
+  textarea {
+    width: 100%; min-height: 220px; resize: vertical; padding: 10px 12px; border: 1px solid var(--muted); border-radius: 8px;
+    background: var(--card); color: var(--text); font: 14px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre; overflow: auto;
+  }
+  textarea[readonly] { opacity: 0.7; }
+  .card.drag { outline: 3px dashed var(--accent); outline-offset: -6px; }
+
+  button, .btn {
+    font: inherit; font-weight: 600; min-height: 44px; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--muted); background: var(--card); color: var(--text);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  }
+  button:hover:not(:disabled) { border-color: var(--text); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  button.primary:hover:not(:disabled) { filter: brightness(0.92); }
+  button.link { border: 0; background: none; color: var(--accent); padding: 0 2px; min-height: 0; text-decoration: underline; font-weight: 500; }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .actions { margin-top: 16px; }
+  @media (max-width: 520px) { .actions > button { flex: 1 1 100%; } }
+
+  .note { border-radius: 8px; padding: 12px 14px; margin: 14px 0 0; border: 1px solid transparent; }
+  .note p:last-child { margin-bottom: 0; }
+  .note.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .note.bad strong { color: var(--bad); }
+  .note.info { background: var(--accent-soft); }
+  .note.warn { background: var(--warn-soft); }
+  .note .detail { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent;
+    animation: spin 0.8s linear infinite; flex: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } .bar > div { transition: none !important; } }
+
+  .tally { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; padding: 0; list-style: none; }
+  .tally li { flex: 1 1 150px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .tally .n { font-size: 1.5rem; font-weight: 700; line-height: 1.1; display: block; }
+  .tally .ok .n { color: var(--ok); }
+  .tally .bad .n { color: var(--bad); }
+
+  .breakdown { margin: 0 0 12px; padding-left: 20px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0 10px; }
+  .filters button { min-height: 38px; padding: 4px 12px; font-weight: 500; border-color: var(--line); }
+  .filters button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
+
+  .tablewrap { border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+  thead th { background: var(--bg); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.rownum { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+  td.flag { background: var(--bad-soft); box-shadow: inset 0 -2px 0 var(--bad); }
+  td .blank { color: var(--muted); font-style: italic; }
+  td.status { min-width: 170px; }
+  .tag { display: block; font-weight: 600; }
+  .tag.bad { color: var(--bad); }
+  .tag.ok { color: var(--ok); }
+  ul.plain { margin: 0; padding: 0; list-style: none; }
+  .tablefoot { margin-top: 10px; }
+
+  @media (max-width: 640px) {
+    .tablewrap { border: 0; overflow: visible; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tbody tr { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+    td { display: flex; gap: 10px; border-bottom: 1px solid var(--line); padding: 7px 10px; }
+    td::before { content: attr(data-label); flex: 0 0 76px; color: var(--muted); font-size: 0.82rem; padding-top: 2px; }
+    td.rownum { background: var(--bg); color: var(--text); font-weight: 600; }
+    td.rownum::before { content: none; }
+    td.status { min-width: 0; }
+    td:last-child { border-bottom: 0; }
+  }
+
+  .bar { height: 16px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin: 16px 0 8px; }
+  .bar > div { height: 100%; width: 0; background: var(--accent); transition: width 0.5s ease; }
+  .bigcount { font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .result-head { display: flex; gap: 12px; align-items: flex-start; }
+  .badge { flex: none; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Import contacts</h1>
+  <p class="muted">Add contacts to the CRM from a spreadsheet. You will see any problems before anything is saved.</p>
+
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li data-step="1"><span class="num" aria-hidden="true">1</span>Add your list</li>
+    <li data-step="2"><span class="num" aria-hidden="true">2</span>Review</li>
+    <li data-step="3"><span class="num" aria-hidden="true">3</span>Import</li>
+  </ol>
+
+  <div class="sr" role="status" aria-live="polite" id="live"></div>
+
+  <!-- Step 1: input -->
+  <section class="card" id="view-input" aria-labelledby="h-input">
+    <h2 id="h-input" tabindex="-1">Add your list</h2>
+    <p>Choose a CSV file exported from your spreadsheet, or paste the rows below. The first row should hold the column names
+      <code>name</code>, <code>email</code>, <code>phone</code>, <code>company</code>. Name and email are needed for every contact.</p>
+
+    <div class="row" style="margin-bottom:14px">
+      <button type="button" id="btn-file">Choose a CSV file</button>
+      <input type="file" id="file" accept=".csv,.txt,text/csv,text/plain" hidden>
+      <span class="muted small" id="file-hint">or drop a file anywhere on this box</span>
+    </div>
+
+    <label class="field" for="csv">Contacts (CSV text)</label>
+    <textarea id="csv" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="csv-count"
+      placeholder="name,email,phone,company&#10;Ana Flores,ana@northwind.com,+1 555 010 2030,Northwind&#10;Ben Okafor,ben@acme.co,,Acme"></textarea>
+    <div class="row small" style="justify-content:space-between;margin-top:6px">
+      <span class="muted" id="csv-count">No contacts yet.</span>
+      <span>
+        <button type="button" class="link" id="btn-template">Download a blank template</button>
+        <button type="button" class="link" id="btn-clear" hidden style="margin-left:12px">Clear</button>
+      </span>
+    </div>
+
+    <div class="note bad" id="input-error" role="alert" hidden></div>
+
+    <div class="row actions">
+      <button type="button" class="primary" id="btn-check">Check for problems</button>
+      <button type="button" id="btn-cancel-check" hidden>Cancel</button>
+      <span class="muted small" id="check-note">Nothing is imported at this step.</span>
+    </div>
+  </section>
+
+  <!-- Step 2: review -->
+  <section class="card" id="view-review" aria-labelledby="h-review" hidden>
+    <h2 id="h-review" tabindex="-1"></h2>
+    <p id="review-sub"></p>
+    <ul class="tally" id="review-tally"></ul>
+    <div id="review-breakdown"></div>
+    <p class="muted small" id="review-notes"></p>
+
+    <div class="row actions">
+      <button type="button" class="primary" id="btn-import"></button>
+      <button type="button" id="btn-back">Go back and edit the list</button>
+      <button type="button" id="btn-dl-problems"></button>
+    </div>
+
+    <div class="filters" role="group" aria-label="Rows to show" id="filters"></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Row</th><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Phone</th><th scope="col">Company</th><th scope="col">Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="tablefoot row">
+      <span class="muted small" id="rows-count"></span>
+      <button type="button" id="btn-more" hidden></button>
+    </div>
+    <p class="muted small" style="margin-top:10px">Row numbers match the rows in your spreadsheet.</p>
+  </section>
+
+  <!-- Step 3: running -->
+  <section class="card" id="view-run" aria-labelledby="h-run" hidden>
+    <h2 id="h-run" tabindex="-1">Importing contacts</h2>
+    <p>This usually takes 10 to 15 seconds. Please keep this page open until it finishes.</p>
+    <div class="bar" id="bar" role="progressbar" aria-labelledby="h-run" aria-valuemin="0" aria-valuenow="0" aria-valuemax="100"><div id="bar-fill"></div></div>
+    <p class="bigcount" id="run-count"></p>
+    <div class="row actions">
+      <button type="button" id="btn-stop">Stop import</button>
+      <span class="muted small" id="stop-note">If you stop, contacts already imported stay in the CRM.</span>
+    </div>
+  </section>
+
+  <!-- Step 3: outcome -->
+  <section class="card" id="view-done" aria-labelledby="h-done" hidden>
+    <div class="result-head">
+      <span class="badge" id="done-badge" aria-hidden="true"></span>
+      <div>
+        <h2 id="h-done" tabindex="-1"></h2>
+        <p id="done-sub"></p>
+      </div>
+    </div>
+    <ul class="tally" id="done-tally"></ul>
+    <div class="note" id="done-note" hidden></div>
+    <div class="row actions" id="done-actions"></div>
+  </section>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms || 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  return {
+    // rows: [{ name, email, phone, company }]. Resolves to [{ row: index, field, code }] where code is
+    // 'REQUIRED', 'EMAIL_FORMAT', 'PHONE_FORMAT' or 'DUPLICATE_IN_CRM'.
+    async validateImport(rows) {
+      await wait(); maybeFail('validate import');
+      const out = [];
+      rows.forEach((r, i) => {
+        if (!r.name || !r.name.trim()) out.push({ row: i, field: 'name', code: 'REQUIRED' });
+        if (!r.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) out.push({ row: i, field: 'email', code: r.email ? 'EMAIL_FORMAT' : 'REQUIRED' });
+        else if (/@example\.org$/.test(r.email)) out.push({ row: i, field: 'email', code: 'DUPLICATE_IN_CRM' });
+        if (r.phone && !/^[+\d][\d\s()-]{5,}$/.test(r.phone)) out.push({ row: i, field: 'phone', code: 'PHONE_FORMAT' });
+      });
+      return out;
+    },
+    // Imports the rows in batches. Calls onProgress(done, total) as it goes. Takes roughly 8 to 15 seconds.
+    // signal is an optional AbortSignal; aborting stops the import, and rows already imported stay imported.
+    // Resolves to { imported, skipped }. May reject part way; error.imported says how many rows were saved.
+    async runImport(rows, onProgress, signal) {
+      const total = rows.length; let done = 0;
+      const steps = 12, f = q.get('fail');
+      const failAt = f === '1' ? 5 : (f !== '0' && Math.random() < 0.25 ? 3 + Math.floor(Math.random() * 7) : -1);
+      for (let s = 1; s <= steps; s++) {
+        await wait(650 + Math.random() * 600);
+        if (signal && signal.aborted) { const e = new Error('ABORTED'); e.code = 'ABORTED'; e.imported = done; throw e; }
+        if (s === failAt) { const e = new Error('ETIMEDOUT: upstream timed out during batch ' + s); e.code = 'ETIMEDOUT'; e.imported = done; throw e; }
+        done = Math.min(total, Math.round((total * s) / steps)); if (onProgress) onProgress(done, total);
+      }
+      return { imported: total, skipped: 0 };
+    },
+  };
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FIELDS = ['name', 'email', 'phone', 'company'];
+  var LABELS = { name: 'Name', email: 'Email', phone: 'Phone', company: 'Company' };
+  var ALIASES = {
+    name: ['name', 'full name', 'fullname', 'contact', 'contact name'],
+    email: ['email', 'e-mail', 'email address', 'e-mail address', 'mail'],
+    phone: ['phone', 'phone number', 'telephone', 'tel', 'mobile', 'cell'],
+    company: ['company', 'company name', 'organisation', 'organization', 'employer', 'business']
+  };
+  var PAGE = 200;
+  var MAX_FILE = 5 * 1024 * 1024;
+
+  var S = {
+    rows: [],          // parsed rows: { n, name, email, phone, company, issues: [{field, text}] }
+    good: [], bad: [],
+    notes: [],
+    filter: 'bad', shown: PAGE,
+    checkToken: 0,
+    imported: 0, serverSkipped: 0, running: false, ctrl: null
+  };
+
+  function plural(n, one, many) { return n.toLocaleString() + ' ' + (n === 1 ? one : (many || one + 's')); }
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'class') e.className = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function say(msg) { $('live').textContent = msg; }
+
+  // ---------- CSV ----------
+  function detectDelimiter(text) {
+    var line = '', inQ = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (c === '"') inQ = !inQ;
+      else if ((c === '\n' || c === '\r') && !inQ) { if (line.trim()) break; line = ''; continue; }
+      line += c;
+    }
+    var best = ',', bestN = 0;
+    [',', ';', '\t'].forEach(function (d) {
+      var n = 0, q = false;
+      for (var j = 0; j < line.length; j++) { if (line[j] === '"') q = !q; else if (line[j] === d && !q) n++; }
+      if (n > bestN) { best = d; bestN = n; }
+    });
+    return best;
+  }
+  function parseCSV(text) {
+    text = text.replace(/^﻿/, '');
+    var d = detectDelimiter(text), out = [], rec = [], cell = '', inQ = false, quoted = false, i = 0, c;
+    function endCell() { rec.push(quoted ? cell : cell.trim()); cell = ''; quoted = false; }
+    function endRec() { endCell(); out.push(rec); rec = []; }
+    while (i < text.length) {
+      c = text[i];
+      if (inQ) {
+        if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else inQ = false; }
+        else cell += c;
+      } else if (c === '"' && cell.trim() === '') { inQ = true; quoted = true; cell = ''; }
+      else if (c === d) endCell();
+      else if (c === '\r') { if (text[i + 1] === '\n') i++; endRec(); }
+      else if (c === '\n') endRec();
+      else cell += c;
+      i++;
+    }
+    if (cell !== '' || quoted || rec.length) endRec();
+    return out;
+  }
+  function norm(h) { return String(h).toLowerCase().replace(/[_\s]+/g, ' ').trim(); }
+  function fieldFor(h) {
+    var n = norm(h);
+    for (var i = 0; i < FIELDS.length; i++) if (ALIASES[FIELDS[i]].indexOf(n) !== -1) return FIELDS[i];
+    return null;
+  }
+
+  // Returns { rows, notes } or { error }.
+  function readContacts(text) {
+    if (!text.trim()) return { error: 'Paste your contacts or choose a file first.' };
+    if (text.indexOf('\u0000') !== -1 || text.slice(0, 2) === 'PK') {
+      return { error: 'That does not look like CSV text. If it is an Excel file, open it and use "Save as" or "Export" to make a CSV file, then try again.' };
+    }
+    var recs = parseCSV(text), first = -1, i;
+    for (i = 0; i < recs.length; i++) if (recs[i].some(function (c) { return c !== ''; })) { first = i; break; }
+    if (first === -1) return { error: 'Paste your contacts or choose a file first.' };
+
+    var head = recs[first], map = {}, extras = [], notes = [];
+    var matches = head.filter(function (h) { return fieldFor(h); }).length;
+    var hasHeader = matches > 0 && !head.some(function (h) { return h.indexOf('@') !== -1; });
+    if (hasHeader) {
+      head.forEach(function (h, idx) {
+        var f = fieldFor(h);
+        if (f && map[f] === undefined) map[f] = idx; else if (h !== '') extras.push(h);
+      });
+      var missing = ['name', 'email'].filter(function (f) { return map[f] === undefined; });
+      if (missing.length) {
+        return { error: 'We could not find ' + (missing.length === 2 ? 'the name and email columns' : 'the ' + missing[0] + ' column') +
+          '. The first row has: ' + head.filter(Boolean).join(', ') + '. Rename the columns to name, email, phone, company and try again.' };
+      }
+      var absent = ['phone', 'company'].filter(function (f) { return map[f] === undefined; });
+      if (absent.length) notes.push('No ' + absent.join(' or ') + ' column was found, so ' + (absent.length === 1 ? 'that will be' : 'those will be') + ' left empty.');
+      if (extras.length) notes.push('Other columns are ignored: ' + extras.join(', ') + '.');
+    } else {
+      FIELDS.forEach(function (f, idx) { map[f] = idx; });
+      notes.push('The first row does not look like column names, so the columns were read in this order: name, email, phone, company.');
+    }
+    var rows = [];
+    for (i = hasHeader ? first + 1 : first; i < recs.length; i++) {
+      var r = recs[i];
+      if (!r.some(function (c) { return c !== ''; })) continue;
+      var row = { n: i + 1, issues: [] };
+      FIELDS.forEach(function (f) { row[f] = map[f] === undefined ? '' : (r[map[f]] || '').trim(); });
+      rows.push(row);
+    }
+    if (!rows.length) return { error: 'We found the column names but no contacts under them.' };
+    return { rows: rows, notes: notes };
+  }
+
+  function csvCell(v) { v = v == null ? '' : String(v); return /[",\r\n]|^\s|\s$/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function download(filename, rows, withProblem) {
+    var lines = [FIELDS.concat(withProblem ? ['problem'] : []).join(',')];
+    rows.forEach(function (r) {
+      var cells = FIELDS.map(function (f) { return csvCell(r[f]); });
+      if (withProblem) cells.push(csvCell(r.issues.map(function (x) { return x.text; }).join('; ')));
+      lines.push(cells.join(','));
+    });
+    var url = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' }));
+    var a = el('a', { href: url, download: filename });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  }
+
+  // ---------- Views ----------
+  function show(view, step) {
+    ['input', 'review', 'run', 'done'].forEach(function (v) { $('view-' + v).hidden = v !== view; });
+    Array.prototype.forEach.call($('steps').children, function (li) {
+      var n = +li.getAttribute('data-step');
+      if (n === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+      li.classList.toggle('done', n < step);
+    });
+    var h = $('h-' + view);
+    window.scrollTo(0, 0);
+    h.focus({ preventScroll: true });
+  }
+
+  // ---------- Step 1 ----------
+  var csv = $('csv'), countTimer = null;
+  function updateCount() {
+    var text = csv.value;
+    $('btn-clear').hidden = !text;
+    if (!text.trim()) { $('csv-count').textContent = 'No contacts yet.'; return; }
+    var res = readContacts(text);
+    $('csv-count').textContent = res.error ? 'No contacts found yet.' : plural(res.rows.length, 'contact') + ' found.';
+  }
+  csv.addEventListener('input', function () {
+    clearTimeout(countTimer); countTimer = setTimeout(updateCount, 250);
+    $('input-error').hidden = true;
+  });
+  function inputError(msg, detail, retry) {
+    var box = $('input-error'); box.textContent = '';
+    box.appendChild(el('p', null, [el('strong', { text: msg })]));
+    if (detail) box.appendChild(el('p', { text: detail }));
+    if (retry) {
+      var b = el('button', { type: 'button', text: 'Try again' });
+      b.addEventListener('click', check);
+      box.appendChild(b);
+    }
+    box.hidden = false;
+  }
+  function loadFile(file) {
+    if (!file) return;
+    $('input-error').hidden = true;
+    if (/\.(xlsx?|numbers|ods)$/i.test(file.name)) {
+      inputError(file.name + ' is a spreadsheet file, not a CSV file.', 'Open it in your spreadsheet program, choose "Save as" or "Export", pick CSV, and choose that file here.');
+      return;
+    }
+    if (file.size > MAX_FILE) { inputError(file.name + ' is too large to import here (over 5 MB).', 'Split it into smaller files and import them one at a time.'); return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      csv.value = String(fr.result || '');
+      updateCount();
+      $('file-hint').textContent = 'Loaded ' + file.name + '. You can edit it below before checking.';
+      say('Loaded ' + file.name);
+      if (!csv.value.trim()) inputError(file.name + ' is empty.');
+    };
+    fr.onerror = function () { inputError('We could not read ' + file.name + '.', 'Try choosing it again, or paste the rows instead.'); };
+    fr.readAsText(file);
+  }
+  $('btn-file').addEventListener('click', function () { $('file').click(); });
+  $('file').addEventListener('change', function () { loadFile(this.files[0]); this.value = ''; });
+  var dropCard = $('view-input'), dragDepth = 0;
+  dropCard.addEventListener('dragenter', function (e) { if (S.checking) return; e.preventDefault(); dragDepth++; dropCard.classList.add('drag'); });
+  dropCard.addEventListener('dragover', function (e) { e.preventDefault(); });
+  dropCard.addEventListener('dragleave', function () { if (--dragDepth <= 0) { dragDepth = 0; dropCard.classList.remove('drag'); } });
+  dropCard.addEventListener('drop', function (e) {
+    e.preventDefault(); dragDepth = 0; dropCard.classList.remove('drag');
+    if (S.checking) return;
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  $('btn-template').addEventListener('click', function () { download('contacts-template.csv', [], false); });
+  $('btn-clear').addEventListener('click', function () {
+    csv.value = ''; updateCount(); $('input-error').hidden = true;
+    $('file-hint').textContent = 'or drop a file anywhere on this box'; csv.focus();
+  });
+
+  function setChecking(on, n) {
+    S.checking = on;
+    var b = $('btn-check');
+    b.disabled = on; csv.readOnly = on; $('btn-file').disabled = on; $('btn-clear').disabled = on;
+    $('btn-cancel-check').hidden = !on;
+    b.textContent = '';
+    if (on) { b.appendChild(el('span', { class: 'spinner', 'aria-hidden': 'true' })); b.appendChild(document.createTextNode('Checking ' + plural(n, 'contact'))); }
+    else b.textContent = 'Check for problems';
+    $('check-note').textContent = on ? 'This takes a few seconds.' : 'Nothing is imported at this step.';
+  }
+
+  var MESSAGES = {
+    'name:REQUIRED': 'Name is missing',
+    'email:REQUIRED': 'Email is missing',
+    'email:EMAIL_FORMAT': 'Email address is not valid',
+    'phone:PHONE_FORMAT': 'Phone number is not valid',
+    'email:DUPLICATE_IN_CRM': 'Already in the CRM'
+  };
+
+  async function check() {
+    if (S.checking) return;
+    $('input-error').hidden = true;
+    var res = readContacts(csv.value);
+    if (res.error) { inputError(res.error); csv.focus(); return; }
+    var rows = res.rows, token = ++S.checkToken;
+    setChecking(true, rows.length);
+    say('Checking ' + plural(rows.length, 'contact'));
+    var payload = rows.map(function (r) { return { name: r.name, email: r.email, phone: r.phone, company: r.company }; });
+    var issues = null, lastErr = null;
+    // Checking changes nothing on the server, so it is safe to retry quietly before bothering the user.
+    for (var attempt = 0; attempt < 3 && !issues; attempt++) {
+      try { issues = await api.validateImport(payload); } catch (e) { lastErr = e; }
+      if (token !== S.checkToken) return;
+    }
+    setChecking(false);
+    if (!issues) {
+      inputError('We could not check your contacts because the connection to the CRM dropped.',
+        'Nothing was imported and your list is still here.', true);
+      $('input-error').appendChild(el('p', { class: 'detail', text: 'Details for support: ' + (lastErr && lastErr.message || 'unknown error') }));
+      return;
+    }
+    (issues || []).forEach(function (it) {
+      var r = rows[it.row]; if (!r) return;
+      r.issues.push({ field: it.field, code: it.code,
+        text: MESSAGES[it.field + ':' + it.code] || ('Problem with ' + (LABELS[it.field] || it.field).toLowerCase()) });
+    });
+    // Same email twice in this list: keep the first, flag the rest.
+    var seen = {};
+    rows.forEach(function (r) {
+      if (r.issues.some(function (x) { return x.field === 'email'; })) return;
+      var key = r.email.toLowerCase();
+      if (seen[key] !== undefined) r.issues.push({ field: 'email', code: 'DUPLICATE_IN_FILE', text: 'Same email as row ' + seen[key] });
+      else seen[key] = r.n;
+    });
+    S.rows = rows; S.notes = res.notes;
+    S.good = rows.filter(function (r) { return !r.issues.length; });
+    S.bad = rows.filter(function (r) { return r.issues.length; });
+    S.imported = 0; S.serverSkipped = 0;
+    renderReview();
+    show('review', 2);
+    say($('h-review').textContent);
+  }
+  $('btn-check').addEventListener('click', check);
+  $('btn-cancel-check').addEventListener('click', function () { S.checkToken++; setChecking(false); say('Check cancelled'); $('btn-check').focus(); });
+
+  // ---------- Step 2 ----------
+  function tally(target, items) {
+    target.textContent = '';
+    items.forEach(function (it) {
+      target.appendChild(el('li', { class: it.cls || '' }, [el('span', { class: 'n', text: it.n.toLocaleString() }), it.label]));
+    });
+  }
+  function renderReview() {
+    var total = S.rows.length, g = S.good.length, b = S.bad.length;
+    $('h-review').textContent = b === 0 ? (total === 1 ? 'Your contact is ready to import' : 'All ' + total.toLocaleString() + ' contacts are ready to import')
+      : g === 0 ? (total === 1 ? 'This contact cannot be imported' : 'None of the ' + total.toLocaleString() + ' contacts can be imported')
+      : g.toLocaleString() + ' of ' + total.toLocaleString() + ' contacts are ready to import';
+    $('review-sub').textContent = b === 0 ? 'No problems found. Nothing has been imported yet.'
+      : g === 0 ? 'Every row has a problem. Go back and fix the list, or download the problem rows to fix them in your spreadsheet.'
+      : plural(b, 'row has', 'rows have') + ' problems and will be left out. You can import the good rows now and fix the rest later, or go back and fix them first. Nothing has been imported yet.';
+    tally($('review-tally'), [
+      { n: g, label: 'ready to import', cls: 'ok' },
+      { n: b, label: b === 1 ? 'row with problems' : 'rows with problems', cls: b ? 'bad' : '' }
+    ]);
+
+    var counts = {}, order = [];
+    S.bad.forEach(function (r) { r.issues.forEach(function (x) {
+      var k = x.code === 'DUPLICATE_IN_FILE' ? 'Same email as another row' : x.text;
+      if (!counts[k]) { counts[k] = 0; order.push(k); } counts[k]++;
+    }); });
+    var bd = $('review-breakdown'); bd.textContent = '';
+    if (order.length) {
+      order.sort(function (a, c) { return counts[c] - counts[a]; });
+      bd.appendChild(el('ul', { class: 'breakdown small' }, order.map(function (k) { return el('li', { text: k + ': ' + counts[k].toLocaleString() }); })));
+    }
+    $('review-notes').textContent = S.notes.join(' ');
+    $('review-notes').hidden = !S.notes.length;
+
+    var imp = $('btn-import');
+    imp.textContent = g ? 'Import ' + plural(g, 'contact') : 'Nothing to import';
+    imp.disabled = !g;
+    $('btn-dl-problems').hidden = !b;
+    $('btn-dl-problems').textContent = 'Download the ' + plural(b, 'problem row') + ' (CSV)';
+
+    S.filter = b ? 'bad' : 'all'; S.shown = PAGE;
+    renderFilters(); renderRows();
+  }
+  function renderFilters() {
+    var f = $('filters'); f.textContent = '';
+    [['bad', 'Problems', S.bad.length], ['good', 'Ready', S.good.length], ['all', 'All rows', S.rows.length]].forEach(function (d) {
+      if (d[0] !== 'all' && (!S.bad.length || !S.good.length)) return;
+      var b = el('button', { type: 'button', 'aria-pressed': String(S.filter === d[0]), text: d[1] + ' (' + d[2].toLocaleString() + ')' });
+      b.addEventListener('click', function () {
+        S.filter = d[0]; S.shown = PAGE; renderRows();
+        Array.prototype.forEach.call(f.children, function (c) { c.setAttribute('aria-pressed', String(c === b)); });
+      });
+      f.appendChild(b);
+    });
+  }
+  function renderRows() {
+    var list = S.filter === 'bad' ? S.bad : S.filter === 'good' ? S.good : S.rows;
+    var body = $('rows'), frag = document.createDocumentFragment();
+    list.slice(0, S.shown).forEach(function (r) {
+      var tr = el('tr');
+      tr.appendChild(el('td', { class: 'rownum', 'data-label': 'Row', text: 'Row ' + r.n }));
+      FIELDS.forEach(function (f) {
+        var flagged = r.issues.some(function (x) { return x.field === f; });
+        var td = el('td', { 'data-label': LABELS[f], class: flagged ? 'flag' : '' });
+        if (r[f]) td.textContent = r[f];
+        else td.appendChild(el('span', { class: 'blank', text: flagged ? 'missing' : (f === 'name' || f === 'email' ? '' : 'none') }));
+        tr.appendChild(td);
+      });
+      var st = el('td', { class: 'status', 'data-label': 'Status' });
+      if (r.issues.length) st.appendChild(el('ul', { class: 'plain' }, r.issues.map(function (x) { return el('li', { class: 'tag bad', text: x.text }); })));
+      else st.appendChild(el('span', { class: 'tag ok', text: 'Ready' }));
+      tr.appendChild(st);
+      frag.appendChild(tr);
+    });
+    body.textContent = ''; body.appendChild(frag);
+    var shown = Math.min(S.shown, list.length);
+    $('rows-count').textContent = 'Showing ' + shown.toLocaleString() + ' of ' + plural(list.length, 'row') + '.';
+    var more = $('btn-more');
+    more.hidden = shown >= list.length;
+    more.textContent = 'Show ' + Math.min(PAGE, list.length - shown).toLocaleString() + ' more';
+  }
+  $('btn-more').addEventListener('click', function () { S.shown += PAGE; renderRows(); });
+  $('btn-back').addEventListener('click', function () { show('input', 1); });
+  $('btn-dl-problems').addEventListener('click', function () { download('contacts-with-problems.csv', S.bad, true); });
+  $('btn-import').addEventListener('click', runImport);
+
+  // ---------- Step 3 ----------
+  function setProgress(done, total) {
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    $('bar-fill').style.width = pct + '%';
+    $('bar').setAttribute('aria-valuenow', String(pct));
+    $('bar').setAttribute('aria-valuetext', done + ' of ' + total + ' contacts imported');
+    $('run-count').textContent = done.toLocaleString() + ' of ' + total.toLocaleString() + ' contacts imported';
+  }
+  window.addEventListener('beforeunload', function (e) { if (S.running) { e.preventDefault(); e.returnValue = ''; } });
+
+  async function runImport() {
+    if (S.running) return;
+    var total = S.good.length, base = S.imported;
+    var batch = S.good.slice(base).map(function (r) { return { name: r.name, email: r.email, phone: r.phone, company: r.company }; });
+    if (!batch.length) return;
+    S.running = true; S.ctrl = new AbortController();
+    var stop = $('btn-stop');
+    stop.disabled = false; stop.textContent = 'Stop import';
+    $('stop-note').textContent = 'If you stop, contacts already imported stay in the CRM.';
+    $('h-run').textContent = base ? 'Importing the remaining contacts' : 'Importing contacts';
+    setProgress(base, total);
+    show('run', 3);
+    say('Import started');
+    var lastSaid = 0, outcome, unknown = false, err = null;
+    try {
+      var res = await api.runImport(batch, function (done) {
+        setProgress(base + done, total);
+        var pct = Math.floor(((base + done) / total) * 4);
+        if (pct > lastSaid && pct < 4) { lastSaid = pct; say((pct * 25) + ' percent imported'); }
+      }, S.ctrl.signal);
+      var n = res && Number.isFinite(res.imported) ? res.imported : batch.length;
+      S.serverSkipped = res && Number.isFinite(res.skipped) ? res.skipped : 0;
+      S.imported = base + n;
+      outcome = 'ok';
+    } catch (e) {
+      err = e;
+      if (Number.isFinite(e && e.imported)) S.imported = base + e.imported; else unknown = true;
+      outcome = e && e.code === 'ABORTED' ? 'stopped' : 'failed';
+    }
+    S.running = false; S.ctrl = null;
+    renderDone(outcome, unknown, err);
+    show('done', 3);
+    say($('h-done').textContent);
+  }
+  $('btn-stop').addEventListener('click', function () {
+    if (!S.ctrl) return;
+    S.ctrl.abort();
+    this.disabled = true; this.textContent = '';
+    this.appendChild(el('span', { class: 'spinner', 'aria-hidden': 'true' }));
+    this.appendChild(document.createTextNode('Stopping'));
+    $('stop-note').textContent = 'Finishing the batch that is in progress.';
+    say('Stopping the import');
+  });
+
+  function actionBtn(label, fn, primary) {
+    var b = el('button', { type: 'button', text: label, class: primary ? 'primary' : '' });
+    b.addEventListener('click', fn);
+    $('done-actions').appendChild(b);
+    return b;
+  }
+  function reset() {
+    csv.value = ''; updateCount(); $('input-error').hidden = true;
+    $('file-hint').textContent = 'or drop a file anywhere on this box';
+    S.rows = []; S.good = []; S.bad = []; S.imported = 0;
+    show('input', 1);
+  }
+  function renderDone(outcome, unknown, err) {
+    var total = S.good.length, done = S.imported, left = Math.max(0, total - done - (outcome === 'ok' ? S.serverSkipped : 0)), b = S.bad.length;
+    var badge = $('done-badge'), note = $('done-note');
+    $('done-actions').textContent = ''; note.hidden = true; note.textContent = ''; note.className = 'note';
+
+    if (outcome === 'ok') {
+      badge.className = 'badge ok'; badge.textContent = '✓';
+      $('h-done').textContent = plural(done, 'contact') + ' imported';
+      $('done-sub').textContent = 'They are in the CRM now.' + (b ? ' ' + plural(b, 'row was', 'rows were') + ' left out because of problems.' : '');
+      if (S.serverSkipped) {
+        note.className = 'note warn'; note.hidden = false;
+        note.appendChild(el('p', { text: 'The CRM skipped ' + plural(S.serverSkipped, 'contact') + ' during the import. Check the list again to see which ones are still missing.' }));
+      }
+    } else {
+      var why = outcome === 'stopped' ? 'You stopped the import.' : 'The CRM stopped responding part way through.';
+      badge.className = 'badge ' + (outcome === 'stopped' ? 'warn' : 'bad'); badge.textContent = '!';
+      if (unknown) {
+        $('h-done').textContent = 'The import did not finish';
+        $('done-sub').textContent = why + ' We could not confirm how many contacts were saved.';
+        note.className = 'note warn'; note.hidden = false;
+        note.appendChild(el('p', { text: 'To avoid adding anyone twice, check the list again. Contacts that were saved will show up as "Already in the CRM" and be left out.' }));
+      } else if (done === 0) {
+        $('h-done').textContent = outcome === 'stopped' ? 'Import stopped. Nothing was imported' : 'The import failed. Nothing was imported';
+        $('done-sub').textContent = why + ' Your list is unchanged, so you can try again.';
+      } else {
+        $('h-done').textContent = outcome === 'stopped' ? 'Import stopped part way' : 'The import stopped before it finished';
+        $('done-sub').textContent = why + ' ' + done.toLocaleString() + ' of ' + plural(total, 'contact') + ' ' + (done === 1 ? 'is' : 'are') +
+          ' saved in the CRM. The other ' + left.toLocaleString() + ' ' + (left === 1 ? 'was' : 'were') + ' not imported.';
+      }
+      if (outcome === 'failed' && err && err.message) {
+        note.hidden = false; if (note.className === 'note') note.className = 'note info';
+        note.appendChild(el('p', { class: 'detail', text: 'Details for support: ' + err.message }));
+      }
+    }
+
+    var items = [{ n: done, label: 'imported', cls: 'ok' }];
+    if (unknown) items = [];
+    else if (outcome !== 'ok') items.push({ n: left, label: 'not imported yet', cls: left ? 'bad' : '' });
+    if (!unknown && outcome === 'ok' && S.serverSkipped) items.push({ n: S.serverSkipped, label: 'skipped by the CRM', cls: 'bad' });
+    if (b) items.push({ n: b, label: 'left out with problems', cls: unknown ? '' : 'bad' });
+    tally($('done-tally'), items);
+    $('done-tally').hidden = !items.length || (outcome === 'ok' && items.length === 1);
+
+    if (outcome === 'ok') {
+      if (b) actionBtn('Download the ' + plural(b, 'problem row') + ' (CSV)', function () { download('contacts-with-problems.csv', S.bad, true); }, true);
+      actionBtn('Import another list', reset, !b);
+      if (b) {
+        note.hidden = false; if (note.className === 'note') note.className = 'note info';
+        note.insertBefore(el('p', { text: 'To add the rows that were left out, download them, fix them in your spreadsheet and import that file. The download includes a column saying what is wrong with each row.' }), note.firstChild);
+      }
+    } else if (unknown) {
+      actionBtn('Check the list again', function () { show('input', 1); check(); }, true);
+      actionBtn('Start a new import', reset);
+    } else {
+      actionBtn(done === 0 ? 'Try again' : 'Import the remaining ' + left.toLocaleString(), runImport, true);
+      actionBtn('Download the ' + plural(left, 'unimported row') + ' (CSV)', function () { download('contacts-not-imported.csv', S.good.slice(S.imported), false); });
+      if (b) actionBtn('Download the ' + plural(b, 'problem row') + ' (CSV)', function () { download('contacts-with-problems.csv', S.bad, true); });
+      actionBtn('Start a new import', reset);
+    }
+  }
+
+  // Initial state
+  show('input', 1);
+  document.activeElement && document.activeElement.blur();
+  updateCount();
+})();
+</script>
+</body>
+</html>

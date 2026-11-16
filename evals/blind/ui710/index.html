@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Northwind</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f6f8;
+    --line: #d5d9e0;
+    --line-strong: #7b8494;
+    --text: #1a1f29;
+    --muted: #525b6b;
+    --accent: #1f4fbf;
+    --accent-soft: #e6edfb;
+    --danger: #a61b29;
+    --danger-soft: #fdecee;
+    --ok: #1a6638;
+    --ok-soft: #e4f4ea;
+    --warn-soft: #fff4d6;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 1180px; margin: 0 auto; padding: 16px 24px 48px; }
+
+  .top { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .brand { color: var(--muted); font-size: 13px; margin: 0; flex-basis: 100%; }
+  h1 { font-size: 22px; line-height: 1.2; margin: 0; flex: 1 1 auto; }
+  .refresh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .updated { color: var(--muted); margin: 0; }
+  .updated.problem { color: var(--danger); }
+
+  button {
+    font: inherit;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    min-height: 32px;
+    padding: 4px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover { background: var(--surface); }
+  button:focus-visible, input:focus-visible, tr:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: #173f9c; }
+  button.danger { color: var(--danger); border-color: var(--danger); }
+  button.danger:hover { background: var(--danger-soft); }
+  button[aria-disabled="true"] { color: #565f6e; border-color: var(--line); background: var(--surface); cursor: default; }
+
+  .tools { display: flex; align-items: flex-end; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 12px; }
+  .field { flex: 1 1 320px; max-width: 440px; }
+  .field label, .group-label { display: block; font-weight: 600; margin: 0 0 4px; }
+  input[type="search"] {
+    font: inherit;
+    font-size: 16px;
+    width: 100%;
+    min-height: 36px;
+    padding: 4px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text);
+  }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .filters button { min-height: 36px; }
+  .filters button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: #143a91;
+    font-weight: 600;
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+  .count { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 400; margin-left: 4px; }
+  .filters button[aria-pressed="true"] .count { color: inherit; }
+
+  .problems { list-style: none; margin: 0 0 12px; padding: 0; }
+  .problems li {
+    display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap;
+    border-left: 4px solid var(--danger);
+    background: var(--danger-soft);
+    padding: 8px 12px;
+    margin-bottom: 6px;
+  }
+  .problems span { flex: 1 1 240px; }
+
+  .summary { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; min-height: 32px; margin-bottom: 4px; color: var(--muted); }
+  .summary p { margin: 0; }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line-strong);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .sortnote { font-weight: 400; color: var(--muted); }
+  tbody tr:hover { background: #fafbfc; }
+  .c-num { white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .c-cust { overflow-wrap: anywhere; min-width: 140px; }
+  .c-due { white-space: nowrap; }
+  .c-amt, th.c-amt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .c-act { width: 290px; }
+  .sub { display: block; color: var(--muted); font-size: 13px; }
+  .sub.late { color: var(--danger); font-weight: 600; }
+  .label-sm { display: none; }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.overdue { background: var(--danger-soft); color: var(--danger); border-color: #e5a3aa; }
+  .badge.paid { background: var(--ok-soft); color: var(--ok); border-color: #9fd0b1; }
+  .badge.sent { background: var(--accent-soft); color: #143a91; border-color: #a9bfee; }
+  .badge.draft { background: var(--surface); color: var(--muted); border-color: var(--line-strong); border-style: dashed; }
+
+  .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .working { color: var(--muted); margin: 0; min-height: 32px; display: flex; align-items: center; gap: 8px; }
+  .rowerr { color: var(--danger); margin: 0 0 6px; font-weight: 600; }
+
+  .state { border: 1px solid var(--line); border-radius: 8px; padding: 40px 24px; min-height: 260px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  .state p { margin: 0; font-size: 16px; }
+  .state .more { color: var(--muted); font-size: 14px; }
+
+  .spinner {
+    width: 16px; height: 16px; flex: none;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 4s; } }
+
+  .pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .pager p { margin: 0; color: var(--muted); }
+
+  dialog {
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    padding: 20px 22px;
+    width: min(440px, calc(100vw - 32px));
+    color: var(--text);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.3);
+  }
+  dialog::backdrop { background: rgba(15, 23, 42, 0.5); }
+  dialog h2 { margin: 0 0 8px; font-size: 18px; overflow-wrap: anywhere; }
+  dialog p { margin: 0 0 6px; overflow-wrap: anywhere; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  .dialog-actions button { min-height: 40px; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 760px) {
+    .page { padding: 12px 16px 40px; }
+    button, .filters button { min-height: 44px; }
+    input[type="search"] { min-height: 44px; }
+    .field { max-width: none; flex-basis: 100%; }
+    .working { min-height: 44px; }
+
+    table, tbody { display: block; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); }
+    tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "num status" "cust cust" "due amt" "act act";
+      gap: 4px 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    tbody tr:hover { background: none; }
+    td { display: block; padding: 0; border: 0; }
+    .c-num { grid-area: num; font-size: 16px; }
+    .c-status { grid-area: status; text-align: right; }
+    .c-cust { grid-area: cust; font-size: 16px; }
+    .c-due { grid-area: due; white-space: normal; }
+    .c-amt { grid-area: amt; font-size: 16px; font-weight: 600; align-self: end; }
+    .c-act { grid-area: act; width: auto; margin-top: 6px; }
+    .c-act:empty { display: none; }
+    .acts button { flex: 1 1 130px; }
+    .label-sm { display: inline; color: var(--muted); }
+    .pager { justify-content: space-between; }
+    .dialog-actions button { flex: 1 1 130px; min-height: 44px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <p class="brand">Northwind accounts</p>
+    <h1>Invoices</h1>
+    <div class="refresh">
+      <p class="updated" id="updated"></p>
+      <button type="button" id="refreshBtn">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tools" id="tools">
+      <div class="field">
+        <label for="q">Search by customer or invoice number</label>
+        <input type="search" id="q" name="q" autocomplete="off" spellcheck="false" enterkeyhint="search">
+      </div>
+      <div role="group" aria-labelledby="statusLabel">
+        <p class="group-label" id="statusLabel">Status</p>
+        <div class="filters" id="filters">
+          <button type="button" data-status="all" aria-pressed="true">All <span class="count"></span></button>
+          <button type="button" data-status="overdue" aria-pressed="false">Overdue <span class="count"></span></button>
+          <button type="button" data-status="sent" aria-pressed="false">Sent <span class="count"></span></button>
+          <button type="button" data-status="draft" aria-pressed="false">Draft <span class="count"></span></button>
+          <button type="button" data-status="paid" aria-pressed="false">Paid <span class="count"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <ul class="problems" id="problems" hidden></ul>
+
+    <div class="summary" id="summary" hidden>
+      <p id="summaryText"></p>
+      <button type="button" id="clearBtn" hidden>Show all invoices</button>
+    </div>
+
+    <div id="stateBox" class="state"></div>
+
+    <table id="table" role="table" hidden>
+      <caption class="sr-only">Invoices</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader" scope="col">Invoice</th>
+          <th role="columnheader" scope="col">Customer</th>
+          <th role="columnheader" scope="col" aria-sort="ascending">Due <span class="sortnote">(oldest first)</span></th>
+          <th role="columnheader" scope="col" class="c-amt">Amount</th>
+          <th role="columnheader" scope="col">Status</th>
+          <th role="columnheader" scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rows" role="rowgroup"></tbody>
+    </table>
+
+    <nav class="pager" id="pager" aria-label="Invoice pages" hidden>
+      <button type="button" id="prevBtn">Previous page</button>
+      <p id="pageText"></p>
+      <button type="button" id="nextBtn">Next page</button>
+    </nav>
+  </main>
+</div>
+
+<dialog id="confirm" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
+  <h2 id="confirmTitle"></h2>
+  <div id="confirmBody">
+    <p id="confirmWhat"></p>
+    <p>Deleting is permanent. The draft cannot be recovered.</p>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" id="confirmKeep">Keep draft</button>
+    <button type="button" id="confirmDelete" class="danger">Delete draft</button>
+  </div>
+</dialog>
+
+<div class="sr-only" id="live" role="status" aria-live="polite"></div>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const customers = ['Acme Ltd', 'Brightside Bakery', 'Castellan Freight and Logistics International', 'Dovetail Joinery', 'Eastfield Primary School', 'Fennel & Rye', 'Greyfriars Dental', 'Harbour Lights Hotel', 'Ivy Lane Books', 'Juniper Health'];
+  const statuses = ['draft', 'sent', 'sent', 'paid', 'paid', 'paid', 'overdue', 'overdue'];
+  let invoices = q.get('empty') === '1' ? [] : Array.from({ length: 46 }, (_, i) => ({
+    id: 'inv_' + (9000 + i), number: 'NW-' + (2041 + i), customer: customers[i % customers.length],
+    issued: new Date(2026, 8, 1 + i).toISOString(), due: new Date(2026, 9, 1 + i).toISOString(),
+    amount: Math.round((120 + ((i * 7919) % 48000)) * 100) / 100 + (i % 9 === 0 ? 1250000 : 0), currency: 'GBP',
+    status: statuses[i % statuses.length], reminderSentAt: null,
+  }));
+  return {
+    async listInvoices() { await wait(); maybeFail('list invoices'); return invoices.map((x) => ({ ...x })); },
+    async markPaid(id) { await wait(); maybeFail('mark paid'); const x = invoices.find((v) => v.id === id); x.status = 'paid'; return { ...x }; },
+    async sendReminder(id) { await wait(); maybeFail('send reminder'); const x = invoices.find((v) => v.id === id); x.reminderSentAt = new Date().toISOString(); return { ...x }; },
+    async deleteInvoice(id) { await wait(); maybeFail('delete invoice'); invoices = invoices.filter((v) => v.id !== id); return { ok: true }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const PAGE_SIZE = 25;
+  const UNDO_MS = 6000;
+  const STATUSES = ['all', 'overdue', 'sent', 'draft', 'paid'];
+  const STATUS_LABEL = { overdue: 'Overdue', sent: 'Sent', draft: 'Draft', paid: 'Paid' };
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    tools: $('tools'), q: $('q'), filters: $('filters'), problems: $('problems'),
+    summary: $('summary'), summaryText: $('summaryText'), clearBtn: $('clearBtn'),
+    stateBox: $('stateBox'), table: $('table'), rows: $('rows'),
+    pager: $('pager'), prevBtn: $('prevBtn'), nextBtn: $('nextBtn'), pageText: $('pageText'),
+    refreshBtn: $('refreshBtn'), updated: $('updated'), live: $('live'),
+    confirm: $('confirm'), confirmTitle: $('confirmTitle'), confirmWhat: $('confirmWhat'),
+    confirmKeep: $('confirmKeep'), confirmDelete: $('confirmDelete'),
+  };
+
+  const s = {
+    invoices: [],      // as last received from the server
+    loaded: false,
+    loading: false,
+    slow: false,       // a load attempt has already failed and is being repeated
+    loadFailed: false,
+    updatedAt: null,
+    q: '',
+    status: 'all',
+    page: 1,
+    viewIds: [],       // ids matching search and filter, fixed until the view is changed
+    ops: new Map(),    // id -> { kind: 'paid' | 'reminder' | 'delete', phase: 'undo' | 'busy', timer }
+    errors: new Map(), // id -> message
+    problems: [],      // failures on invoices that were not on screen when they failed
+  };
+
+  /* ---------- formatting ---------- */
+
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const stampFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const timeFmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const moneyFmts = {};
+  function money(amount, currency) {
+    const c = currency || 'GBP';
+    if (!moneyFmts[c]) moneyFmts[c] = new Intl.NumberFormat('en-GB', { style: 'currency', currency: c });
+    return moneyFmts[c].format(amount);
+  }
+  function daysLate(dueIso) {
+    const due = new Date(dueIso); due.setHours(0, 0, 0, 0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return Math.round((today - due) / 86400000);
+  }
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+
+  function h(tag, attrs, ...kids) {
+    const node = document.createElement(tag);
+    for (const k in (attrs || {})) {
+      const v = attrs[k];
+      if (v === false || v == null) continue;
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else node.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids) if (kid != null && kid !== false) node.append(kid);
+    return node;
+  }
+
+  let liveTimer = null;
+  function announce(msg) {
+    clearTimeout(liveTimer);
+    el.live.textContent = '';
+    liveTimer = setTimeout(() => { el.live.textContent = msg; }, 60);
+  }
+
+  /* ---------- derived data ---------- */
+
+  const byId = (id) => s.invoices.find((v) => v.id === id);
+  function shownStatus(inv) {
+    const op = s.ops.get(inv.id);
+    return op && op.kind === 'paid' ? 'paid' : inv.status;
+  }
+  const squash = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  function matchesSearch(inv, query) {
+    const plain = query.trim().toLowerCase();
+    if (!plain) return true;
+    if (inv.customer.toLowerCase().includes(plain) || inv.number.toLowerCase().includes(plain)) return true;
+    const sq = squash(plain);
+    return !!sq && (squash(inv.customer).includes(sq) || squash(inv.number).includes(sq));
+  }
+  function computeView() {
+    s.viewIds = s.invoices
+      .filter((v) => matchesSearch(v, s.q) && (s.status === 'all' || shownStatus(v) === s.status))
+      .sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : a.number.localeCompare(b.number, 'en', { numeric: true })))
+      .map((v) => v.id);
+    const pages = Math.max(1, Math.ceil(s.viewIds.length / PAGE_SIZE));
+    if (s.page > pages) s.page = pages;
+    if (s.page < 1) s.page = 1;
+  }
+  const pageCount = () => Math.max(1, Math.ceil(s.viewIds.length / PAGE_SIZE));
+  const pageIds = () => s.viewIds.slice((s.page - 1) * PAGE_SIZE, s.page * PAGE_SIZE);
+  const isFiltered = () => s.q.trim() !== '' || s.status !== 'all';
+
+  /* ---------- address bar ---------- */
+
+  function readUrl() {
+    const p = new URLSearchParams(location.search);
+    s.q = p.get('q') || '';
+    s.status = STATUSES.includes(p.get('status')) ? p.get('status') : 'all';
+    s.page = Math.max(1, parseInt(p.get('page'), 10) || 1);
+  }
+  function writeUrl(push) {
+    const p = new URLSearchParams(location.search);
+    if (s.q.trim()) p.set('q', s.q.trim()); else p.delete('q');
+    if (s.status !== 'all') p.set('status', s.status); else p.delete('status');
+    if (s.page > 1) p.set('page', String(s.page)); else p.delete('page');
+    const qs = p.toString();
+    const url = location.pathname + (qs ? '?' + qs : '') + location.hash;
+    if (url === location.pathname + location.search + location.hash) return;
+    try { history[push ? 'pushState' : 'replaceState'](null, '', url); } catch (e) { /* address bar cannot be updated here */ }
+  }
+
+  /* ---------- rendering ---------- */
+
+  function renderFilters() {
+    const base = s.invoices.filter((v) => matchesSearch(v, s.q));
+    for (const b of el.filters.querySelectorAll('button')) {
+      const st = b.dataset.status;
+      b.setAttribute('aria-pressed', String(st === s.status));
+      const n = st === 'all' ? base.length : base.filter((v) => shownStatus(v) === st).length;
+      b.querySelector('.count').textContent = s.loaded ? String(n) : '';
+    }
+  }
+
+  function describeFilter() {
+    const what = s.status === 'all' ? 'invoices' : STATUS_LABEL[s.status].toLowerCase() + ' invoices';
+    const q = s.q.trim();
+    return { what, q };
+  }
+
+  function renderHeader() {
+    const busy = s.loading && s.loaded;
+    el.refreshBtn.textContent = busy ? 'Refreshing…' : 'Refresh';
+    el.refreshBtn.setAttribute('aria-disabled', String(s.loading));
+    el.refreshBtn.hidden = !s.loaded && (s.loading || s.loadFailed);
+    if (s.loaded && s.loadFailed) {
+      el.updated.textContent = 'Refresh failed: the server did not respond. Showing invoices as of ' + timeFmt.format(s.updatedAt) + '.';
+      el.updated.className = 'updated problem';
+    } else {
+      el.updated.textContent = s.updatedAt ? 'Updated ' + timeFmt.format(s.updatedAt) : '';
+      el.updated.className = 'updated';
+    }
+  }
+
+  function showState(kids) {
+    el.stateBox.replaceChildren(...kids);
+    el.stateBox.hidden = false;
+    el.table.hidden = true;
+    el.pager.hidden = true;
+    el.summary.hidden = true;
+  }
+
+  function renderProblems() {
+    el.problems.hidden = s.problems.length === 0;
+    el.problems.replaceChildren(...s.problems.map((p) => {
+      const show = h('button', { type: 'button', text: 'Show ' + p.number });
+      show.addEventListener('click', () => {
+        s.problems = s.problems.filter((x) => x !== p);
+        s.q = p.number; s.status = 'all'; s.page = 1; el.q.value = s.q;
+        changeView(true);
+        const row = rowEl(p.id);
+        if (row) row.focus();
+      });
+      const hide = h('button', { type: 'button', text: 'Dismiss', 'aria-label': 'Dismiss message about ' + p.number });
+      hide.addEventListener('click', () => {
+        s.problems = s.problems.filter((x) => x !== p);
+        renderProblems();
+        el.q.focus();
+      });
+      return h('li', null, h('span', { text: p.text }), show, hide);
+    }));
+  }
+
+  function render() {
+    renderHeader();
+    renderFilters();
+    renderProblems();
+    el.tools.hidden = s.loaded && s.invoices.length === 0;
+
+    if (!s.loaded) {
+      if (s.loadFailed) {
+        const retry = h('button', { type: 'button', class: 'primary', text: 'Try again' });
+        retry.addEventListener('click', () => { load(); });
+        showState([
+          h('p', { text: 'Invoices could not be loaded.' }),
+          h('p', { class: 'more', text: 'The server did not respond.' }),
+          retry,
+        ]);
+        if (document.activeElement === document.body) retry.focus();
+      } else {
+        showState([
+          h('span', { class: 'spinner', 'aria-hidden': 'true' }),
+          h('p', { text: s.slow ? 'Still loading. The server is slow to respond.' : 'Loading invoices…' }),
+        ]);
+      }
+      return;
+    }
+
+    if (s.invoices.length === 0) {
+      showState([h('p', { text: 'No invoices yet.' }), h('p', { class: 'more', text: 'New invoices will be listed here.' })]);
+      return;
+    }
+
+    if (s.viewIds.length === 0) {
+      const { what, q } = describeFilter();
+      const clear = h('button', { type: 'button', text: 'Show all invoices' });
+      clear.addEventListener('click', clearView);
+      showState([h('p', { text: q ? 'No ' + what + ' match “' + q + '”.' : 'No ' + what + '.' }), clear]);
+      return;
+    }
+
+    el.stateBox.hidden = true;
+    el.table.hidden = false;
+    el.summary.hidden = false;
+
+    const total = s.viewIds.length;
+    const first = (s.page - 1) * PAGE_SIZE + 1;
+    const last = Math.min(total, s.page * PAGE_SIZE);
+    const { what, q } = describeFilter();
+    let text = total > PAGE_SIZE ? first + ' to ' + last + ' of ' + total + ' ' + what : plural(total, what.replace(/s$/, ''), what);
+    if (q) text += ' matching “' + q + '”';
+    el.summaryText.textContent = text;
+    el.clearBtn.hidden = !isFiltered();
+
+    el.rows.replaceChildren(...pageIds().map((id) => buildRow(byId(id))));
+
+    const pages = pageCount();
+    el.pager.hidden = pages < 2;
+    el.pageText.textContent = 'Page ' + s.page + ' of ' + pages;
+    el.prevBtn.setAttribute('aria-disabled', String(s.page <= 1));
+    el.nextBtn.setAttribute('aria-disabled', String(s.page >= pages));
+  }
+
+  const rowEl = (id) => el.rows.querySelector('tr[data-id="' + id + '"]');
+
+  function actButton(act, label, inv, cls) {
+    return h('button', { type: 'button', 'data-act': act, class: cls || null, text: label, 'aria-label': label + ', ' + inv.number + ', ' + inv.customer });
+  }
+
+  function buildRow(inv) {
+    const op = s.ops.get(inv.id);
+    const err = s.errors.get(inv.id);
+    const status = shownStatus(inv);
+
+    const due = h('td', { role: 'cell', class: 'c-due' }, h('span', { class: 'label-sm', text: 'Due ' }), dateFmt.format(new Date(inv.due)));
+    if (status === 'overdue') {
+      const d = daysLate(inv.due);
+      if (d > 0) due.append(h('span', { class: 'sub late', text: plural(d, 'day', 'days') + ' overdue' }));
+    }
+
+    const statusCell = h('td', { role: 'cell', class: 'c-status' }, h('span', { class: 'badge ' + status, text: STATUS_LABEL[status] || status }));
+    if (inv.reminderSentAt && status !== 'paid') {
+      statusCell.append(h('span', { class: 'sub', text: 'Reminder sent ' + stampFmt.format(new Date(inv.reminderSentAt)) }));
+    }
+
+    const act = h('td', { role: 'cell', class: 'c-act' });
+    if (op && op.phase === 'undo') {
+      const undo = h('button', { type: 'button', 'data-act': 'undo', text: 'Undo', 'aria-label': 'Undo ' + (op.kind === 'paid' ? 'mark as paid' : 'send reminder') + ', ' + inv.number });
+      act.append(h('div', { class: 'acts' },
+        h('p', { class: 'working', text: op.kind === 'paid' ? 'Marked as paid' : 'Sending reminder…' }), undo));
+    } else if (op) {
+      const msg = { paid: 'Saving…', reminder: 'Sending reminder…', delete: 'Deleting…' }[op.kind];
+      act.append(h('p', { class: 'working' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), msg));
+    } else {
+      if (err) act.append(h('p', { class: 'rowerr', text: err }));
+      const acts = h('div', { class: 'acts' });
+      if (status === 'overdue' || status === 'sent') acts.append(actButton('paid', 'Mark as paid', inv));
+      if (status === 'overdue') acts.append(actButton('reminder', inv.reminderSentAt ? 'Send another reminder' : 'Send reminder', inv));
+      if (status === 'draft') acts.append(actButton('delete', 'Delete draft', inv, 'danger'));
+      if (acts.childNodes.length) act.append(acts);
+    }
+
+    return h('tr', { role: 'row', 'data-id': inv.id, tabindex: '-1' },
+      h('td', { role: 'cell', class: 'c-num', text: inv.number }),
+      h('td', { role: 'cell', class: 'c-cust', text: inv.customer }),
+      due,
+      h('td', { role: 'cell', class: 'c-amt', text: money(inv.amount, inv.currency) }),
+      statusCell,
+      act);
+  }
+
+  // Redraw one row in place, keeping keyboard focus inside it.
+  function renderRow(id, preferAct) {
+    const old = rowEl(id);
+    const inv = byId(id);
+    if (!old || !inv) return;
+    const hadFocus = old.contains(document.activeElement);
+    const fresh = buildRow(inv);
+    old.replaceWith(fresh);
+    if (hadFocus) {
+      const target = (preferAct && fresh.querySelector('[data-act="' + preferAct + '"]')) || fresh.querySelector('button') || fresh;
+      target.focus();
+    }
+    renderFilters();
+  }
+
+  /* ---------- view changes ---------- */
+
+  function changeView(push) {
+    computeView();
+    writeUrl(push);
+    render();
+  }
+  function clearView() {
+    s.q = ''; s.status = 'all'; s.page = 1; el.q.value = '';
+    changeView(true);
+    el.q.focus();
+    announce(plural(s.viewIds.length, 'invoice', 'invoices') + ' shown.');
+  }
+
+  let searchTimer = null;
+  el.q.addEventListener('input', () => {
+    s.q = el.q.value; s.page = 1;
+    changeView(false);
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      if (s.loaded) announce(s.viewIds.length ? plural(s.viewIds.length, 'invoice', 'invoices') + ' shown.' : 'No invoices match.');
+    }, 600);
+  });
+
+  el.filters.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || b.dataset.status === s.status) return;
+    s.status = b.dataset.status; s.page = 1;
+    changeView(true);
+    if (s.loaded) announce(s.viewIds.length ? plural(s.viewIds.length, 'invoice', 'invoices') + ' shown.' : 'No invoices match.');
+  });
+
+  el.clearBtn.addEventListener('click', clearView);
+
+  function goToPage(n) {
+    if (n < 1 || n > pageCount()) return;
+    s.page = n;
+    writeUrl(true);
+    render();
+    el.summary.scrollIntoView({ block: 'start' });
+    announce('Page ' + s.page + ' of ' + pageCount() + '.');
+  }
+  el.prevBtn.addEventListener('click', () => goToPage(s.page - 1));
+  el.nextBtn.addEventListener('click', () => goToPage(s.page + 1));
+
+  window.addEventListener('popstate', () => {
+    readUrl(); el.q.value = s.q;
+    computeView(); render();
+  });
+
+  /* ---------- loading ---------- */
+
+  async function load() {
+    if (s.loading) return;
+    s.loading = true; s.slow = false; s.loadFailed = false;
+    render();
+    let list = null;
+    for (let attempt = 0; attempt < 3 && !list; attempt++) {
+      try { list = await api.listInvoices(); }
+      catch (e) { if (attempt < 2 && !s.loaded) { s.slow = true; render(); } }
+    }
+    s.loading = false;
+    if (list) {
+      s.invoices = list;
+      s.loaded = true;
+      s.updatedAt = new Date();
+      for (const id of [...s.errors.keys()]) if (!byId(id)) s.errors.delete(id);
+      computeView();
+      render();
+      announce(list.length ? plural(list.length, 'invoice', 'invoices') + ' loaded.' : 'No invoices yet.');
+    } else {
+      s.loadFailed = true;
+      render();
+      announce(s.loaded ? 'Refresh failed. The server did not respond.' : 'Invoices could not be loaded. The server did not respond.');
+    }
+  }
+  el.refreshBtn.addEventListener('click', () => { load(); });
+
+  /* ---------- row actions ---------- */
+
+  const FAIL_TEXT = {
+    paid: 'Not marked as paid: the server did not respond. Try again.',
+    reminder: 'Reminder not sent: the server did not respond. Try again.',
+    delete: 'Not deleted: the server did not respond. Try again.',
+  };
+  const FAIL_SHORT = { paid: 'was not marked as paid', reminder: 'reminder was not sent', delete: 'was not deleted' };
+
+  // Mark as paid and Send reminder wait a few seconds before going to the server, so they can be undone.
+  function startWithUndo(id, kind) {
+    if (s.ops.has(id)) return;
+    const inv = byId(id);
+    s.errors.delete(id);
+    const op = { kind, phase: 'undo', timer: setTimeout(() => commit(id), UNDO_MS) };
+    s.ops.set(id, op);
+    renderRow(id, 'undo');
+    announce(kind === 'paid' ? inv.number + ' marked as paid. Undo is available for a few seconds.' : 'Sending reminder for ' + inv.number + '. Undo is available for a few seconds.');
+  }
+
+  function undo(id) {
+    const op = s.ops.get(id);
+    if (!op || op.phase !== 'undo') return;
+    clearTimeout(op.timer);
+    s.ops.delete(id);
+    renderRow(id, op.kind);
+    const inv = byId(id);
+    announce(op.kind === 'paid' ? inv.number + ' is not marked as paid.' : 'Reminder for ' + inv.number + ' was not sent.');
+  }
+
+  async function commit(id) {
+    const op = s.ops.get(id);
+    if (!op || op.phase === 'busy') return;
+    clearTimeout(op.timer);
+    op.phase = 'busy';
+    renderRow(id);
+    const inv = byId(id);
+    const number = inv ? inv.number : '';
+    try {
+      if (op.kind === 'paid') {
+        let updated;
+        try { updated = await api.markPaid(id); }
+        catch (first) { updated = await api.markPaid(id); } // safe to repeat: paid stays paid
+        replaceInvoice(updated);
+        announce(number + ' saved as paid.');
+      } else if (op.kind === 'reminder') {
+        replaceInvoice(await api.sendReminder(id));
+        announce('Reminder sent for ' + number + '.');
+      } else {
+        await api.deleteInvoice(id);
+        s.ops.delete(id);
+        removeInvoice(id, number);
+        return;
+      }
+      s.ops.delete(id);
+      renderRow(id);
+    } catch (e) {
+      s.ops.delete(id);
+      if (!byId(id)) return;
+      s.errors.set(id, FAIL_TEXT[op.kind]);
+      if (rowEl(id)) {
+        renderRow(id, op.kind);
+      } else {
+        s.problems.push({ id, number, text: number + ' ' + FAIL_SHORT[op.kind] + ': the server did not respond.' });
+        renderProblems();
+        renderFilters();
+      }
+      announce(number + ' ' + FAIL_SHORT[op.kind] + '. The server did not respond.');
+    }
+  }
+
+  function replaceInvoice(updated) {
+    const i = s.invoices.findIndex((v) => v.id === updated.id);
+    if (i >= 0) s.invoices[i] = updated;
+  }
+
+  function removeInvoice(id, number) {
+    const row = rowEl(id);
+    const hadFocus = row && row.contains(document.activeElement);
+    const neighbourId = row && ((row.nextElementSibling || row.previousElementSibling || {}).dataset || {}).id;
+    s.invoices = s.invoices.filter((v) => v.id !== id);
+    s.viewIds = s.viewIds.filter((v) => v !== id);
+    s.errors.delete(id);
+    if (s.page > pageCount()) s.page = pageCount();
+    writeUrl(false);
+    render();
+    if (hadFocus) {
+      const next = neighbourId && rowEl(neighbourId);
+      if (next) next.focus();
+      else if (!el.tools.hidden) el.q.focus();
+      else el.refreshBtn.focus();
+    }
+    announce('Draft ' + number + ' deleted.');
+  }
+
+  el.rows.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const id = b.closest('tr').dataset.id;
+    const act = b.dataset.act;
+    if (act === 'undo') undo(id);
+    else if (act === 'delete') askDelete(id);
+    else startWithUndo(id, act);
+  });
+
+  // If the page is closed or hidden during the undo window, send the change now so it is not lost.
+  function flushPending() {
+    for (const [id, op] of s.ops) if (op.phase === 'undo') commit(id);
+  }
+  window.addEventListener('pagehide', flushPending);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPending(); });
+
+  /* ---------- delete confirmation ---------- */
+
+  let deleteId = null;
+  function askDelete(id) {
+    const inv = byId(id);
+    if (!inv || s.ops.has(id)) return;
+    deleteId = id;
+    el.confirmTitle.textContent = 'Delete draft ' + inv.number + '?';
+    el.confirmWhat.textContent = inv.customer + ', ' + money(inv.amount, inv.currency) + ', due ' + dateFmt.format(new Date(inv.due)) + '.';
+    el.confirm.showModal();
+    el.confirmKeep.focus();
+  }
+  el.confirmKeep.addEventListener('click', () => el.confirm.close());
+  el.confirm.addEventListener('click', (e) => { if (e.target === el.confirm) el.confirm.close(); });
+  el.confirmDelete.addEventListener('click', () => {
+    const id = deleteId;
+    el.confirm.close();
+    if (!id || !byId(id)) return;
+    s.errors.delete(id);
+    s.ops.set(id, { kind: 'delete', phase: 'undo', timer: null });
+    const row = rowEl(id);
+    if (row) row.focus();
+    commit(id);
+  });
+  el.confirm.addEventListener('close', () => { deleteId = null; });
+
+  /* ---------- start ---------- */
+
+  readUrl();
+  el.q.value = s.q;
+  load();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - harbour documentation</title>
+<meta name="description" content="Install harbour 2.4, create a repository, make a first backup, restore files and schedule a nightly run.">
+<style>
+:root {
+  color-scheme: light dark;
+  --surface: #f4f7fb;
+  --surface-raised: #fcfeff;
+  --text: #141b24;
+  --text-muted: #515963;
+  --border: #d3d8de;
+  --border-strong: #737b86;
+  --accent: #17559b;
+  --danger: #b02a2d;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-2xl: 2rem;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0c1015;
+    --surface-raised: #14191f;
+    --text: #e4e8ed;
+    --text-muted: #9ea5ae;
+    --border: #2a2e34;
+    --border-strong: #6d7580;
+    --accent: #8cbaf7;
+    --danger: #f7857d;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 var(--text-base)/1.5 var(--font-sans);
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); text-underline-offset: 0.15em; }
+
+.vh {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip {
+  position: absolute;
+  left: var(--s4); top: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+.site {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s1) var(--s4);
+  padding: var(--s3) var(--s5);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+.site-name { margin: 0; font-weight: 600; }
+.site-version { margin: 0; color: var(--text-muted); }
+
+main {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 46rem);
+  column-gap: var(--s7);
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--s6) var(--s5) var(--s7);
+}
+main > * { grid-column: 2; }
+
+.toc {
+  grid-column: 1;
+  grid-row: 1 / span 12;
+  align-self: start;
+  position: sticky;
+  top: var(--s5);
+  font-size: var(--text-sm);
+}
+.toc h2 {
+  margin: 0 0 var(--s2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc a {
+  display: block;
+  padding: var(--s1) 0;
+  min-height: 28px;
+}
+
+h1, h2, h3 { font-weight: 600; text-wrap: balance; }
+h1 { margin: 0 0 var(--s3); font-size: var(--text-2xl); line-height: 1.2; }
+.lead { margin: 0 0 var(--s5); }
+section { scroll-margin-top: var(--s4); }
+section h2 {
+  margin: var(--s7) 0 var(--s3);
+  padding-top: var(--s5);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-lg);
+  line-height: 1.3;
+}
+#requirements h2 { margin-top: var(--s5); }
+section h3 { margin: var(--s5) 0 var(--s2); font-size: var(--text-base); line-height: 1.5; }
+p, li { max-width: 70ch; }
+p { margin: 0 0 var(--s3); }
+ul { margin: 0 0 var(--s3); padding-left: var(--s5); }
+li { margin-bottom: var(--s1); }
+
+code { font-family: var(--font-mono); font-size: var(--text-sm); font-variant-ligatures: none; }
+p code, li code, h3 code {
+  padding: 0 var(--s1);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+.cmd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  margin: 0 0 var(--s4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+}
+.cmd pre {
+  margin: 0;
+  padding: var(--s3) var(--s4);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.nb { white-space: nowrap; }
+.copy {
+  margin: var(--s2);
+  min-width: 5rem;
+  min-height: 32px;
+  padding: var(--s1) var(--s3);
+  font: 400 var(--text-sm)/1.45 var(--font-sans);
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.copy:hover { border-color: var(--text); }
+.copy:active { background: var(--border); }
+.cmd-msg {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+  padding: var(--s2) var(--s4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+.cmd-msg:empty { display: none; }
+
+.warn {
+  padding-left: var(--s4);
+  border-left: 4px solid var(--danger);
+}
+.warn strong { color: var(--danger); }
+
+.next { list-style: none; padding: 0; }
+.next a { display: inline-block; padding: var(--s1) 0; }
+
+@media (max-width: 860px) {
+  main {
+    display: block;
+    padding: var(--s5) var(--s4) var(--s7);
+  }
+  .site { padding: var(--s3) var(--s4); }
+  .toc {
+    position: static;
+    margin-bottom: var(--s2);
+    padding: var(--s3) 0 var(--s1);
+    border-top: 1px solid var(--border);
+  }
+  .toc ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    column-gap: var(--s4);
+  }
+  .toc a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .copy { min-height: 44px; }
+  .cmd { grid-template-columns: minmax(0, 1fr); }
+  .cmd pre { padding-bottom: var(--s1); }
+  .copy { justify-self: start; margin: var(--s2) var(--s3) var(--s3); }
+  .next a { min-height: 44px; padding: var(--s3) 0; }
+  section h2 { margin-top: var(--s6); }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<header class="site">
+  <p class="site-name">harbour documentation</p>
+  <p class="site-version">Version 2.4</p>
+</header>
+
+<main id="content">
+  <h1>Getting started with harbour</h1>
+  <p class="lead">harbour makes encrypted, de-duplicated backups of folders to a local disk or to any S3-compatible storage. This page takes you from install to a first backup, a restore and a nightly schedule.</p>
+
+  <nav class="toc" aria-labelledby="toc-title">
+    <h2 id="toc-title">On this page</h2>
+    <ol>
+      <li><a href="#requirements">Requirements</a></li>
+      <li><a href="#install">1. Install</a></li>
+      <li><a href="#repository">2. Create a repository</a></li>
+      <li><a href="#backup">3. First backup</a></li>
+      <li><a href="#list">4. See what is stored</a></li>
+      <li><a href="#restore">5. Restore files</a></li>
+      <li><a href="#schedule">6. Nightly backups</a></li>
+      <li><a href="#problems">Common problems</a></li>
+      <li><a href="#next">Next pages</a></li>
+    </ol>
+  </nav>
+
+  <section id="requirements" aria-labelledby="requirements-h">
+    <h2 id="requirements-h">Requirements</h2>
+    <ul>
+      <li>macOS 12 or later, Linux with glibc 2.31 or later, or Windows 10 or later</li>
+      <li>About 60 MB of disk space</li>
+    </ul>
+    <p>harbour has no other dependencies.</p>
+  </section>
+
+  <section id="install" aria-labelledby="install-h">
+    <h2 id="install-h">1. Install harbour</h2>
+
+    <h3>macOS</h3>
+    <div class="cmd">
+      <pre><code id="c-mac">brew install harbour</code></pre>
+      <button type="button" class="copy" data-copy="c-mac"><span class="copy-label">Copy</span><span class="vh"> the macOS install command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+
+    <h3>Linux</h3>
+    <div class="cmd">
+      <pre><code id="c-linux">curl <span class="nb">-fsSL</span> https://get.harbour.example/install.sh | sh</code></pre>
+      <button type="button" class="copy" data-copy="c-linux"><span class="copy-label">Copy</span><span class="vh"> the Linux install command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+
+    <h3>Windows</h3>
+    <div class="cmd">
+      <pre><code id="c-win">winget install Harbour.Harbour</code></pre>
+      <button type="button" class="copy" data-copy="c-win"><span class="copy-label">Copy</span><span class="vh"> the Windows install command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+
+    <h3>Check the install</h3>
+    <p>This prints the installed version.</p>
+    <div class="cmd">
+      <pre><code id="c-version">harbour <span class="nb">--version</span></code></pre>
+      <button type="button" class="copy" data-copy="c-version"><span class="copy-label">Copy</span><span class="vh"> the version check command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+  </section>
+
+  <section id="repository" aria-labelledby="repository-h">
+    <h2 id="repository-h">2. Create a repository</h2>
+    <p>A repository is where harbour stores your backups. The examples on this page use <code>/mnt/backup/repo</code>. Replace it with your own location.</p>
+    <div class="cmd">
+      <pre><code id="c-init">harbour init /mnt/backup/repo</code></pre>
+      <button type="button" class="copy" data-copy="c-init"><span class="copy-label">Copy</span><span class="vh"> the command that creates a repository</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+    <p>harbour asks for a passphrase twice.</p>
+    <p class="warn"><strong>The passphrase cannot be recovered.</strong> If you lose it, nobody can read the backups, including us. Store a copy somewhere safe before you go on.</p>
+
+    <h3>Use S3-compatible storage instead</h3>
+    <p>Set <code>HARBOUR_S3_KEY</code> and <code>HARBOUR_S3_SECRET</code> in your environment, then create the repository with an <code>s3://</code> address.</p>
+    <div class="cmd">
+      <pre><code id="c-s3">harbour init <span class="nb">s3://bucket-name/path</span></code></pre>
+      <button type="button" class="copy" data-copy="c-s3"><span class="copy-label">Copy</span><span class="vh"> the command that creates a repository on S3</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+  </section>
+
+  <section id="backup" aria-labelledby="backup-h">
+    <h2 id="backup-h">3. Make a first backup</h2>
+    <p>This backs up the folder <code>~/Documents</code>.</p>
+    <div class="cmd">
+      <pre><code id="c-backup">harbour backup ~/Documents <span class="nb">--repo</span> /mnt/backup/repo</code></pre>
+      <button type="button" class="copy" data-copy="c-backup"><span class="copy-label">Copy</span><span class="vh"> the backup command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+    <p>The first run copies everything and can take a long time. Later runs send only what changed.</p>
+  </section>
+
+  <section id="list" aria-labelledby="list-h">
+    <h2 id="list-h">4. See what is stored</h2>
+    <div class="cmd">
+      <pre><code id="c-list">harbour list <span class="nb">--repo</span> /mnt/backup/repo</code></pre>
+      <button type="button" class="copy" data-copy="c-list"><span class="copy-label">Copy</span><span class="vh"> the list command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+    <p>Each backup is called a snapshot and has an id like <code>a1b2c3d4</code>. You need the id to restore.</p>
+  </section>
+
+  <section id="restore" aria-labelledby="restore-h">
+    <h2 id="restore-h">5. Restore files</h2>
+    <p>Replace <code>a1b2c3d4</code> with the id of the snapshot you want, and <code>~/restored</code> with the folder to restore into.</p>
+    <div class="cmd">
+      <pre><code id="c-restore">harbour restore a1b2c3d4 <span class="nb">--to</span> ~/restored <span class="nb">--repo</span> /mnt/backup/repo</code></pre>
+      <button type="button" class="copy" data-copy="c-restore"><span class="copy-label">Copy</span><span class="vh"> the restore command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+    <p>harbour never overwrites existing files unless you add <code>--overwrite</code>.</p>
+  </section>
+
+  <section id="schedule" aria-labelledby="schedule-h">
+    <h2 id="schedule-h">6. Back up every night</h2>
+    <p>On Linux or macOS, add this line to your crontab to run a backup every night at 02:00.</p>
+    <div class="cmd">
+      <pre><code id="c-cron">0 2 * * * harbour backup ~/Documents <span class="nb">--repo</span> /mnt/backup/repo <span class="nb">--quiet</span></code></pre>
+      <button type="button" class="copy" data-copy="c-cron"><span class="copy-label">Copy</span><span class="vh"> the crontab line</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+  </section>
+
+  <section id="problems" aria-labelledby="problems-h">
+    <h2 id="problems-h">Common problems</h2>
+
+    <h3><code>repository is locked</code></h3>
+    <p>Another harbour process is using the repository, or one crashed. If you are sure nothing is running, unlock it.</p>
+    <div class="cmd">
+      <pre><code id="c-unlock">harbour unlock <span class="nb">--repo</span> /mnt/backup/repo</code></pre>
+      <button type="button" class="copy" data-copy="c-unlock"><span class="copy-label">Copy</span><span class="vh"> the unlock command</span></button>
+      <p class="cmd-msg" role="alert"></p>
+    </div>
+
+    <h3><code>wrong passphrase</code></h3>
+    <p>Check the keyboard layout and Caps Lock. There is no reset.</p>
+
+    <h3><code>permission denied</code> reading a file</h3>
+    <p>harbour skips the file and carries on, then lists the skipped files at the end. To include them, run the backup with <code>sudo</code>.</p>
+  </section>
+
+  <section id="next" aria-labelledby="next-h">
+    <h2 id="next-h">Next pages</h2>
+    <ul class="next">
+      <li><a href="/docs/excludes">Excluding files</a></li>
+      <li><a href="/docs/retention">Retention and pruning</a></li>
+      <li><a href="/docs/check">Checking a repository</a></li>
+    </ul>
+  </section>
+</main>
+
+<div id="copy-status" class="vh" role="status"></div>
+
+<script>
+(function () {
+  var status = document.getElementById('copy-status');
+  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+  var timers = new WeakMap();
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () {
+        if (!legacyCopy(text)) { throw new Error('copy failed'); }
+      });
+    }
+    return legacyCopy(text) ? Promise.resolve() : Promise.reject(new Error('copy failed'));
+  }
+
+  function selectNode(node) {
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest ? event.target.closest('.copy') : null;
+    if (!button) { return; }
+    var code = document.getElementById(button.getAttribute('data-copy'));
+    var label = button.querySelector('.copy-label');
+    var message = button.parentNode.querySelector('.cmd-msg');
+
+    copyText(code.textContent).then(function () {
+      message.textContent = '';
+      label.textContent = 'Copied';
+      status.textContent = '';
+      window.setTimeout(function () { status.textContent = 'Copied to the clipboard.'; }, 50);
+      window.clearTimeout(timers.get(button));
+      timers.set(button, window.setTimeout(function () {
+        label.textContent = 'Copy';
+      }, 2000));
+    }, function () {
+      window.clearTimeout(timers.get(button));
+      label.textContent = 'Copy';
+      selectNode(code);
+      message.textContent = 'Could not copy. The text is selected: press ' +
+        (isMac ? 'Command+C' : 'Ctrl+C') + ' to copy it.';
+    });
+  });
+})();
+</script>
+</body>
+</html>

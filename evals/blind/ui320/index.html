@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Team settings</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --ink: #1d1c1a;
+    --muted: #5d5a53;
+    --line: #dedbd3;
+    --line-strong: #8f8b82;
+    --accent: #285e4f;
+    --accent-hover: #1f4a3e;
+    --accent-ink: #ffffff;
+    --accent-soft: #e6f0ec;
+    --danger: #a8281f;
+    --danger-hover: #861f18;
+    --danger-ink: #ffffff;
+    --danger-soft: #fbeceb;
+    --skeleton: #e9e6df;
+    --focus: #1a6fd6;
+    --control-h: 40px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151614;
+      --surface: #1f201d;
+      --ink: #eceae4;
+      --muted: #a9a69d;
+      --line: #383a35;
+      --line-strong: #7c7f77;
+      --accent: #7fc9b0;
+      --accent-hover: #9ad8c2;
+      --accent-ink: #0f2a22;
+      --accent-soft: #1f332c;
+      --danger: #f0958d;
+      --danger-hover: #f6b1ab;
+      --danger-ink: #3a100c;
+      --danger-soft: #3a1f1c;
+      --skeleton: #2b2d29;
+      --focus: #8ab8ff;
+    }
+  }
+  @media (pointer: coarse) { :root { --control-h: 44px; } }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.top { margin-bottom: 28px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+  h2 { font-size: 18px; line-height: 1.3; margin: 0; }
+  h3 { font-size: 15px; line-height: 1.3; margin: 0 0 10px; }
+  p { margin: 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .card-desc { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .count { color: var(--muted); font-size: 14px; }
+
+  label.field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  input[type="text"], input[type="email"], select {
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    min-height: var(--control-h);
+    padding: 6px 12px;
+    width: 100%;
+    min-width: 0;
+  }
+  select { padding-right: 8px; cursor: pointer; }
+  input[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+  input:disabled, select:disabled { opacity: 0.6; cursor: not-allowed; }
+  input[readonly] { opacity: 0.75; }
+
+  button { font: inherit; cursor: pointer; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: var(--control-h);
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn.danger { background: var(--danger); border-color: var(--danger); color: var(--danger-ink); }
+  .btn.danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+  .btn.quiet-danger { border-color: transparent; background: transparent; color: var(--danger); font-weight: 500; padding: 6px 10px; }
+  .btn.quiet-danger:hover { background: var(--danger-soft); }
+  .btn[aria-disabled="true"], .btn:disabled { opacity: 0.6; cursor: default; }
+  .linkbtn {
+    background: none; border: 0; padding: 4px 2px; color: var(--accent);
+    font-weight: 600; text-decoration: underline; text-underline-offset: 3px;
+    min-height: 28px;
+  }
+  .linkbtn:hover { color: var(--accent-hover); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: none; }
+
+  .spinner {
+    width: 14px; height: 14px; flex: none;
+    border: 2px solid currentColor; border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .msg { font-size: 14px; margin-top: 8px; min-height: 0; }
+  .msg.error { color: var(--danger); }
+  .msg.ok { color: var(--accent); }
+  .msg.muted { color: var(--muted); }
+  .status { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .status.ok { color: var(--accent); }
+
+  /* Team name */
+  .name-row { display: flex; gap: 12px; align-items: flex-end; }
+  .name-row .grow { flex: 1; min-width: 0; }
+
+  /* Invite */
+  .invite {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: var(--bg);
+  }
+  .invite-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px auto; gap: 12px; align-items: end; }
+
+  .notice {
+    display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .notice-text { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+  .notice-actions { display: flex; gap: 14px; }
+
+  /* Members */
+  ul.members { list-style: none; margin: 0; padding: 0; }
+  li.member {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 150px 190px 84px;
+    grid-template-areas: "av who active role act" "msg msg msg msg msg";
+    column-gap: 14px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  li.member.is-new { animation: flash 2.4s ease-out; }
+  @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+  .avatar {
+    grid-area: av;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+    align-self: start;
+  }
+  .who { grid-area: who; min-width: 0; }
+  .who .name { font-weight: 600; overflow-wrap: anywhere; line-height: 1.35; }
+  .who .email { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; line-height: 1.35; }
+  .active { grid-area: active; color: var(--muted); font-size: 14px; }
+  .rolecell { grid-area: role; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+  .rolecell select { width: 116px; flex: none; }
+  .role-fixed { width: 116px; padding-left: 13px; font-weight: 600; }
+  .act { grid-area: act; display: flex; justify-content: flex-end; }
+  .rowmsg { grid-area: msg; display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; justify-content: flex-end; color: var(--danger); font-size: 14px; margin-top: 8px; }
+  .empty { border-top: 1px solid var(--line); padding: 28px 0 8px; text-align: center; color: var(--muted); }
+  .empty strong { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  /* Notifications */
+  ul.notifs { list-style: none; margin: 0; padding: 0; }
+  ul.notifs li { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+  ul.notifs label { flex: 1; min-width: 0; cursor: pointer; }
+  ul.notifs .n-title { display: block; font-weight: 600; }
+  ul.notifs .n-desc { display: block; color: var(--muted); font-size: 14px; }
+  ul.notifs .n-err { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; color: var(--danger); font-size: 14px; margin-top: 4px; }
+  .n-side { display: flex; align-items: center; gap: 10px; flex: none; }
+  input.switch {
+    appearance: none; -webkit-appearance: none;
+    width: 46px; height: 28px; margin: 0; flex: none;
+    border-radius: 14px;
+    background: var(--line-strong);
+    position: relative; cursor: pointer;
+    transition: background 0.15s;
+  }
+  input.switch::before {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+  }
+  input.switch:checked { background: var(--accent); }
+  input.switch:checked::before { transform: translateX(18px); }
+  @media (prefers-color-scheme: dark) { input.switch:checked::before { background: var(--accent-ink); } }
+  input.switch[aria-disabled="true"] { opacity: 0.7; cursor: default; }
+  @media (forced-colors: active) {
+    input.switch { appearance: auto; -webkit-appearance: checkbox; width: 22px; height: 22px; }
+    input.switch::before { display: none; }
+  }
+
+  /* Loading and load error */
+  .skel { background: var(--skeleton); border-radius: 6px; animation: pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+  .skel-row { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+  .loaderr { text-align: center; padding: 48px 24px; }
+  .loaderr h2 { margin-bottom: 6px; }
+  .loaderr p { color: var(--muted); margin-bottom: 18px; }
+
+  /* Dialog */
+  dialog {
+    border: 1px solid var(--line); border-radius: 14px; padding: 0;
+    width: calc(100% - 32px); max-width: 460px;
+    background: var(--surface); color: var(--ink);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+  .dlg { padding: 24px; }
+  .dlg h2 { margin-bottom: 8px; overflow-wrap: anywhere; }
+  .dlg p { color: var(--muted); }
+  .dlg .msg.error { margin-top: 12px; }
+  .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  @media (max-width: 720px) {
+    .page { padding: 24px 16px 64px; }
+    h1 { font-size: 24px; }
+    .card { padding: 18px 16px; }
+    .name-row { flex-direction: column; align-items: stretch; }
+    .invite { padding: 14px; }
+    .invite-row { grid-template-columns: 1fr; }
+    li.member {
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      grid-template-areas: "av who who" "av active active" "role role act" "msg msg msg";
+      row-gap: 2px;
+    }
+    .rolecell { justify-content: flex-start; flex-direction: row-reverse; justify-content: flex-end; margin-top: 10px; }
+    .rolecell select { width: 130px; }
+    .role-fixed { width: auto; padding-left: 0; }
+    .act { margin-top: 10px; }
+    .rowmsg { justify-content: flex-start; }
+    .dlg-actions { flex-direction: column-reverse; }
+    .dlg-actions .btn { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner, .skel, li.member.is-new { animation: none; }
+    .spinner { display: none; }
+    input.switch, input.switch::before { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <h1>Team settings</h1>
+    <p class="sub" id="team-sub"></p>
+  </header>
+
+  <main>
+    <!-- Loading -->
+    <div id="view-loading" role="status">
+      <span class="sr-only">Loading team settings</span>
+      <div class="card" aria-hidden="true">
+        <div class="skel" style="width:120px;height:18px;margin-bottom:16px"></div>
+        <div class="skel" style="width:100%;height:40px"></div>
+      </div>
+      <div class="card" aria-hidden="true">
+        <div class="skel" style="width:100px;height:18px;margin-bottom:18px"></div>
+        <div class="skel-row"><div class="skel" style="width:40px;height:40px;border-radius:50%"></div><div style="flex:1"><div class="skel" style="width:40%;height:14px;margin-bottom:8px"></div><div class="skel" style="width:60%;height:12px"></div></div></div>
+        <div class="skel-row"><div class="skel" style="width:40px;height:40px;border-radius:50%"></div><div style="flex:1"><div class="skel" style="width:30%;height:14px;margin-bottom:8px"></div><div class="skel" style="width:50%;height:12px"></div></div></div>
+        <div class="skel-row"><div class="skel" style="width:40px;height:40px;border-radius:50%"></div><div style="flex:1"><div class="skel" style="width:45%;height:14px;margin-bottom:8px"></div><div class="skel" style="width:55%;height:12px"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Load error -->
+    <div id="view-error" class="card loaderr" hidden>
+      <h2 id="loaderr-title" tabindex="-1">We couldn't load your team settings</h2>
+      <p>The connection dropped before the page finished loading. Nothing has been changed.</p>
+      <button type="button" class="btn primary" id="load-retry">Try again</button>
+    </div>
+
+    <!-- Content -->
+    <div id="view-content" hidden>
+
+      <section class="card" aria-labelledby="h-name">
+        <div class="card-head"><h2 id="h-name">Team name</h2></div>
+        <p class="card-desc">Shown to everyone on the team and in the emails the team gets.</p>
+        <form id="rename-form" novalidate>
+          <div class="name-row">
+            <div class="grow">
+              <label class="field-label" for="team-name">Name</label>
+              <input type="text" id="team-name" name="team-name" autocomplete="off" maxlength="100" aria-describedby="rename-msg">
+            </div>
+            <button type="submit" class="btn primary" id="rename-save">Save name</button>
+          </div>
+          <p class="msg" id="rename-msg" hidden></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="h-members">
+        <div class="card-head">
+          <h2 id="h-members">Members</h2>
+          <span class="count" id="seat-count"></span>
+        </div>
+        <p class="card-desc">Everyone with access to this team, and their role.</p>
+
+        <form id="invite-form" class="invite" novalidate aria-labelledby="h-invite">
+          <h3 id="h-invite">Invite someone</h3>
+          <div class="invite-row">
+            <div>
+              <label class="field-label" for="invite-email">Email address</label>
+              <input type="email" id="invite-email" name="invite-email" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email" placeholder="name@example.com" aria-describedby="invite-msg">
+            </div>
+            <div>
+              <label class="field-label" for="invite-role">Role</label>
+              <select id="invite-role" name="invite-role">
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" class="btn primary" id="invite-send">Send invite</button>
+          </div>
+          <p class="msg" id="invite-msg" hidden></p>
+        </form>
+
+        <div class="notice" id="notice" tabindex="-1" hidden>
+          <span class="notice-text" id="notice-text"></span>
+          <span class="notice-actions">
+            <button type="button" class="linkbtn" id="notice-action" hidden></button>
+            <button type="button" class="linkbtn" id="notice-dismiss">Dismiss</button>
+          </span>
+        </div>
+
+        <ul class="members" id="member-list" aria-labelledby="h-members"></ul>
+        <div class="empty" id="members-empty" hidden>
+          <strong>No one is on this team yet</strong>
+          Invite someone by email above to get started.
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-notifs">
+        <div class="card-head"><h2 id="h-notifs">Email notifications</h2></div>
+        <p class="card-desc">Choose which emails the team gets. Changes are saved as you make them.</p>
+        <ul class="notifs" id="notif-list"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<dialog id="remove-dialog" aria-labelledby="remove-title" aria-describedby="remove-desc">
+  <div class="dlg">
+    <h2 id="remove-title"></h2>
+    <p id="remove-desc">They will lose access right away. You can invite them again later.</p>
+    <p class="msg error" id="remove-error" hidden></p>
+    <div class="dlg-actions">
+      <button type="button" class="btn" id="remove-cancel">Cancel</button>
+      <button type="button" class="btn danger" id="remove-confirm"></button>
+    </div>
+  </div>
+</dialog>
+
+<div class="sr-only" aria-live="polite" id="live"></div>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, '');
+      else el.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) {
+      if (kid == null || kid === false) continue;
+      el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+    }
+    return el;
+  }
+
+  const spinner = () => h('span', { class: 'spinner', 'aria-hidden': 'true' });
+
+  // Screen reader announcements. Visible messages are not live regions, so
+  // nothing is read twice.
+  let liveTimer;
+  function announce(text) {
+    const live = $('live');
+    live.textContent = '';
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => { live.textContent = text; }, 60);
+  }
+
+  // The connection drops now and then. Calls that are safe to repeat get one
+  // quiet second attempt before the person is asked to do anything.
+  const isTransient = (e) => !['VALIDATION', 'EXISTS', 'SEATS'].includes(e && e.code);
+  async function withRetry(fn) {
+    try { return await fn(); }
+    catch (e) { if (!isTransient(e)) throw e; return await fn(); }
+  }
+
+  function setBusy(btn, busy, label) {
+    btn.setAttribute('aria-disabled', busy ? 'true' : 'false');
+    btn.textContent = '';
+    if (busy) btn.append(spinner());
+    btn.append(label);
+  }
+
+  function setMsg(el, kind, text) {
+    if (!text) { el.hidden = true; el.textContent = ''; return; }
+    el.className = 'msg ' + kind;
+    el.textContent = text;
+    el.hidden = false;
+  }
+
+  const ROLE_LABEL = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+  const roleNoun = (r) => (r === 'admin' ? 'an admin' : r === 'owner' ? 'the owner' : 'a member');
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+  function initials(name) {
+    const parts = String(name).trim().split(/[\s._-]+/).filter(Boolean);
+    if (!parts.length) return '?';
+    const first = parts[0][0];
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  function formatActive(iso) {
+    if (!iso) return { text: "Hasn't signed in yet", title: null };
+    const d = new Date(iso);
+    if (isNaN(d)) return { text: 'Last active unknown', title: null };
+    const now = new Date();
+    const dayStart = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const days = Math.round((dayStart(now) - dayStart(d)) / 86400000);
+    const title = d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    let text;
+    if (days <= 0) text = 'Active today';
+    else if (days === 1) text = 'Active yesterday';
+    else if (days < 7) text = 'Active ' + days + ' days ago';
+    else {
+      const opts = { month: 'short', day: 'numeric' };
+      if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+      text = 'Last active ' + d.toLocaleDateString(undefined, opts);
+    }
+    return { text, title };
+  }
+
+  // ---------- state ----------
+  let team = null;
+  const rows = new Map();     // member id -> <li>
+  const memberUi = new Map(); // member id -> { busy, pendingRole, error, saved }
+  const ui = (id) => {
+    if (!memberUi.has(id)) memberUi.set(id, { busy: false, pendingRole: null, error: null, saved: false, isNew: false });
+    return memberUi.get(id);
+  };
+
+  // ---------- loading ----------
+  function show(view) {
+    for (const v of ['loading', 'error', 'content']) $('view-' + v).hidden = v !== view;
+  }
+
+  async function load(fromRetry) {
+    show('loading');
+    try {
+      team = await withRetry(() => api.getTeam());
+    } catch (e) {
+      show('error');
+      announce("We couldn't load your team settings.");
+      if (fromRetry) $('load-retry').focus();
+      return;
+    }
+    renderAll();
+    show('content');
+    if (fromRetry) { announce('Team settings loaded.'); $('h-name').setAttribute('tabindex', '-1'); $('h-name').focus(); }
+  }
+  $('load-retry').addEventListener('click', () => load(true));
+
+  function renderAll() {
+    renderTeamName();
+    $('team-name').value = team.name;
+    rows.clear();
+    $('member-list').textContent = '';
+    for (const m of team.members) {
+      const li = buildRow(m);
+      rows.set(m.id, li);
+      $('member-list').append(li);
+    }
+    updateMemberMeta();
+    renderNotifs();
+  }
+
+  function renderTeamName() {
+    $('team-sub').textContent = team.name;
+    document.title = 'Team settings - ' + team.name;
+  }
+
+  // ---------- rename ----------
+  const nameInput = $('team-name');
+  const renameBtn = $('rename-save');
+  const renameMsg = $('rename-msg');
+  let renaming = false;
+  let renameOkTimer;
+
+  const nameDirty = () => team && nameInput.value.trim() !== team.name;
+
+  nameInput.addEventListener('input', () => {
+    nameInput.removeAttribute('aria-invalid');
+    setMsg(renameMsg, '', '');
+  });
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nameDirty() && !renaming) {
+      nameInput.value = team.name;
+      nameInput.removeAttribute('aria-invalid');
+      setMsg(renameMsg, 'muted', 'Change undone.');
+      announce('Change undone.');
+    }
+  });
+
+  $('rename-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (renaming) return;
+    clearTimeout(renameOkTimer);
+    const name = nameInput.value.trim();
+    if (!name) {
+      nameInput.setAttribute('aria-invalid', 'true');
+      setMsg(renameMsg, 'error', 'Enter a name for the team.');
+      announce('Enter a name for the team.');
+      nameInput.focus();
+      return;
+    }
+    if (name === team.name) {
+      nameInput.value = name;
+      setMsg(renameMsg, 'muted', 'That is already the team name.');
+      announce('That is already the team name.');
+      return;
+    }
+    renaming = true;
+    nameInput.readOnly = true;
+    nameInput.removeAttribute('aria-invalid');
+    setMsg(renameMsg, '', '');
+    setBusy(renameBtn, true, 'Saving');
+    try {
+      const res = await withRetry(() => api.renameTeam(name));
+      team.name = res.name;
+      nameInput.value = res.name;
+      renderTeamName();
+      setMsg(renameMsg, 'ok', 'Saved. The team is now called ' + res.name + '.');
+      announce('Saved. The team is now called ' + res.name + '.');
+      renameOkTimer = setTimeout(() => setMsg(renameMsg, '', ''), 6000);
+    } catch (err) {
+      const text = err && err.code === 'VALIDATION'
+        ? 'Enter a name for the team.'
+        : "We couldn't save the new name, so the team is still called " + team.name + '. Check your connection and try again.';
+      if (err && err.code === 'VALIDATION') nameInput.setAttribute('aria-invalid', 'true');
+      setMsg(renameMsg, 'error', text);
+      announce(text);
+    } finally {
+      renaming = false;
+      nameInput.readOnly = false;
+      setBusy(renameBtn, false, 'Save name');
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (nameDirty() || renaming) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // ---------- members ----------
+  function updateMemberMeta() {
+    const n = team.members.length;
+    const full = n >= team.seats;
+    $('seat-count').textContent = n + ' of ' + team.seats + ' seats used';
+    $('members-empty').hidden = n > 0;
+    $('member-list').hidden = n === 0;
+    // Inviting is closed while every seat is taken, with the reason shown.
+    if (!inviting) {
+      inviteEmail.disabled = full;
+      inviteRole.disabled = full;
+      inviteBtn.disabled = full;
+      if (full) setMsg(inviteMsg, 'muted', 'All ' + team.seats + ' seats are in use. Remove someone to free a seat before inviting.');
+      else if (inviteMsg.dataset.kind === 'full') setMsg(inviteMsg, '', '');
+      inviteMsg.dataset.kind = full ? 'full' : '';
+    }
+  }
+
+  function buildRow(m) {
+    const s = ui(m.id);
+    const isOwner = m.role === 'owner';
+    const act = formatActive(m.lastActive);
+
+    let roleCell;
+    if (isOwner) {
+      roleCell = h('div', { class: 'rolecell' }, h('span', { class: 'role-fixed' }, 'Owner'));
+    } else {
+      const sel = h('select', { id: 'role-' + m.id, 'aria-label': 'Role for ' + m.name, disabled: s.busy },
+        h('option', { value: 'member' }, 'Member'),
+        h('option', { value: 'admin' }, 'Admin'));
+      sel.value = s.busy && s.pendingRole ? s.pendingRole : m.role;
+      sel.addEventListener('change', () => changeRole(m.id, sel.value));
+      let status = null;
+      if (s.busy) status = h('span', { class: 'status' }, spinner(), 'Saving');
+      else if (s.saved) status = h('span', { class: 'status ok' }, 'Saved');
+      roleCell = h('div', { class: 'rolecell' }, status, sel);
+    }
+
+    const removeBtn = isOwner ? null : h('button', {
+      type: 'button', class: 'btn quiet-danger', id: 'remove-' + m.id,
+      'aria-label': 'Remove ' + m.name,
+      'aria-disabled': s.busy ? 'true' : null,
+      onclick: () => { if (!ui(m.id).busy) openRemove(m.id); },
+    }, 'Remove');
+
+    const rowMsg = s.error ? h('div', { class: 'rowmsg' },
+      h('span', {}, s.error.text),
+      h('button', { type: 'button', class: 'linkbtn', id: 'retry-' + m.id, onclick: () => changeRole(m.id, s.error.role) }, 'Try again')
+    ) : null;
+
+    return h('li', { class: 'member' + (s.isNew ? ' is-new' : ''), 'data-id': m.id },
+      h('div', { class: 'avatar', 'aria-hidden': 'true' }, initials(m.name)),
+      h('div', { class: 'who' },
+        h('div', { class: 'name' }, m.name),
+        h('div', { class: 'email' }, m.email)),
+      h('div', { class: 'active', title: act.title }, act.text),
+      roleCell,
+      h('div', { class: 'act' }, removeBtn),
+      rowMsg);
+  }
+
+  function refreshRow(id, focusId) {
+    const old = rows.get(id);
+    const m = team.members.find((x) => x.id === id);
+    if (!old || !m) return;
+    const active = document.activeElement;
+    const hadFocus = old.contains(active) ? active.id : null;
+    const li = buildRow(m);
+    old.replaceWith(li);
+    rows.set(id, li);
+    const nothingFocused = !document.activeElement || document.activeElement === document.body;
+    const target = (hadFocus && $(hadFocus) && !$(hadFocus).disabled) ? hadFocus : (nothingFocused ? focusId : null);
+    if (target && $(target)) $(target).focus();
+  }
+
+  async function changeRole(id, role) {
+    const m = team.members.find((x) => x.id === id);
+    const s = ui(id);
+    if (!m || s.busy) return;
+    if (role === m.role) { s.error = null; refreshRow(id, 'role-' + id); return; }
+    const prev = m.role;
+    s.busy = true; s.pendingRole = role; s.error = null; s.saved = false; s.isNew = false;
+    refreshRow(id);
+    try {
+      const res = await withRetry(() => api.changeRole(id, role));
+      m.role = res.role;
+      s.saved = true;
+      announce(m.name + ' is now ' + roleNoun(m.role) + '.');
+      setTimeout(() => { if (s.saved && !s.busy) { s.saved = false; refreshRow(id); } }, 3000);
+    } catch (e) {
+      const text = "We couldn't make " + m.name + ' ' + roleNoun(role) + '. They are still ' + roleNoun(prev) + '.';
+      s.error = { text, role };
+      announce(text);
+    } finally {
+      s.busy = false; s.pendingRole = null;
+      refreshRow(id, 'role-' + id);
+    }
+  }
+
+  // ---------- notice ----------
+  let noticeFn = null;
+  function showNotice(text, action) {
+    $('notice-text').textContent = text;
+    const btn = $('notice-action');
+    if (action) { btn.textContent = action.label; btn.hidden = false; noticeFn = action.fn; }
+    else { btn.hidden = true; noticeFn = null; }
+    $('notice').hidden = false;
+    announce(text);
+  }
+  function hideNotice() { $('notice').hidden = true; noticeFn = null; }
+  $('notice-action').addEventListener('click', () => { if (noticeFn) noticeFn(); });
+  $('notice-dismiss').addEventListener('click', () => { hideNotice(); (inviteEmail.disabled ? $('h-members') : inviteEmail).focus(); });
+  $('h-members').setAttribute('tabindex', '-1');
+
+  // ---------- invite ----------
+  const inviteEmail = $('invite-email');
+  const inviteRole = $('invite-role');
+  const inviteBtn = $('invite-send');
+  const inviteMsg = $('invite-msg');
+  let inviting = false;
+
+  function inviteError(text) {
+    inviteEmail.setAttribute('aria-invalid', 'true');
+    inviteMsg.dataset.kind = '';
+    setMsg(inviteMsg, 'error', text);
+    announce(text);
+    inviteEmail.focus();
+  }
+
+  inviteEmail.addEventListener('input', () => {
+    inviteEmail.removeAttribute('aria-invalid');
+    if (inviteMsg.dataset.kind !== 'full') setMsg(inviteMsg, '', '');
+  });
+
+  $('invite-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (inviting || inviteBtn.disabled) return;
+    const email = inviteEmail.value.trim().toLowerCase();
+    const role = inviteRole.value;
+    if (!email) return inviteError('Enter the email address of the person to invite.');
+    if (!EMAIL_RE.test(email)) return inviteError('That does not look like a full email address. Use the form name@example.com.');
+    const existing = team.members.find((m) => m.email.toLowerCase() === email);
+    if (existing) return inviteError(existing.name + ' (' + existing.email + ') is already on this team.');
+
+    inviting = true;
+    inviteEmail.readOnly = true;
+    inviteRole.disabled = true;
+    inviteEmail.removeAttribute('aria-invalid');
+    setMsg(inviteMsg, '', '');
+    setBusy(inviteBtn, true, 'Sending');
+    let added = null, failure = null;
+    try {
+      // Not repeated automatically: a second attempt could send a second invite.
+      added = await api.inviteMember(email, role);
+    } catch (err) {
+      failure = err || {};
+    }
+    inviting = false;
+    inviteEmail.readOnly = false;
+    inviteRole.disabled = false;
+    setBusy(inviteBtn, false, 'Send invite');
+
+    if (added) {
+      team.members.push(added);
+      ui(added.id).isNew = true;
+      const li = buildRow(added);
+      rows.set(added.id, li);
+      $('member-list').append(li);
+      inviteEmail.value = '';
+      inviteRole.value = 'member';
+      updateMemberMeta();
+      showNotice('Invite sent to ' + added.email + '. They have been added as ' + roleNoun(added.role) + '.');
+      if (inviteEmail.disabled) $('notice').focus();
+      return;
+    }
+    updateMemberMeta();
+    if (failure.code === 'EXISTS') inviteError(email + ' is already on this team.');
+    else if (failure.code === 'SEATS') inviteError('All ' + team.seats + ' seats are in use. Remove someone to free a seat, then invite again.');
+    else if (failure.code === 'VALIDATION') inviteError('That does not look like a full email address. Use the form name@example.com.');
+    else inviteError("We couldn't send the invite to " + email + '. Check your connection and try again.');
+  });
+
+  // ---------- remove ----------
+  const dialog = $('remove-dialog');
+  const removeConfirm = $('remove-confirm');
+  const removeCancel = $('remove-cancel');
+  let removeId = null;
+  let removing = false;
+
+  function openRemove(id) {
+    const m = team.members.find((x) => x.id === id);
+    if (!m) return;
+    removeId = id;
+    $('remove-title').textContent = 'Remove ' + m.name + ' from ' + team.name + '?';
+    setMsg($('remove-error'), 'error', '');
+    setBusy(removeConfirm, false, 'Remove ' + shortName(m.name));
+    dialog.showModal();
+    removeCancel.focus();
+  }
+  const shortName = (name) => (name.length > 24 ? 'from team' : name);
+
+  function closeRemove() { if (!removing) dialog.close(); }
+  removeCancel.addEventListener('click', closeRemove);
+  dialog.addEventListener('cancel', (e) => { if (removing) e.preventDefault(); });
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) closeRemove(); });
+
+  removeConfirm.addEventListener('click', async () => {
+    if (removing) return;
+    const m = team.members.find((x) => x.id === removeId);
+    if (!m) { dialog.close(); return; }
+    removing = true;
+    setMsg($('remove-error'), 'error', '');
+    setBusy(removeConfirm, true, 'Removing');
+    removeCancel.setAttribute('aria-disabled', 'true');
+    let ok = false;
+    try {
+      await withRetry(() => api.removeMember(m.id));
+      ok = true;
+    } catch (e) { /* handled below */ }
+    removing = false;
+    removeCancel.setAttribute('aria-disabled', 'false');
+
+    if (!ok) {
+      const text = "We couldn't remove " + m.name + '. They still have access. Check your connection and try again.';
+      setMsg($('remove-error'), 'error', text);
+      announce(text);
+      setBusy(removeConfirm, false, 'Try again');
+      return;
+    }
+    team.members = team.members.filter((x) => x.id !== m.id);
+    const li = rows.get(m.id);
+    if (li) li.remove();
+    rows.delete(m.id);
+    memberUi.delete(m.id);
+    updateMemberMeta();
+    dialog.close();
+    showNotice(m.name + ' was removed and no longer has access.', {
+      label: 'Invite again',
+      fn: () => {
+        inviteEmail.value = m.email;
+        inviteRole.value = m.role === 'admin' ? 'admin' : 'member';
+        inviteEmail.removeAttribute('aria-invalid');
+        setMsg(inviteMsg, '', '');
+        hideNotice();
+        inviteEmail.focus();
+      },
+    });
+    $('notice').focus();
+  });
+
+  // ---------- notifications ----------
+  const NOTIF_COPY = {
+    weekly_digest: ['Weekly digest', "A summary of the team's week, sent once a week."],
+    new_member: ['New members', 'When someone joins the team.'],
+    billing: ['Billing', 'Receipts, renewals and payment problems.'],
+    mentions: ['Mentions', 'When someone on the team is mentioned.'],
+  };
+  const notifCopy = (key) => NOTIF_COPY[key] || [key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()), ''];
+  const notifUi = {};
+
+  function renderNotifs() {
+    const list = $('notif-list');
+    list.textContent = '';
+    for (const key of Object.keys(team.notifications)) {
+      const [title, desc] = notifCopy(key);
+      const st = notifUi[key] = { busy: false, timer: null };
+      const sw = h('input', { type: 'checkbox', role: 'switch', class: 'switch', id: 'notif-' + key, 'aria-describedby': desc ? 'notif-desc-' + key : null });
+      sw.checked = !!team.notifications[key];
+      const status = h('span', { class: 'status' });
+      const errText = h('span', {});
+      const retry = h('button', { type: 'button', class: 'linkbtn' }, 'Try again');
+      const err = h('div', { class: 'n-err', hidden: true }, errText, retry);
+      st.sw = sw; st.status = status; st.err = err; st.errText = errText; st.retry = retry; st.title = title;
+
+      sw.addEventListener('click', (e) => { if (st.busy) e.preventDefault(); });
+      sw.addEventListener('change', () => saveNotif(key, sw.checked));
+      retry.addEventListener('click', () => { sw.focus(); saveNotif(key, st.want); });
+
+      list.append(h('li', {},
+        h('div', { style: 'flex:1;min-width:0' },
+          h('label', { for: 'notif-' + key },
+            h('span', { class: 'n-title' }, title),
+            desc ? h('span', { class: 'n-desc', id: 'notif-desc-' + key }, desc) : null),
+          err),
+        h('div', { class: 'n-side' }, status, sw)));
+    }
+  }
+
+  async function saveNotif(key, on) {
+    const st = notifUi[key];
+    if (st.busy) return;
+    st.busy = true; st.want = on;
+    clearTimeout(st.timer);
+    st.sw.checked = on;
+    st.sw.setAttribute('aria-disabled', 'true');
+    st.err.hidden = true;
+    st.status.className = 'status';
+    st.status.textContent = '';
+    st.status.append(spinner(), 'Saving');
+    try {
+      await withRetry(() => api.setNotification(key, on));
+      team.notifications[key] = on;
+      st.status.className = 'status ok';
+      st.status.textContent = 'Saved';
+      announce(st.title + ' emails turned ' + (on ? 'on' : 'off') + '.');
+      st.timer = setTimeout(() => { st.status.textContent = ''; }, 3000);
+    } catch (e) {
+      st.sw.checked = !!team.notifications[key];
+      st.status.textContent = '';
+      const text = "We couldn't turn " + st.title.toLowerCase() + ' emails ' + (on ? 'on' : 'off') + '. They are still ' + (on ? 'off' : 'on') + '.';
+      st.errText.textContent = text;
+      st.err.hidden = false;
+      announce(text);
+    } finally {
+      st.busy = false;
+      st.sw.setAttribute('aria-disabled', 'false');
+    }
+  }
+
+  load(false);
+})();
+</script>
+</body>
+</html>

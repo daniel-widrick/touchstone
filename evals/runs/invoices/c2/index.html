@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Northwind</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --surface: #ffffff; --text: #18202b; --muted: #566070; --border: #dde1e8;
+    --hover: #f3f6fb; --accent: #1b56c4; --accent-text: #ffffff; --focus: #1b56c4;
+    --danger: #b3261e; --danger-bg: #fdeceb; --ok: #146c3c; --ok-bg: #e4f4ea;
+    --info: #1b4f9c; --info-bg: #e6eefb; --neutral-bg: #eceef2; --skeleton: #e6e9ee;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a; --surface: #1b1f26; --text: #e8ebf0; --muted: #a2abb9; --border: #323843;
+      --hover: #222833; --accent: #8fb4ff; --accent-text: #0d1a33; --focus: #8fb4ff;
+      --danger: #ff9d94; --danger-bg: #43201d; --ok: #7fd6a2; --ok-bg: #173524;
+      --info: #a5c4ff; --info-bg: #1c2c4a; --neutral-bg: #2a303a; --skeleton: #2a303a;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 64px; }
+  h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button, input, select { font: inherit; color: inherit; }
+
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .brand { color: var(--muted); font-size: 13px; margin: 0 0 2px; }
+  .stats { display: flex; gap: 28px; margin: 0; }
+  .stats div { text-align: right; }
+  .stats dt { font-size: 12.5px; color: var(--muted); }
+  .stats dd { margin: 0; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stats .od dd { color: var(--danger); }
+
+  .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .search { position: relative; flex: 1 1 300px; max-width: 440px; }
+  .search input { width: 100%; height: 40px; padding: 0 40px 0 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+  .search input::placeholder { color: var(--muted); }
+  .search svg { position: absolute; left: 11px; top: 12px; color: var(--muted); pointer-events: none; }
+  .search .clear { position: absolute; right: 4px; top: 4px; width: 32px; height: 32px; border: 0; background: none; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; }
+  .search .clear:hover { background: var(--neutral-bg); color: var(--text); }
+  .filters { display: flex; gap: 6px; overflow-x: auto; padding: 2px; margin: -2px; }
+  .filters button { height: 36px; padding: 0 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .filters button:hover { background: var(--hover); }
+  .filters button[aria-pressed="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+  .filters .n { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: 0.75; font-size: 13px; }
+  .spacer { flex: 1; }
+  .btn { height: 36px; padding: 0 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; cursor: pointer; white-space: nowrap; }
+  .btn:hover:not(:disabled) { background: var(--hover); }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+  .btn.primary:hover:not(:disabled) { background: var(--accent); filter: brightness(1.1); }
+  .btn.danger { color: var(--danger); }
+  .btn.danger-solid { background: var(--danger); border-color: var(--danger); color: var(--surface); font-weight: 600; }
+  .btn.danger-solid:hover:not(:disabled) { background: var(--danger); filter: brightness(1.1); }
+  .btn.sm { height: 32px; padding: 0 10px; font-size: 14px; }
+  .sortsel { display: none; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 0 8px; }
+
+  .meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; margin-bottom: 8px; min-height: 20px; }
+  .banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--danger-bg); color: var(--text); border: 1px solid var(--danger); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+  .banner[hidden] { display: none; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  th, td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: 0; }
+  thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; padding: 0; border-radius: 10px 10px 0 0; }
+  thead th > span, thead th > button { display: block; width: 100%; padding: 10px 14px; text-align: inherit; }
+  thead th > button { border: 0; background: none; cursor: pointer; font-weight: 600; color: var(--muted); }
+  thead th > button:hover { color: var(--text); }
+  thead th .arrow { display: inline-block; width: 1em; opacity: 0.9; }
+  th.num, td.num { text-align: right; }
+  tbody tr:hover td { background: var(--hover); }
+  tbody tr:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
+  tr.busy td { opacity: 0.6; }
+  td.number { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.customer { max-width: 300px; overflow-wrap: anywhere; }
+  td.date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.amount { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .sub { display: block; font-size: 12.5px; color: var(--muted); font-weight: 400; white-space: normal; }
+  .sub.late { color: var(--danger); font-weight: 600; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .badge.draft { background: var(--neutral-bg); color: var(--muted); border: 1px dashed var(--muted); }
+  .badge.sent { background: var(--info-bg); color: var(--info); }
+  .badge.paid { background: var(--ok-bg); color: var(--ok); }
+  .badge.overdue { background: var(--danger-bg); color: var(--danger); }
+  td.actions { width: 1%; white-space: nowrap; }
+  .acts { display: flex; gap: 6px; justify-content: flex-end; }
+  .rowerr { margin: 6px 0 0; font-size: 13px; color: var(--danger); white-space: normal; text-align: right; max-width: 260px; margin-left: auto; }
+  .rownote { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); text-align: right; white-space: normal; }
+
+  .state { padding: 56px 24px; text-align: center; }
+  .state h2 { font-size: 18px; margin: 0 0 6px; }
+  .state p { margin: 0 auto 16px; color: var(--muted); max-width: 46ch; }
+  .state .acts { justify-content: center; flex-wrap: wrap; }
+  .skel { display: block; height: 14px; border-radius: 4px; background: var(--skeleton); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.45; } }
+
+  .toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 20; width: max-content; max-width: calc(100vw - 32px); }
+  .toast { background: var(--text); color: var(--surface); padding: 10px 16px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); font-size: 14px; }
+
+  dialog { border: 1px solid var(--border); border-radius: 12px; padding: 0; background: var(--surface); color: var(--text); width: min(440px, calc(100vw - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  dialog::backdrop { background: rgba(10, 14, 20, 0.5); }
+  dialog form { padding: 22px; }
+  dialog h2 { margin: 0 0 12px; font-size: 18px; }
+  dialog .facts { margin: 0 0 12px; padding: 12px 14px; background: var(--bg); border-radius: 8px; }
+  dialog .facts strong { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  dialog p { margin: 0 0 12px; color: var(--muted); }
+  dialog .acts { margin-top: 20px; }
+  dialog .btn { height: 40px; padding: 0 16px; }
+
+  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+  @media (max-width: 1000px) { .col-issued { display: none; } }
+  @media (max-width: 760px) {
+    .wrap { padding: 16px 12px 80px; }
+    .stats { gap: 20px; }
+    .stats div { text-align: left; }
+    .search { max-width: none; flex-basis: 100%; }
+    .search input { height: 44px; font-size: 16px; }
+    .search svg { top: 14px; }
+    .search .clear { top: 6px; }
+    .filters { flex-basis: 100%; }
+    .filters button { height: 40px; }
+    .sortsel { display: block; height: 40px; flex: 1; min-width: 0; }
+    .spacer { display: none; }
+    .btn { height: 40px; }
+    .panel { background: none; border: 0; }
+    table, tbody { display: block; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+      grid-template-areas: "number status" "customer customer" "due amount" "actions actions"; }
+    tbody tr:hover td { background: none; }
+    td { display: block; padding: 0; border: 0; }
+    td.number { grid-area: number; }
+    td.status { grid-area: status; }
+    td.customer { grid-area: customer; max-width: none; margin-bottom: 6px; }
+    td.date.due { grid-area: due; align-self: end; }
+    td.amount { grid-area: amount; align-self: end; font-size: 17px; }
+    td.actions { grid-area: actions; width: auto; }
+    td.actions:empty { display: none; }
+    .acts { margin-top: 10px; justify-content: stretch; }
+    .acts .btn { flex: 1; height: 44px; }
+    .rowerr, .rownote { text-align: left; max-width: none; }
+    .state { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+    dialog .acts { flex-direction: column-reverse; }
+    dialog .btn { height: 46px; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="brand">Northwind accounts</p>
+      <h1>Invoices</h1>
+    </div>
+    <dl class="stats" id="stats" hidden>
+      <div class="od"><dt>Overdue</dt><dd id="statOverdue"></dd></div>
+      <div><dt>Sent, awaiting payment</dt><dd id="statSent"></dd></div>
+    </dl>
+  </header>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <div class="search" role="search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14" stroke-linecap="round"/></svg>
+      <label class="sr-only" for="q">Search by customer or invoice number</label>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search customer or invoice number" aria-keyshortcuts="/">
+      <button class="clear" id="qClear" type="button" aria-label="Clear search" hidden>&times;</button>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by status"></div>
+    <span class="spacer"></span>
+    <label class="sr-only" for="sortSel">Sort by</label>
+    <select class="sortsel" id="sortSel">
+      <option value="due:asc">Due date, oldest first</option>
+      <option value="due:desc">Due date, newest first</option>
+      <option value="amount:desc">Amount, highest first</option>
+      <option value="amount:asc">Amount, lowest first</option>
+      <option value="customer:asc">Customer, A to Z</option>
+      <option value="number:desc">Invoice number, newest first</option>
+    </select>
+    <button class="btn" id="refresh" type="button">Refresh</button>
+  </div>
+
+  <div class="banner" id="banner" role="alert" hidden>
+    <span id="bannerText"></span>
+    <button class="btn sm" id="bannerRetry" type="button">Try again</button>
+  </div>
+
+  <div class="meta" id="meta" hidden>
+    <span id="count" role="status" aria-live="polite"></span>
+    <span id="updated"></span>
+  </div>
+
+  <main class="panel" id="panel" aria-live="off"></main>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="sr-only" id="alerts" role="alert"></div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog">
+    <h2 id="dlgTitle"></h2>
+    <div class="facts" id="dlgFacts"></div>
+    <p id="dlgBody"></p>
+    <div class="acts">
+      <button class="btn" type="button" id="dlgCancel">Cancel</button>
+      <button class="btn" type="button" id="dlgOk"></button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const customers = ['Acme Ltd', 'Brightside Bakery', 'Castellan Freight and Logistics International', 'Dovetail Joinery', 'Eastfield Primary School', 'Fennel & Rye', 'Greyfriars Dental', 'Harbour Lights Hotel', 'Ivy Lane Books', 'Juniper Health'];
+  const statuses = ['draft', 'sent', 'sent', 'paid', 'paid', 'paid', 'overdue', 'overdue'];
+  let invoices = q.get('empty') === '1' ? [] : Array.from({ length: 46 }, (_, i) => ({
+    id: 'inv_' + (9000 + i), number: 'NW-' + (2041 + i), customer: customers[i % customers.length],
+    issued: new Date(2026, 8, 1 + i).toISOString(), due: new Date(2026, 9, 1 + i).toISOString(),
+    amount: Math.round((120 + ((i * 7919) % 48000)) * 100) / 100 + (i % 9 === 0 ? 1250000 : 0), currency: 'GBP',
+    status: statuses[i % statuses.length], reminderSentAt: null,
+  }));
+  return {
+    async listInvoices() { await wait(); maybeFail('list invoices'); return invoices.map((x) => ({ ...x })); },
+    async markPaid(id) { await wait(); maybeFail('mark paid'); const x = invoices.find((v) => v.id === id); x.status = 'paid'; return { ...x }; },
+    async sendReminder(id) { await wait(); maybeFail('send reminder'); const x = invoices.find((v) => v.id === id); x.reminderSentAt = new Date().toISOString(); return { ...x }; },
+    async deleteInvoice(id) { await wait(); maybeFail('delete invoice'); invoices = invoices.filter((v) => v.id !== id); return { ok: true }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const FILTERS = [['all', 'All'], ['overdue', 'Overdue'], ['sent', 'Sent'], ['draft', 'Draft'], ['paid', 'Paid']];
+  const STATUS_LABEL = { draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' };
+  const params = new URLSearchParams(location.search);
+
+  const state = {
+    phase: 'loading',            // loading | error | ready
+    invoices: [],
+    filter: FILTERS.some((f) => f[0] === params.get('status')) ? params.get('status') : 'all',
+    query: params.get('q') || '',
+    sort: { key: 'due', dir: 'asc' },
+    pending: new Map(),          // invoice id -> action in flight
+    errors: new Map(),           // invoice id -> message
+    sticky: new Set(),           // ids kept visible after their status changed under the current filter
+    loadedAt: null,
+    refreshing: false,
+  };
+  let loadToken = 0;
+
+  /* ---------- formatting ---------- */
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const moneyFmt = {};
+  const money = (amount, currency) => {
+    const c = currency || 'GBP';
+    if (!moneyFmt[c]) moneyFmt[c] = new Intl.NumberFormat('en-GB', { style: 'currency', currency: c });
+    return moneyFmt[c].format(amount);
+  };
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const timeFmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const fmtDate = (iso) => dateFmt.format(new Date(iso));
+  const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daysPast = (iso) => Math.round((dayStart(new Date()) - dayStart(new Date(iso))) / 86400000);
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+  const fmtWhen = (iso) => {
+    const d = new Date(iso);
+    return dayStart(d) === dayStart(new Date()) ? 'today at ' + timeFmt.format(d) : 'on ' + fmtDate(iso);
+  };
+
+  /* ---------- helpers ---------- */
+  async function withRetry(fn, attempts) {
+    let lastErr;
+    for (let i = 0; i < attempts; i++) {
+      try { return await fn(); } catch (e) { lastErr = e; }
+    }
+    throw lastErr;
+  }
+  function toast(msg) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    $('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
+  function alertSR(msg) {
+    const el = $('alerts');
+    el.textContent = '';
+    setTimeout(() => { el.textContent = msg; }, 50);
+  }
+  function syncUrl() {
+    const p = new URLSearchParams(location.search);
+    if (state.filter === 'all') p.delete('status'); else p.set('status', state.filter);
+    if (state.query.trim()) p.set('q', state.query.trim()); else p.delete('q');
+    const s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) { /* file URLs may refuse */ }
+  }
+
+  function confirmDialog(opts) {
+    const dlg = $('dlg');
+    $('dlgTitle').textContent = opts.title;
+    $('dlgFacts').innerHTML = opts.factsHtml;
+    $('dlgBody').textContent = opts.body;
+    const ok = $('dlgOk');
+    ok.textContent = opts.confirmLabel;
+    ok.className = 'btn ' + (opts.danger ? 'danger-solid' : 'primary');
+    const opener = document.activeElement;
+    dlg.showModal();
+    (opts.danger ? $('dlgCancel') : ok).focus();
+    return new Promise((resolve) => {
+      const cancel = $('dlgCancel');
+      let settled = false;
+      const finish = (answer) => {
+        if (settled) return;
+        settled = true;
+        ok.removeEventListener('click', onOk);
+        cancel.removeEventListener('click', onCancel);
+        dlg.removeEventListener('close', onClose);
+        if (dlg.open) dlg.close();
+        if (opener && document.contains(opener)) opener.focus();
+        resolve(answer);
+      };
+      const onOk = (e) => { e.preventDefault(); finish(true); };
+      const onCancel = (e) => { e.preventDefault(); finish(false); };
+      const onClose = () => finish(false); // Escape key
+      ok.addEventListener('click', onOk);
+      cancel.addEventListener('click', onCancel);
+      dlg.addEventListener('close', onClose);
+    });
+  }
+  const factsHtml = (inv) => esc(inv.number) + ' &middot; ' + esc(inv.customer) + '<strong>' + esc(money(inv.amount, inv.currency)) + '</strong>';
+
+  /* ---------- data ---------- */
+  const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+  const squash = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  function matchesQuery(inv, q) {
+    if (!q) return true;
+    if (norm(inv.customer).includes(q)) return true;
+    const sq = squash(q);
+    return sq !== '' && squash(inv.number).includes(sq);
+  }
+  function searched() {
+    const q = norm(state.query);
+    return state.invoices.filter((inv) => matchesQuery(inv, q));
+  }
+  function visible(list) {
+    const rows = list.filter((inv) => state.filter === 'all' || inv.status === state.filter || state.sticky.has(inv.id));
+    const { key, dir } = state.sort;
+    const sign = dir === 'asc' ? 1 : -1;
+    const cmp = {
+      due: (a, b) => new Date(a.due) - new Date(b.due),
+      amount: (a, b) => a.amount - b.amount,
+      customer: (a, b) => a.customer.localeCompare(b.customer, 'en-GB'),
+      number: (a, b) => a.number.localeCompare(b.number, 'en-GB', { numeric: true }),
+    }[key];
+    return rows.sort((a, b) => sign * cmp(a, b) || a.number.localeCompare(b.number, 'en-GB', { numeric: true }));
+  }
+
+  async function load(background) {
+    const token = ++loadToken;
+    if (state.phase !== 'ready') state.phase = 'loading';
+    state.refreshing = true;
+    render();
+    try {
+      // Reading is safe to repeat, so quietly retry before bothering anyone.
+      const list = await withRetry(() => api.listInvoices(), 3);
+      if (token !== loadToken) return;
+      state.invoices = list;
+      state.phase = 'ready';
+      state.loadedAt = new Date();
+      state.sticky.clear();
+      for (const id of [...state.errors.keys()]) if (!list.some((v) => v.id === id)) state.errors.delete(id);
+      $('banner').hidden = true;
+    } catch (e) {
+      if (token !== loadToken) return;
+      if (state.phase !== 'ready') {
+        state.phase = 'error';
+      } else if (!background) {
+        $('bannerText').textContent = "Couldn't refresh the list. You're looking at the version from " + timeFmt.format(state.loadedAt) + '.';
+        $('banner').hidden = false;
+      }
+    } finally {
+      if (token === loadToken) { state.refreshing = false; render(); }
+    }
+  }
+
+  /* ---------- actions ---------- */
+  const ACTIONS = {
+    paid: {
+      busy: 'Marking paid...',
+      run: (id) => withRetry(() => api.markPaid(id), 2),
+      done: (inv) => inv.number + ' marked as paid',
+      fail: "Couldn't reach the server, so this invoice is not marked as paid. Try again.",
+    },
+    remind: {
+      busy: 'Sending...',
+      run: (id) => api.sendReminder(id), // never auto-retried: a repeat could email the customer twice
+      done: (inv) => 'Reminder sent to ' + inv.customer,
+      fail: "Couldn't reach the server, so no reminder was sent. Try again.",
+    },
+    del: {
+      busy: 'Deleting...',
+      run: (id) => withRetry(() => api.deleteInvoice(id), 2),
+      done: (inv) => 'Draft ' + inv.number + ' deleted',
+      fail: "Couldn't reach the server, so this draft was not deleted. Try again.",
+    },
+  };
+
+  async function act(id, action) {
+    const inv = state.invoices.find((v) => v.id === id);
+    if (!inv || state.pending.has(id)) return;
+
+    if (action === 'paid') {
+      const ok = await confirmDialog({
+        title: 'Mark ' + inv.number + ' as paid?',
+        factsHtml: factsHtml(inv),
+        body: 'Check the amount matches the payment received. This cannot be undone from this screen.',
+        confirmLabel: 'Mark as paid',
+      });
+      if (!ok) return;
+    } else if (action === 'remind' && inv.reminderSentAt) {
+      const ok = await confirmDialog({
+        title: 'Send another reminder?',
+        factsHtml: factsHtml(inv),
+        body: 'A reminder was already sent ' + fmtWhen(inv.reminderSentAt) + '. The customer will get a second email.',
+        confirmLabel: 'Send again',
+      });
+      if (!ok) return;
+    } else if (action === 'del') {
+      const ok = await confirmDialog({
+        title: 'Delete draft ' + inv.number + '?',
+        factsHtml: factsHtml(inv),
+        body: 'This permanently deletes the draft for everyone. It cannot be recovered.',
+        confirmLabel: 'Delete permanently',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+
+    const def = ACTIONS[action];
+    state.pending.set(id, action);
+    state.errors.delete(id);
+    render();
+    try {
+      const result = await def.run(id);
+      state.pending.delete(id);
+      if (action === 'del') {
+        const rows = [...document.querySelectorAll('#rows tr')];
+        const idx = rows.findIndex((r) => r.id === 'row-' + id);
+        const hadFocus = idx >= 0 && rows[idx].contains(document.activeElement);
+        const next = rows[idx + 1] || rows[idx - 1];
+        state.invoices = state.invoices.filter((v) => v.id !== id);
+        render();
+        if (hadFocus) {
+          const target = (next && $(next.id)) || $('q');
+          target.focus();
+        }
+      } else {
+        const i = state.invoices.findIndex((v) => v.id === id);
+        if (i >= 0) state.invoices[i] = result;
+        state.sticky.add(id); // keep the row where it is until the view changes
+        render();
+      }
+      toast(def.done(inv));
+    } catch (e) {
+      state.pending.delete(id);
+      state.errors.set(id, def.fail);
+      render();
+      alertSR(inv.number + ': ' + def.fail);
+    }
+  }
+
+  /* ---------- rendering ---------- */
+  function rowHtml(inv) {
+    const busy = state.pending.get(inv.id);
+    const err = state.errors.get(inv.id);
+    const dis = busy ? ' disabled' : '';
+    const past = daysPast(inv.due);
+    let dueSub = '';
+    if (inv.status === 'overdue') {
+      dueSub = '<span class="sub late">' + (past > 0 ? plural(past, 'day') + ' overdue' : 'Overdue') + '</span>';
+    } else if (inv.status === 'sent') {
+      dueSub = '<span class="sub">' + (past > 0 ? 'Due ' + plural(past, 'day') + ' ago' : past === 0 ? 'Due today' : 'Due in ' + plural(-past, 'day')) + '</span>';
+    }
+    const btn = (action, label, cls) =>
+      '<button type="button" class="btn sm ' + (cls || '') + '" data-act="' + action + '" data-id="' + esc(inv.id) + '" data-key="' + esc(inv.id) + ':' + action + '"' + dis +
+      ' aria-label="' + esc(label + ', ' + inv.number + ', ' + inv.customer) + '">' + esc(busy === action ? ACTIONS[action].busy : label) + '</button>';
+    let buttons = '';
+    if (inv.status === 'overdue') buttons += btn('remind', inv.reminderSentAt ? 'Remind again' : 'Send reminder');
+    if (inv.status === 'overdue' || inv.status === 'sent') buttons += btn('paid', 'Mark paid', 'primary');
+    if (inv.status === 'draft') buttons += btn('del', 'Delete', 'danger');
+    let actions = buttons ? '<div class="acts">' + buttons + '</div>' : '';
+    if (inv.reminderSentAt && inv.status === 'overdue') actions += '<p class="rownote">Reminder sent ' + esc(fmtWhen(inv.reminderSentAt)) + '</p>';
+    if (err) actions += '<p class="rowerr">' + esc(err) + '</p>';
+    return '<tr id="row-' + esc(inv.id) + '" tabindex="-1" role="row"' + (busy ? ' class="busy" aria-busy="true"' : '') + '>' +
+      '<td class="number" role="cell">' + esc(inv.number) + '</td>' +
+      '<td class="customer" role="cell">' + esc(inv.customer) + '</td>' +
+      '<td class="date col-issued" role="cell">' + esc(fmtDate(inv.issued)) + '</td>' +
+      '<td class="date due" role="cell"><span class="sr-only">Due </span>' + esc(fmtDate(inv.due)) + dueSub + '</td>' +
+      '<td class="amount num" role="cell">' + esc(money(inv.amount, inv.currency)) + '</td>' +
+      '<td class="status" role="cell"><span class="badge ' + esc(inv.status) + '">' + esc(STATUS_LABEL[inv.status] || inv.status) + '</span></td>' +
+      '<td class="actions" role="cell">' + actions + '</td></tr>';
+  }
+
+  function headHtml() {
+    const th = (key, label, cls) => {
+      const on = state.sort.key === key;
+      const aria = on ? (state.sort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+      const arrow = on ? (state.sort.dir === 'asc' ? '&uarr;' : '&darr;') : '';
+      return '<th scope="col" role="columnheader" class="' + (cls || '') + '" aria-sort="' + aria + '"><button type="button" data-sort="' + key + '" data-key="sort:' + key + '">' + label + ' <span class="arrow" aria-hidden="true">' + arrow + '</span></button></th>';
+    };
+    const plain = (label, cls) => '<th scope="col" role="columnheader" class="' + (cls || '') + '"><span>' + label + '</span></th>';
+    return '<thead role="rowgroup"><tr role="row">' + th('number', 'Invoice') + th('customer', 'Customer') + plain('Issued', 'col-issued') + th('due', 'Due') + th('amount', 'Amount', 'num') + plain('Status') + plain('<span class="sr-only">Actions</span>') + '</tr></thead>';
+  }
+
+  function skeletonHtml() {
+    const widths = [60, 180, 80, 80, 90, 60, 120];
+    let rows = '';
+    for (let i = 0; i < 8; i++) {
+      rows += '<tr>' + widths.map((w, c) => '<td' + (c === 2 ? ' class="col-issued"' : '') + '><span class="skel" style="width:' + Math.round(w * (0.7 + ((i * 7 + c * 3) % 5) / 10)) + 'px"></span></td>').join('') + '</tr>';
+    }
+    return '<p class="sr-only" role="status">Loading invoices</p><table aria-hidden="true"><tbody>' + rows + '</tbody></table>';
+  }
+
+  function emptyHtml(list) {
+    const q = state.query.trim();
+    const label = (STATUS_LABEL[state.filter] || '').toLowerCase();
+    if (!state.invoices.length) {
+      return '<div class="state"><h2>No invoices yet</h2><p>Invoices will appear here as soon as they are created.</p></div>';
+    }
+    if (q) {
+      const elsewhere = state.filter !== 'all' && list.length > 0;
+      return '<div class="state"><h2>No ' + (state.filter === 'all' ? '' : esc(label) + ' ') + 'invoices match "' + esc(q) + '"</h2>' +
+        '<p>' + (elsewhere ? plural(list.length, 'invoice') + ' with another status ' + (list.length === 1 ? 'matches' : 'match') + ' this search.' : 'Check the spelling, or try the invoice number, for example NW-2041.') + '</p>' +
+        '<div class="acts">' + (elsewhere ? '<button type="button" class="btn primary" data-go="all">Show all matches</button>' : '') + '<button type="button" class="btn" data-go="clear">Clear search</button></div></div>';
+    }
+    return '<div class="state"><h2>No ' + esc(label) + ' invoices</h2><p>' + (state.filter === 'overdue' ? 'Nothing is overdue right now.' : 'There is nothing with this status at the moment.') + '</p>' +
+      '<div class="acts"><button type="button" class="btn" data-go="all">Show all invoices</button></div></div>';
+  }
+
+  function render() {
+    const panel = $('panel');
+    const ae = document.activeElement;
+    const focusKey = ae && panel.contains(ae) ? (ae.dataset.key || null) : null;
+    const focusRow = ae && panel.contains(ae) && ae.closest('tr') ? ae.closest('tr').id : null;
+
+    const ready = state.phase === 'ready';
+    $('toolbar').hidden = !ready || !state.invoices.length;
+    $('meta').hidden = !ready || !state.invoices.length;
+    $('stats').hidden = !ready || !state.invoices.length;
+    panel.setAttribute('aria-busy', state.phase === 'loading' ? 'true' : 'false');
+
+    if (state.phase === 'loading') { panel.innerHTML = skeletonHtml(); return; }
+    if (state.phase === 'error') {
+      panel.innerHTML = '<div class="state" role="alert"><h2>Couldn\'t load invoices</h2><p>The server didn\'t respond. This is usually temporary, and nothing has been changed.</p><div class="acts"><button type="button" class="btn primary" data-go="reload">Try again</button></div></div>';
+      return;
+    }
+
+    // header stats
+    const sum = (status) => {
+      const xs = state.invoices.filter((v) => v.status === status);
+      return xs.length ? xs.length + ' · ' + money(xs.reduce((t, v) => t + v.amount, 0), xs[0].currency) : 'None';
+    };
+    $('statOverdue').textContent = sum('overdue');
+    $('statSent').textContent = sum('sent');
+
+    // toolbar
+    const list = searched();
+    $('filters').innerHTML = FILTERS.map(([key, label]) => {
+      const n = key === 'all' ? list.length : list.filter((v) => v.status === key).length;
+      return '<button type="button" data-filter="' + key + '" aria-pressed="' + (state.filter === key) + '">' + label + '<span class="n">' + n + '</span></button>';
+    }).join('');
+    if ($('q').value !== state.query) $('q').value = state.query;
+    $('qClear').hidden = !state.query;
+    const sortVal = state.sort.key + ':' + state.sort.dir;
+    $('sortSel').value = [...$('sortSel').options].some((o) => o.value === sortVal) ? sortVal : '';
+    $('refresh').disabled = state.refreshing;
+    $('refresh').textContent = state.refreshing ? 'Refreshing...' : 'Refresh';
+    $('updated').textContent = state.loadedAt ? 'Updated ' + timeFmt.format(state.loadedAt) : '';
+
+    const rows = visible(list);
+    $('count').textContent = rows.length === state.invoices.length
+      ? plural(rows.length, 'invoice')
+      : 'Showing ' + rows.length + ' of ' + plural(state.invoices.length, 'invoice');
+
+    panel.innerHTML = rows.length
+      ? '<table role="table" aria-label="Invoices">' + headHtml() + '<tbody id="rows" role="rowgroup">' + rows.map(rowHtml).join('') + '</tbody></table>'
+      : emptyHtml(list);
+
+    // put keyboard focus back where it was
+    if (focusKey || focusRow) {
+      let target = null;
+      if (focusKey) target = [...panel.querySelectorAll('[data-key]')].find((el) => el.dataset.key === focusKey && !el.disabled);
+      if (!target && focusRow) target = $(focusRow);
+      if (target) target.focus({ preventScroll: true });
+    }
+  }
+
+  /* ---------- events ---------- */
+  function setView(change) {
+    change();
+    state.sticky.clear();
+    syncUrl();
+    render();
+  }
+  $('panel').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.act) act(b.dataset.id, b.dataset.act);
+    else if (b.dataset.sort) {
+      const key = b.dataset.sort;
+      setView(() => {
+        state.sort = state.sort.key === key ? { key, dir: state.sort.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: key === 'amount' ? 'desc' : 'asc' };
+      });
+    } else if (b.dataset.go === 'reload') load(false);
+    else if (b.dataset.go === 'all') setView(() => { state.filter = 'all'; });
+    else if (b.dataset.go === 'clear') { setView(() => { state.query = ''; }); $('q').focus(); }
+  });
+  $('filters').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-filter]');
+    if (!b) return;
+    const key = b.dataset.filter;
+    setView(() => { state.filter = key; });
+    const again = $('filters').querySelector('[data-filter="' + key + '"]');
+    if (again) again.focus();
+  });
+  $('q').addEventListener('input', (e) => setView(() => { state.query = e.target.value; }));
+  $('q').addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.query) { e.preventDefault(); setView(() => { state.query = ''; }); }
+  });
+  $('qClear').addEventListener('click', () => { setView(() => { state.query = ''; }); $('q').focus(); });
+  $('sortSel').addEventListener('change', (e) => {
+    const [key, dir] = e.target.value.split(':');
+    if (key) setView(() => { state.sort = { key, dir }; });
+  });
+  $('refresh').addEventListener('click', () => load(false));
+  $('bannerRetry').addEventListener('click', () => load(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || $('dlg').open || $('toolbar').hidden) return;
+    const t = e.target;
+    if (t instanceof HTMLInputElement || t instanceof HTMLSelectElement || t instanceof HTMLTextAreaElement) return;
+    e.preventDefault();
+    $('q').focus();
+    $('q').select();
+  });
+  // Colleagues change invoices too: quietly refresh when someone comes back to the tab.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible' || state.phase !== 'ready' || state.refreshing) return;
+    if (state.pending.size || $('dlg').open) return;
+    if (Date.now() - state.loadedAt.getTime() > 120000) load(true);
+  });
+
+  $('q').value = state.query;
+  load(false);
+})();
+</script>
+</body>
+</html>

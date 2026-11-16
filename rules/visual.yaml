@@ -1,0 +1,329 @@
+domain: visual
+prefix: VIS
+title: Type, colour, spacing and motion
+load_when: "Any screen. These rules cover how appearance helps or hinders reading and use. Most are measured by the checker. Many rest on hallmark's stated preferences and say so; where the product already has a design system, that system's values win."
+rules:
+  - id: VIS-001
+    rule: "Text is large enough to read: running text at 16 pixels or more, and nothing below 12."
+    why: "Small text is slow to read and is the first thing people with weaker eyesight lose."
+    applies_when: "The screen shows text."
+    pass_when: "Paragraphs and other running prose compute to at least 16px; table cells, captions and secondary labels to at least 13px; no visible text is under 12px."
+    evidence: measured
+    check: text-size
+    severity: major
+    support: some-support
+    sources: ["hhs:11:8", "hallmark:typography.md#Body text rules", "hallmark:custom-theme.md#C.3"]
+    counters: [B10.3]
+    exceptions: ["Legal small print that the product is required to show at a set size."]
+    examples:
+      pass: "Body copy at 16px, table cells at 14px, timestamps at 13px."
+      fail: "Paragraphs at 13px and helper text at 11px."
+      na: "A screen with no text."
+
+  - id: VIS-002
+    rule: "Lines of prose run to about 45 to 80 characters."
+    why: "Very long lines make the eye lose its place on the return; very short ones break phrases apart."
+    applies_when: "The screen has prose that wraps onto two or more lines."
+    pass_when: "At 1280 wide, each block of wrapped prose averages no more than about 80 characters per line."
+    evidence: measured
+    check: line-length
+    severity: minor
+    support: contested
+    sources: ["hallmark:typography.md#Principles", "hallmark:slop-test.md#25", "hhs:6:12"]
+    counters: [B6.6]
+    exceptions: ["Table cells, code and log output."]
+    dissent: "The HHS guidelines report that lines of 75 to 100 characters are read fastest and that about 50 are preferred; WCAG's enhanced level sets 80 as a ceiling. This rule takes 80 as the limit."
+    examples:
+      pass: "A description column capped at 70ch."
+      fail: "A paragraph spanning a 1400px container at 160 characters a line."
+      na: "No wrapped prose."
+
+  - id: VIS-003
+    rule: "Lines of running text are spaced at about one and a half times the text size."
+    why: "Tight lines run together; the eye skips or rereads."
+    applies_when: "The screen has prose that wraps onto two or more lines."
+    pass_when: "Wrapped prose has a computed line height of at least 1.4 times its font size; headings may be tighter."
+    evidence: measured
+    check: line-height
+    severity: minor
+    support: practice-consensus
+    sources: ["hallmark:typography.md#Body text rules", "wcag22:1.4.12"]
+    counters: [B6.6]
+    examples:
+      pass: "body { line-height: 1.5 }"
+      fail: "Paragraphs at the browser default of about 1.2."
+      na: "No wrapped prose."
+
+  - id: VIS-004
+    rule: "A screen uses at most three typefaces, normally two."
+    why: "Each added typeface is another thing to load and another signal that means nothing."
+    applies_when: "The screen shows text."
+    pass_when: "The rendered text uses three font families or fewer, counting a monospace face as one."
+    evidence: measured
+    check: font-families
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:typography.md#The 2+1 rule"]
+    counters: [B9.1]
+    examples:
+      pass: "One sans-serif throughout, plus a monospace for codes."
+      fail: "A serif for headings, two sans-serifs for body and buttons, a display face for numbers and a monospace."
+      na: "A screen with no text."
+
+  - id: VIS-005
+    rule: "Text sizes come from a short scale."
+    why: "Many near-identical sizes blur the hierarchy; a few distinct ones show it."
+    applies_when: "The screen shows text."
+    pass_when: "Visible text uses seven distinct font sizes or fewer."
+    evidence: measured
+    check: font-sizes
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:typography.md#Scale"]
+    counters: [B6.1, B9.1]
+    dissent: "Hallmark asks for five. Application screens with tables, labels and headings commonly need six or seven, so this rule allows seven."
+    examples:
+      pass: "13, 14, 16, 20 and 28px."
+      fail: "12, 13, 14, 15, 16, 17, 18, 20, 22 and 26px on one screen."
+      na: "A screen with no text."
+
+  - id: VIS-006
+    rule: "A heading is plainly different from the text under it."
+    why: "A heading that looks like body text does not get used for scanning."
+    applies_when: "The screen has headings."
+    pass_when: "Each heading differs from running text by a size ratio of at least 1.15 or by at least 200 units of weight."
+    evidence: measured
+    check: heading-contrast
+    severity: major
+    support: some-support
+    sources: ["hhs:9:3", "hhs:16:2", "hallmark:typography.md#Principles"]
+    counters: [B6.1]
+    examples:
+      pass: "Body 16px regular; section headings 20px semibold."
+      fail: "Headings at 16px regular, the same as the paragraphs."
+      na: "No headings."
+
+  - id: VIS-007
+    rule: "Running text is set in ordinary sentence case, aligned to one edge."
+    why: "All capitals and justified text are slower to read and justified text opens uneven gaps."
+    applies_when: "The screen has prose."
+    pass_when: "No block of prose longer than a short label is in all capitals, and none is justified."
+    evidence: measured
+    check: text-style
+    severity: minor
+    support: well-replicated
+    sources: ["hhs:15:6", "sm86:2.1/6", "hallmark:typography.md#Body text rules"]
+    counters: [A10]
+    exceptions: ["Short labels and table headings of a few words."]
+    examples:
+      pass: "Left-aligned paragraphs in sentence case."
+      fail: "A paragraph with text-transform: uppercase; a justified column."
+      na: "No prose."
+
+  - id: VIS-008
+    rule: "Images reserve their space before they load."
+    why: "An image that arrives without a reserved box pushes the page down under the reader."
+    applies_when: "The screen has images."
+    pass_when: "Every img has width and height attributes or a CSS aspect ratio."
+    evidence: dom
+    check: img-dimensions
+    severity: minor
+    support: practice-consensus
+    sources: ["webdev:cls", "hallmark:typography.md#Required features"]
+    counters: [B10.9]
+    examples:
+      pass: "<img src=\"team.jpg\" width=\"640\" height=\"360\" alt=\"\">"
+      fail: "<img src=\"team.jpg\" alt=\"\">"
+      na: "No images."
+
+  - id: VIS-009
+    rule: "The top heading fits its space at every width."
+    why: "An oversized headline pushes the content out of the first view and breaks on phones."
+    applies_when: "The screen has a top heading."
+    pass_when: "The h1 is 96px or smaller, wraps to at most three lines at the current width, and never overflows at 320."
+    evidence: measured
+    check: headline-fit
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:typography.md#Scale", "hallmark:hero-enrichment.md#Hero space discipline"]
+    counters: [A6]
+    examples:
+      pass: "A 40px h1 on one line at desktop width and two at phone width."
+      fail: "A 120px h1 that fills the first screen in five lines on a phone."
+      na: "No top heading; see ACC-009."
+
+  - id: VIS-010
+    rule: "Text is a solid colour."
+    why: "Gradient-filled and glowing text has no single contrast ratio and often fails where the gradient is lightest."
+    applies_when: "The screen shows text."
+    pass_when: "No text uses a gradient or image fill clipped to the letters."
+    evidence: dom
+    check: gradient-text
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:typography.md#Bans", "wcag22:1.4.3"]
+    counters: [A5]
+    examples:
+      pass: "color: #1c1f24"
+      fail: "background: linear-gradient(...); -webkit-background-clip: text; color: transparent"
+      na: "A screen with no text."
+
+  - id: VIS-011
+    rule: "The screen follows the system's light or dark setting."
+    why: "Someone who has set their device to dark is handed a bright white screen, often at night, and the other way round."
+    applies_when: "Always, unless the product has one deliberate theme of its own."
+    pass_when: "The page declares both colour schemes and restyles under prefers-color-scheme, and text contrast holds in both."
+    evidence: dom
+    check: system-theme
+    severity: major
+    support: house-preference
+    sources: ["hallmark:responsive.md#Bans", "hallmark:color.md#Dark mode recipe"]
+    counters: [B10.3]
+    exceptions: ["A screen added to an existing product that has a single theme.", "A brief that asks for one theme."]
+    examples:
+      pass: "Colours defined as variables, redefined under @media (prefers-color-scheme: dark)."
+      fail: "Hardcoded white background and dark text with no dark rules."
+      na: "Never, apart from the stated exceptions."
+
+  - id: VIS-012
+    rule: "Spacing comes from a short scale."
+    why: "Arbitrary gaps make related things look unrelated and the screen look unplanned."
+    applies_when: "The screen has more than a handful of elements."
+    pass_when: "Gaps, margins and padding in use reduce to about ten values, and less space separates items within a group than separates groups."
+    evidence: measured
+    check: spacing-scale
+    severity: minor
+    support: some-support
+    sources: ["hallmark:layout-and-space.md#Spacing scale", "tullis1983", "sm86:2.5/3"]
+    counters: [B6.6]
+    examples:
+      pass: "4, 8, 12, 16, 24, 32 and 48px."
+      fail: "5, 7, 9, 10, 13, 14, 15, 18, 21, 22, 27 and 30px."
+      na: "A screen with one or two elements."
+
+  - id: VIS-013
+    rule: "One accent colour, used for the same kinds of thing throughout."
+    why: "Colour used everywhere signals nothing; colour used consistently can be learned."
+    applies_when: "The screen uses colour beyond neutrals and status colours."
+    pass_when: "There is one accent hue, it marks the same roles on every screen (for example the primary action, links and the current item), and it covers a small share of the view."
+    evidence: judgement
+    severity: minor
+    support: some-support
+    sources: ["sm86:2.6/28", "sm86:2.6/7", "hallmark:color.md#Accent discipline"]
+    counters: [A9, A1]
+    examples:
+      pass: "Blue on the primary button, links and the active navigation item; everything else neutral."
+      fail: "Purple headings, a teal button, orange links and a pink badge."
+      na: "A screen in neutrals and status colours only."
+
+  - id: VIS-014
+    rule: "Animation changes position and opacity, not layout."
+    why: "Animating size or position properties moves the content around it and stutters on slower devices."
+    applies_when: "The screen has transitions or animations."
+    pass_when: "No transition applies to all properties, and none animates width, height, top, left, margin or padding."
+    evidence: static
+    check: transition-props
+    severity: minor
+    support: practice-consensus
+    sources: ["vercel:guidelines", "hallmark:motion.md#Principles", "hallmark:slop-test.md#14"]
+    counters: [B10.8]
+    examples:
+      pass: "transition: opacity 150ms, transform 150ms"
+      fail: "transition: all 0.3s; an accordion that animates height"
+      na: "No animation."
+
+  - id: VIS-015
+    rule: "Transitions are short."
+    why: "People wait for every animation; a slow one is a delay added to each action."
+    applies_when: "The screen has transitions."
+    pass_when: "No transition lasts longer than half a second, and feedback on press or hover takes 300ms or less."
+    evidence: static
+    check: transition-duration
+    severity: minor
+    support: practice-consensus
+    sources: ["carbon:elements/motion/overview", "atlassian:foundations/motion/applying-motion", "hallmark:motion.md#Durations"]
+    counters: [B10.8]
+    examples:
+      pass: "150ms on hover, 240ms on a panel."
+      fail: "A 1.2s fade on every button."
+      na: "No transitions."
+
+  - id: VIS-016
+    rule: "Nothing moves continuously except an indicator that work is in progress."
+    why: "Constant motion pulls the eye away from the task and cannot be ignored."
+    applies_when: "The screen has animation."
+    pass_when: "No animation repeats for ever apart from loading and progress indicators."
+    evidence: dom
+    check: infinite-animation
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:2.2.2", "hhs:14:4", "hallmark:motion.md#Bans"]
+    counters: [B10.8, A8]
+    examples:
+      pass: "A spinner while a request is in flight."
+      fail: "A pulsing status dot, a scrolling marquee, a floating background shape."
+      na: "No animation."
+
+  - id: VIS-017
+    rule: "Everything meant to be read is visible when the screen has loaded."
+    why: "Content that waits for a scroll or a pointer to appear is missed by fast scrollers, by search and by anyone whose script fails."
+    applies_when: "Always."
+    pass_when: "No readable content sits at zero opacity or off-screen waiting for a scroll position or an observer."
+    evidence: dom
+    check: scroll-hidden
+    severity: major
+    support: practice-consensus
+    sources: ["catalogue:B2.6", "hallmark:hero-enrichment.md#Animation discipline", "hhs:6:9"]
+    counters: [B2.6]
+    exceptions: ["Menus, dialogs and tooltips that open on a deliberate action."]
+    examples:
+      pass: "All sections rendered at full opacity on load."
+      fail: "Sections with opacity: 0 that fade in when an IntersectionObserver fires."
+      na: "Never; this rule always applies."
+
+  - id: VIS-018
+    rule: "A control's label stays on one line."
+    why: "A button or tab whose label wraps looks broken and changes the height of everything beside it."
+    applies_when: "The screen has buttons, tabs or navigation links."
+    pass_when: "At 320, 375 and 1280 wide every button, tab and navigation link renders on one line without being cut off."
+    evidence: measured
+    check: label-wrap
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:slop-test.md#49", "hallmark:responsive.md#Clickable text"]
+    counters: [B10.1]
+    exceptions: ["Buttons whose label is a sentence by design, such as a choice in a decision dialog."]
+    examples:
+      pass: "'Send invite' on one line at every width."
+      fail: "'Add a new team member' wrapping to three lines in a narrow toolbar."
+      na: "No buttons, tabs or navigation links."
+
+  - id: VIS-019
+    rule: "A change of state does not change an element's size or move its neighbours."
+    why: "A field that grows when its error appears, or a button that widens while loading, makes the layout jump under the pointer."
+    applies_when: "The screen has controls with hover, focus, error or busy states."
+    pass_when: "A control's box is the same at rest, focused, in error and busy; space for an error line is reserved or its arrival does not move the controls after it out from under the pointer."
+    evidence: walk
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:interaction-and-states.md#State-by-state recipe", "webdev:cls"]
+    counters: [B5.8]
+    examples:
+      pass: "A busy button keeps its width and swaps its label in place."
+      fail: "A 1px border becoming 3px on focus and nudging the row."
+      na: "No stateful controls."
+
+  - id: VIS-020
+    rule: "A screen added to an existing product uses that product's fonts, colours, spacing and components."
+    why: "A screen that looks like it came from somewhere else breaks what users have learned and what the team maintains."
+    applies_when: "The project already has screens, a stylesheet, tokens or a component library."
+    pass_when: "The new screen reuses the existing tokens and components; anything new is listed and justified."
+    evidence: static
+    severity: major
+    support: well-replicated
+    sources: ["hhs:11:4", "polson1986", "hallmark:SKILL.md#Step 0", "hallmark:export-formats.md#Output rule"]
+    counters: [B9.1, B9.5]
+    examples:
+      pass: "A new settings page built from the project's Button and Field components and its colour variables."
+      fail: "A new page with its own palette, font and button styles in a project that has a design system."
+      na: "A new project with nothing to match."

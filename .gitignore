@@ -1,0 +1,6 @@
+# Books held privately for intake; never published
+sources/books/
+
+.DS_Store
+node_modules/
+__pycache__/

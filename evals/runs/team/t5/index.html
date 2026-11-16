@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings</title>
+<style>
+  :root {
+    --text: #1a1d21;
+    --muted: #55606e;
+    --line: #d5dae1;
+    --edge: #76808f;
+    --bg: #ffffff;
+    --soft: #f3f5f8;
+    --accent: #1f5fbf;
+    --accent-dark: #184c99;
+    --danger: #b3261e;
+    --danger-soft: #fdf1f0;
+    --ok-soft: #eef6f0;
+    --ok: #1d6b3a;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 24px 64px; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 16px; }
+  h2 { font-size: 1.125rem; line-height: 1.3; margin: 0; }
+  p { margin: 0; }
+  section { border-top: 1px solid var(--line); padding: 24px 0 28px; }
+  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+  .muted { color: var(--muted); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  [hidden] { display: none !important; }
+
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: none; }
+
+  /* Controls */
+  label, .label { display: block; font-weight: 600; font-size: 0.9375rem; margin-bottom: 4px; }
+  input[type="text"], input[type="email"], select {
+    font: inherit; font-size: 16px; color: var(--text); background: #fff;
+    border: 1px solid var(--edge); border-radius: 6px;
+    min-height: 40px; padding: 6px 10px; width: 100%;
+  }
+  select { padding-right: 28px; }
+  input[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
+  .btn {
+    font: inherit; font-weight: 600; color: var(--text); background: #fff;
+    border: 1px solid var(--edge); border-radius: 6px;
+    min-height: 40px; padding: 6px 14px; cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: var(--soft); }
+  .btn:active { background: #e4e8ee; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-primary:active { background: #123b78; }
+  .btn-danger { color: var(--danger); border-color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-soft); }
+  .btn[aria-disabled="true"] { opacity: 0.6; cursor: progress; }
+  .field-error { color: var(--danger); font-size: 0.9375rem; margin-top: 4px; }
+  .field-error:empty { display: none; }
+
+  /* Forms */
+  .form-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+  .field-email { flex: 1 1 260px; max-width: 380px; }
+  .field-role { flex: 0 0 140px; }
+  .field-name { flex: 1 1 260px; max-width: 380px; }
+  .form-status { margin-top: 8px; min-height: 1.45em; font-size: 0.9375rem; }
+  .form-status.is-error { color: var(--danger); }
+  .form-status.is-ok { color: var(--ok); }
+
+  /* Messages */
+  .msgs:empty { display: none; }
+  .msgs { margin-top: 16px; display: grid; gap: 8px; }
+  .msg {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+    padding: 10px 12px; border-radius: 6px; border-left: 4px solid var(--danger); background: var(--danger-soft);
+  }
+  .msg.is-ok { border-left-color: var(--ok); background: var(--ok-soft); }
+  .msg p { flex: 1 1 240px; overflow-wrap: anywhere; }
+  .msg-actions { display: flex; gap: 8px; }
+  .msg .btn { min-height: 36px; }
+
+  /* Members table */
+  .members { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .members th {
+    text-align: left; font-size: 0.875rem; font-weight: 600; color: var(--muted);
+    padding: 8px 12px 8px 0; border-bottom: 1px solid var(--edge);
+  }
+  .members td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .members th:last-child, .members td:last-child { padding-right: 0; }
+  .c-person { overflow-wrap: anywhere; }
+  .p-name { font-weight: 600; }
+  .p-email { color: var(--muted); font-size: 0.9375rem; }
+  .c-role { width: 150px; }
+  .c-active { width: 140px; white-space: nowrap; }
+  .c-act { width: 130px; text-align: right; white-space: nowrap; }
+  .role-wrap, .act-wrap { display: flex; align-items: center; gap: 8px; }
+  .act-wrap { justify-content: flex-end; }
+  .members select { width: 116px; }
+  tr.is-new td { animation: fresh 2.5s ease-out; }
+  @keyframes fresh { from { background: #fff4c2; } to { background: transparent; } }
+  tr.is-removing .c-person, tr.is-removing .c-active { opacity: 0.55; }
+  .empty { margin-top: 16px; padding: 16px; background: var(--soft); border-radius: 6px; }
+
+  .spinner {
+    display: none; flex: none; width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid #b9c1cc; border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  [aria-busy="true"] > .spinner, .is-busy .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Notifications */
+  .notifs { list-style: none; margin: 0; padding: 0; max-width: 420px; }
+  .notifs li { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+  .notifs label { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; min-height: 48px; font-weight: 400; font-size: 1rem; cursor: pointer; }
+  .notifs li .spinner { order: -1; }
+  .switch { display: inline-flex; align-items: center; gap: 8px; }
+  .switch input {
+    appearance: none; -webkit-appearance: none; margin: 0; cursor: pointer;
+    width: 44px; height: 24px; border-radius: 12px; border: 2px solid var(--edge); background: #fff; position: relative;
+    transition: background-color 0.12s;
+  }
+  .switch input::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--edge); transition: transform 0.12s;
+  }
+  .switch input:checked { background: var(--accent); border-color: var(--accent); }
+  .switch input:checked::after { background: #fff; transform: translateX(20px); }
+  .switch .state { width: 1.6em; color: var(--muted); font-size: 0.9375rem; }
+  .switch .state::after { content: "Off"; }
+  .switch input:checked + .state::after { content: "On"; }
+
+  /* Page status */
+  #page-status { padding: 8px 0 24px; }
+  #page-status .btn { margin-top: 12px; }
+  #page-status .line { display: flex; align-items: center; gap: 10px; }
+
+  /* Dialog */
+  dialog {
+    border: 1px solid var(--edge); border-radius: 10px; padding: 24px; width: min(440px, calc(100vw - 32px));
+    color: var(--text); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  }
+  dialog::backdrop { background: rgba(20, 24, 30, 0.5); }
+  dialog h2 { overflow-wrap: anywhere; margin-bottom: 8px; }
+  .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  @media (max-width: 640px) {
+    main { padding: 16px 16px 48px; }
+    input[type="text"], input[type="email"], select, .btn { min-height: 44px; }
+    .msg .btn { min-height: 44px; }
+    .field-email, .field-name { flex-basis: 100%; max-width: none; }
+    .field-role { flex: 1 1 130px; }
+    .members, .members tbody, .members td { display: block; }
+    .members thead {
+      position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%);
+    }
+    .members tr {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 12px;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+    }
+    .members tbody tr:first-child { border-top: 1px solid var(--edge); }
+    .members td { padding: 0; border: 0; width: auto; }
+    .c-person { grid-column: 1 / -1; grid-row: 1; }
+    .c-active { grid-column: 1 / -1; grid-row: 2; color: var(--muted); font-size: 0.9375rem; white-space: normal; }
+    .c-active::before { content: "Last active: "; }
+    .c-role { grid-column: 1; grid-row: 3; }
+    .c-act { grid-column: 2; grid-row: 3; }
+    .members select { width: 130px; }
+    .dialog-actions .btn { flex: 1 1 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation-duration: 2.4s; }
+    tr.is-new td { animation: none; }
+    .switch input, .switch input::after { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Team settings</h1>
+
+  <div id="page-status" role="status" tabindex="-1">
+    <p class="line"><span class="spinner" style="display:inline-block" aria-hidden="true"></span>Loading team settings...</p>
+  </div>
+
+  <div id="content" hidden>
+    <section aria-labelledby="members-h">
+      <div class="section-head">
+        <h2 id="members-h">Members</h2>
+        <p class="muted" id="seats" role="status"></p>
+      </div>
+
+      <form id="invite-form" novalidate>
+        <div class="form-row">
+          <div class="field-email">
+            <label for="invite-email">Email address to invite</label>
+            <input id="invite-email" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="invite-email-error">
+          </div>
+          <div class="field-role">
+            <label for="invite-role">Role</label>
+            <select id="invite-role" name="role">
+              <option value="member" selected>Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit" id="invite-submit">Send invite</button>
+        </div>
+        <p class="field-error" id="invite-email-error"></p>
+        <p class="form-status" id="invite-status" role="status"></p>
+      </form>
+
+      <div class="msgs" id="member-msgs" role="status" tabindex="-1"></div>
+
+      <table class="members" id="members-table" role="table">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col" role="columnheader">Person</th>
+            <th scope="col" role="columnheader" id="col-role">Role</th>
+            <th scope="col" role="columnheader">Last active</th>
+            <th scope="col" role="columnheader"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="members-body" role="rowgroup"></tbody>
+      </table>
+      <p class="empty" id="members-empty" hidden>No one is on this team yet. Invite the first person by email above.</p>
+    </section>
+
+    <section aria-labelledby="notifs-h">
+      <div class="section-head">
+        <h2 id="notifs-h">Email notifications</h2>
+      </div>
+      <ul class="notifs" id="notifs"></ul>
+      <div class="msgs" id="notif-msgs" role="status" tabindex="-1"></div>
+    </section>
+
+    <section aria-labelledby="name-h">
+      <div class="section-head">
+        <h2 id="name-h">Team name</h2>
+      </div>
+      <form id="name-form" novalidate>
+        <div class="form-row">
+          <div class="field-name">
+            <label for="team-name">Name</label>
+            <input id="team-name" name="name" type="text" autocomplete="off" maxlength="80" aria-describedby="team-name-error">
+          </div>
+          <button class="btn" type="submit" id="name-submit">Save name</button>
+        </div>
+        <p class="field-error" id="team-name-error"></p>
+        <p class="form-status" id="name-status" role="status"></p>
+      </form>
+    </section>
+  </div>
+
+  <p class="sr-only" id="announce" role="status"></p>
+</main>
+
+<dialog id="remove-dialog" aria-labelledby="remove-title" aria-describedby="remove-desc">
+  <h2 id="remove-title"></h2>
+  <p id="remove-desc">They lose access at once. You can invite them again later.</p>
+  <div class="dialog-actions">
+    <button class="btn" type="button" id="remove-cancel" autofocus>Keep on team</button>
+    <button class="btn btn-danger" type="button" id="remove-confirm">Remove from team</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props, ...kids) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else node.setAttribute(k, v);
+    }
+    node.append(...kids);
+    return node;
+  };
+
+  const ROLE_LABEL = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+  const ROLE_PHRASE = { admin: 'an admin', member: 'a member' };
+  const NOTIF_LABEL = {
+    weekly_digest: 'Weekly digest',
+    new_member: 'New members',
+    billing: 'Billing',
+    mentions: 'Mentions',
+  };
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+  const pageStatus = $('page-status');
+  const content = $('content');
+  const seatsEl = $('seats');
+  const memberMsgs = $('member-msgs');
+  const notifMsgs = $('notif-msgs');
+  const tbody = $('members-body');
+  const announceEl = $('announce');
+
+  let seats = 0;
+  let savedName = '';
+  let members = [];
+
+  /* ---------- helpers ---------- */
+
+  function announce(text) {
+    announceEl.textContent = '';
+    setTimeout(() => { announceEl.textContent = text; }, 50);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return null;
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function labelFor(key) {
+    if (NOTIF_LABEL[key]) return NOTIF_LABEL[key];
+    const s = String(key).replace(/_/g, ' ');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // A message that stays in a section's message area until it is dismissed or replaced.
+  function showMsg(region, key, text, opts) {
+    const o = opts || {};
+    removeMsg(region, key);
+    const box = el('div', { class: 'msg' + (o.ok ? ' is-ok' : '') });
+    box.dataset.key = key;
+    box.append(el('p', { text }));
+    const bar = el('div', { class: 'msg-actions' });
+    const close = (then) => {
+      const target = o.focus && o.focus();
+      box.remove();
+      if (target && target.isConnected) target.focus(); else region.focus();
+      if (then) then();
+    };
+    if (o.retry) {
+      const b = el('button', { class: 'btn', type: 'button', text: 'Try again' });
+      b.addEventListener('click', () => close(o.retry));
+      bar.append(b);
+    }
+    const d = el('button', { class: 'btn', type: 'button', text: 'Dismiss' });
+    d.addEventListener('click', () => close());
+    bar.append(d);
+    box.append(bar);
+    region.append(box);
+  }
+
+  function removeMsg(region, key) {
+    for (const node of region.querySelectorAll('.msg')) {
+      if (node.dataset.key === key) {
+        if (node.contains(document.activeElement)) region.focus();
+        node.remove();
+      }
+    }
+  }
+
+  function setFormStatus(node, text, kind) {
+    node.textContent = text;
+    node.classList.toggle('is-error', kind === 'error');
+    node.classList.toggle('is-ok', kind === 'ok');
+  }
+
+  function setFieldError(input, errorEl, text) {
+    errorEl.textContent = text;
+    if (text) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+  }
+
+  // Sends the latest chosen value, puts the old one back if the server refuses it.
+  function autosave({ initial, send, show, setBusy, onFail, onSaved }) {
+    const s = { saved: initial, desired: initial, busy: false };
+    async function run() {
+      if (s.busy) return;
+      s.busy = true; setBusy(true);
+      let changed = false;
+      while (s.desired !== s.saved) {
+        const target = s.desired;
+        try {
+          await send(target);
+          s.saved = target; changed = true;
+        } catch (err) {
+          if (s.desired !== target) continue;
+          s.desired = s.saved; show(s.saved);
+          s.busy = false; setBusy(false);
+          onFail(target);
+          return;
+        }
+      }
+      s.busy = false; setBusy(false);
+      if (changed) onSaved(s.saved);
+    }
+    return { set(value) { s.desired = value; show(value); run(); }, get saved() { return s.saved; } };
+  }
+
+  /* ---------- load ---------- */
+
+  async function load() {
+    pageStatus.replaceChildren(el('p', { class: 'line' },
+      el('span', { class: 'spinner', style: 'display:inline-block', 'aria-hidden': 'true' }),
+      'Loading team settings...'));
+    let team;
+    try {
+      team = await api.getTeam();
+    } catch (err) {
+      const retry = el('button', { class: 'btn btn-primary', type: 'button', text: 'Try again' });
+      retry.addEventListener('click', () => { pageStatus.focus(); load(); });
+      pageStatus.replaceChildren(el('p', { text: 'Could not load team settings.' }), retry);
+      return;
+    }
+    seats = team.seats;
+    savedName = team.name;
+    members = team.members;
+    $('team-name').value = team.name;
+    document.title = 'Team settings - ' + team.name;
+    tbody.replaceChildren(...members.map(renderRow));
+    renderNotifs(team.notifications);
+    refreshCounts();
+    pageStatus.replaceChildren();
+    pageStatus.hidden = true;
+    content.hidden = false;
+  }
+
+  function refreshCounts() {
+    seatsEl.textContent = members.length + ' of ' + seats + ' seats used';
+    const none = members.length === 0;
+    $('members-table').hidden = none;
+    $('members-empty').hidden = !none;
+  }
+
+  /* ---------- members ---------- */
+
+  function renderRow(m) {
+    const tr = el('tr', { role: 'row', id: 'row-' + m.id });
+
+    const person = el('td', { role: 'cell', class: 'c-person' },
+      el('div', { class: 'p-name', id: 'pname-' + m.id, text: m.name }),
+      el('div', { class: 'p-email', text: m.email }));
+
+    const roleCell = el('td', { role: 'cell', class: 'c-role' });
+    const actCell = el('td', { role: 'cell', class: 'c-act' });
+
+    if (m.role === 'owner') {
+      roleCell.textContent = ROLE_LABEL.owner;
+    } else {
+      const select = el('select', { 'aria-labelledby': 'col-role pname-' + m.id },
+        el('option', { value: 'member', text: 'Member' }),
+        el('option', { value: 'admin', text: 'Admin' }));
+      select.value = m.role;
+      const wrap = el('div', { class: 'role-wrap' }, select, el('span', { class: 'spinner', 'aria-hidden': 'true' }));
+      roleCell.append(wrap);
+
+      const msgKey = 'role-' + m.id;
+      const saver = autosave({
+        initial: m.role,
+        send: (role) => api.changeRole(m.id, role),
+        show: (role) => { select.value = role; },
+        setBusy: (on) => { wrap.classList.toggle('is-busy', on); },
+        onSaved: (role) => {
+          m.role = role;
+          announce(m.name + ' is now ' + ROLE_PHRASE[role] + '.');
+        },
+        onFail: (role) => {
+          showMsg(memberMsgs, msgKey,
+            'Could not make ' + m.name + ' ' + ROLE_PHRASE[role] + '. They are still ' + ROLE_PHRASE[saver.saved] + '.',
+            { retry: () => saver.set(role), focus: () => select });
+        },
+      });
+      select.addEventListener('change', () => {
+        removeMsg(memberMsgs, msgKey);
+        saver.set(select.value);
+      });
+
+      const removeBtn = el('button', { class: 'btn btn-danger', type: 'button', 'aria-label': 'Remove ' + m.name, text: 'Remove' });
+      removeBtn.addEventListener('click', () => {
+        if (m.removing) return;
+        askRemove(m);
+      });
+      actCell.append(el('div', { class: 'act-wrap' }, el('span', { class: 'spinner', 'aria-hidden': 'true' }), removeBtn));
+    }
+
+    const date = formatDate(m.lastActive);
+    const active = el('td', { role: 'cell', class: 'c-active' });
+    if (date) active.append(el('time', { datetime: m.lastActive, text: date }));
+    else active.textContent = 'Never';
+
+    tr.append(person, roleCell, active, actCell);
+    return tr;
+  }
+
+  const dialog = $('remove-dialog');
+  let removeTarget = null;
+
+  function askRemove(m) {
+    removeTarget = m;
+    $('remove-title').textContent = 'Remove ' + m.name + ' from ' + savedName + '?';
+    dialog.showModal();
+    $('remove-cancel').focus();
+  }
+  $('remove-cancel').addEventListener('click', () => dialog.close());
+  $('remove-confirm').addEventListener('click', () => {
+    const m = removeTarget;
+    dialog.close();
+    if (m) removeMember(m);
+  });
+  dialog.addEventListener('close', () => { removeTarget = null; });
+
+  async function removeMember(m) {
+    if (m.removing) return;
+    const row = $('row-' + m.id);
+    const btn = row.querySelector('.btn-danger');
+    const wrap = row.querySelector('.act-wrap');
+    const msgKey = 'remove-' + m.id;
+    removeMsg(memberMsgs, msgKey);
+    m.removing = true;
+    row.classList.add('is-removing');
+    wrap.classList.add('is-busy');
+    btn.setAttribute('aria-disabled', 'true');
+    try {
+      await api.removeMember(m.id);
+    } catch (err) {
+      m.removing = false;
+      row.classList.remove('is-removing');
+      wrap.classList.remove('is-busy');
+      btn.removeAttribute('aria-disabled');
+      showMsg(memberMsgs, msgKey, 'Could not remove ' + m.name + '. They still have access.',
+        { retry: () => removeMember(m), focus: () => btn });
+      return;
+    }
+    members = members.filter((x) => x !== m);
+    removeMsg(memberMsgs, 'role-' + m.id);
+    showMsg(memberMsgs, 'removed', m.name + ' was removed and no longer has access.', { ok: true });
+    const moveFocus = row.contains(document.activeElement) || document.activeElement === document.body;
+    row.remove();
+    refreshCounts();
+    if (moveFocus) memberMsgs.focus();
+  }
+
+  /* ---------- invite ---------- */
+
+  const inviteForm = $('invite-form');
+  const inviteEmail = $('invite-email');
+  const inviteRole = $('invite-role');
+  const inviteError = $('invite-email-error');
+  const inviteStatus = $('invite-status');
+  const inviteSubmit = $('invite-submit');
+  let inviting = false;
+
+  inviteEmail.addEventListener('input', () => {
+    if (inviteError.textContent) setFieldError(inviteEmail, inviteError, '');
+  });
+
+  inviteForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (inviting) return;
+    const email = inviteEmail.value.trim().toLowerCase();
+    const role = inviteRole.value;
+    setFormStatus(inviteStatus, '');
+
+    let problem = '';
+    if (!email) problem = 'Enter an email address.';
+    else if (!EMAIL_RE.test(email)) problem = 'Enter a full email address, like name@example.com.';
+    else if (members.some((m) => m.email.toLowerCase() === email)) problem = email + ' is already on the team.';
+    if (problem) {
+      setFieldError(inviteEmail, inviteError, problem);
+      inviteEmail.focus();
+      return;
+    }
+    setFieldError(inviteEmail, inviteError, '');
+
+    inviting = true;
+    inviteSubmit.setAttribute('aria-disabled', 'true');
+    setFormStatus(inviteStatus, 'Sending invite to ' + email + '...');
+    try {
+      const m = await api.inviteMember(email, role);
+      members.push(m);
+      const row = renderRow(m);
+      row.classList.add('is-new');
+      tbody.append(row);
+      refreshCounts();
+      if (inviteEmail.value.trim().toLowerCase() === email) inviteEmail.value = '';
+      inviteRole.value = 'member';
+      setFormStatus(inviteStatus, 'Invited ' + email + ' as ' + ROLE_PHRASE[role] + '.', 'ok');
+    } catch (err) {
+      if (err && err.code === 'VALIDATION') {
+        setFormStatus(inviteStatus, '');
+        setFieldError(inviteEmail, inviteError, 'Enter a full email address, like name@example.com.');
+        inviteEmail.focus();
+      } else if (err && err.code === 'EXISTS') {
+        setFormStatus(inviteStatus, '');
+        setFieldError(inviteEmail, inviteError, email + ' is already on the team.');
+        inviteEmail.focus();
+      } else if (err && err.code === 'SEATS') {
+        setFormStatus(inviteStatus, 'All ' + seats + ' seats are in use. Remove someone to free a seat, then send the invite again.', 'error');
+      } else {
+        setFormStatus(inviteStatus, 'Could not send the invite to ' + email + '. Try again.', 'error');
+      }
+    } finally {
+      inviting = false;
+      inviteSubmit.removeAttribute('aria-disabled');
+    }
+  });
+
+  /* ---------- notifications ---------- */
+
+  function renderNotifs(notifications) {
+    const list = $('notifs');
+    list.replaceChildren();
+    for (const [key, on] of Object.entries(notifications)) {
+      const label = labelFor(key);
+      const input = el('input', { type: 'checkbox', role: 'switch', id: 'notif-' + key });
+      input.checked = !!on;
+      const li = el('li', {},
+        el('label', { for: 'notif-' + key },
+          el('span', { text: label }),
+          el('span', { class: 'switch' }, input, el('span', { class: 'state', 'aria-hidden': 'true' }))),
+        el('span', { class: 'spinner', 'aria-hidden': 'true' }));
+      const msgKey = 'notif-' + key;
+      const saver = autosave({
+        initial: !!on,
+        send: (value) => api.setNotification(key, value),
+        show: (value) => { input.checked = value; },
+        setBusy: (busy) => { li.classList.toggle('is-busy', busy); },
+        onSaved: (value) => { announce(label + ' emails turned ' + (value ? 'on' : 'off') + '.'); },
+        onFail: (value) => {
+          showMsg(notifMsgs, msgKey,
+            'Could not turn ' + (value ? 'on' : 'off') + ' ' + label + ' emails. They are still ' + (value ? 'off' : 'on') + '.',
+            { retry: () => saver.set(value), focus: () => input });
+        },
+      });
+      input.addEventListener('change', () => {
+        removeMsg(notifMsgs, msgKey);
+        saver.set(input.checked);
+      });
+      list.append(li);
+    }
+  }
+
+  /* ---------- team name ---------- */
+
+  const nameForm = $('name-form');
+  const nameInput = $('team-name');
+  const nameError = $('team-name-error');
+  const nameStatus = $('name-status');
+  const nameSubmit = $('name-submit');
+  let renaming = false;
+
+  nameInput.addEventListener('input', () => {
+    if (nameError.textContent) setFieldError(nameInput, nameError, '');
+    if (!renaming) setFormStatus(nameStatus, '');
+  });
+
+  nameForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (renaming) return;
+    const name = nameInput.value.trim();
+    if (!name) {
+      setFormStatus(nameStatus, '');
+      setFieldError(nameInput, nameError, 'Enter a team name.');
+      nameInput.focus();
+      return;
+    }
+    setFieldError(nameInput, nameError, '');
+    if (name === savedName) {
+      nameInput.value = name;
+      setFormStatus(nameStatus, 'The team is already named ' + savedName + '.');
+      return;
+    }
+    renaming = true;
+    nameSubmit.setAttribute('aria-disabled', 'true');
+    setFormStatus(nameStatus, 'Saving...');
+    try {
+      const res = await api.renameTeam(name);
+      savedName = res.name;
+      if (nameInput.value.trim() === name) nameInput.value = res.name;
+      document.title = 'Team settings - ' + savedName;
+      setFormStatus(nameStatus, 'Team renamed to ' + savedName + '.', 'ok');
+    } catch (err) {
+      if (err && err.code === 'VALIDATION') {
+        setFormStatus(nameStatus, '');
+        setFieldError(nameInput, nameError, 'Enter a team name.');
+        nameInput.focus();
+      } else {
+        setFormStatus(nameStatus, 'Could not save the name. The team is still named ' + savedName + '. Try again.', 'error');
+      }
+    } finally {
+      renaming = false;
+      nameSubmit.removeAttribute('aria-disabled');
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!content.hidden && nameInput.value.trim() !== savedName && nameInput.value.trim() !== '') {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

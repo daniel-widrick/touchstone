@@ -1,0 +1,38 @@
+{
+  "note": "Ground truth for the two planted-defect screens. 'fail' lists the scorecard rules each screen was written to break; team-good.html was written to break none. Used by evals/judge_accuracy.py.",
+  "team-bad.html": {
+    "fail": [
+      "COPY-001",
+      "COPY-002",
+      "COPY-003",
+      "COPY-006",
+      "COPY-007",
+      "COPY-009",
+      "COPY-011",
+      "DATA-002",
+      "STATE-001",
+      "STATE-003",
+      "STATE-004",
+      "STATE-005",
+      "STATE-007",
+      "FORM-008",
+      "FORM-013",
+      "FORM-014",
+      "FB-001",
+      "FB-002",
+      "FB-003",
+      "FB-004",
+      "FB-006",
+      "FB-008",
+      "FB-009",
+      "ACC-013"
+    ]
+  },
+  "team-good.html": {
+    "fail": []
+  },
+  "corrections": [
+    "2026-11-16: ACT-007 removed from team-bad.html. The screen has three primary buttons but one per card, and the rule allows one per self-contained region; all three judges passed it and they were right.",
+    "2026-11-16: all three judges failed TASK-002 on team-good.html because the page title hardcoded the team name and went stale after a rename. That was a real defect, not a false alarm; the screen has since been fixed. The judge results in evals/results were produced before the fix."
+  ]
+}

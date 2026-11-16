@@ -1,0 +1,213 @@
+domain: actions
+prefix: ACT
+title: Controls and actions
+load_when: "Any screen with buttons, links, menus, icons or row actions."
+rules:
+  - id: ACT-001
+    rule: "Every control has a name that assistive technology can announce."
+    why: "A control with no name is announced as just 'button' and cannot be found by voice or screen reader."
+    applies_when: "The screen has buttons, links or elements with a control role."
+    pass_when: "Each one has non-empty text, an aria-label, an aria-labelledby target or a labelled image."
+    evidence: dom
+    check: accessible-name
+    severity: blocker
+    support: practice-consensus
+    sources: ["wcag22:4.1.2", "wcag22:2.4.4", "webaim:2026"]
+    counters: [B1.2]
+    examples:
+      pass: "<button aria-label=\"Close dialog\"><svg aria-hidden=\"true\">...</svg></button>"
+      fail: "<button><svg>...</svg></button>"
+      na: "A page with no controls."
+
+  - id: ACT-002
+    rule: "Controls carry a visible text label; an icon alone is used only where its meaning is universal."
+    why: "Few icons are understood without words, and a tooltip is unavailable on touch."
+    applies_when: "A control shows an icon and no visible text."
+    pass_when: "The icon is one of the widely understood few (search, close, home, print, menu), or visible text sits beside it."
+    evidence: dom
+    check: icon-only-control
+    severity: major
+    support: some-support
+    sources: ["nng:icon-usability", "wiedenbeck1999", "hhs:14:2", "sm86:3.1.8/4"]
+    counters: [B1.2]
+    exceptions: ["Dense toolbars of standard formatting icons, when each also shows its name on hover and on keyboard focus."]
+    dissent: "GitHub Primer accepts icon-only buttons whose label appears in a tooltip on hover and focus."
+    examples:
+      pass: "A row shows 'Edit' and 'Archive' as words; the dialog close button is an X."
+      fail: "A row of five unlabelled glyphs for archive, snooze, assign, pin and share."
+      na: "Every control has visible text."
+
+  - id: ACT-003
+    rule: "Controls needed for the task are visible without pointing at anything first."
+    why: "Hover does not exist on touch screens and hidden controls are found late or not at all."
+    applies_when: "A control is styled to appear on hover, or lives inside an element that appears on hover."
+    pass_when: "The control is visible at rest; hover may only add emphasis."
+    evidence: dom
+    check: hover-only
+    severity: major
+    support: practice-consensus
+    sources: ["nng:data-tables", "carbon:components/data-table/usage", "hhs:10:8", "hhs:3:7"]
+    counters: [B1.1]
+    exceptions: ["Supplementary detail that repeats information available elsewhere on the screen."]
+    examples:
+      pass: "Each table row always shows its 'Edit' button and an overflow menu button."
+      fail: ".row .actions { opacity: 0 } .row:hover .actions { opacity: 1 }"
+      na: "No hover-revealed elements."
+
+  - id: ACT-004
+    rule: "Anything clickable is a native button or link, or carries the role, focusability and key handling of one."
+    why: "A clickable div cannot be reached or operated from the keyboard and is not announced as a control."
+    applies_when: "An element responds to click."
+    pass_when: "It is a button, a, input, select, summary or label, or it has a control role, tabindex 0 and Enter or Space handling."
+    evidence: dom
+    check: fake-control
+    severity: blocker
+    support: practice-consensus
+    sources: ["wcag22:2.1.1", "wcag22:4.1.2", "vercel:guidelines"]
+    counters: [B1.7, B2.2]
+    examples:
+      pass: "<button type=\"button\" onClick={save}>Save</button>"
+      fail: "<div className=\"btn\" onClick={save}>Save</div>"
+      na: "A page with no click handlers."
+
+  - id: ACT-005
+    rule: "Actions are buttons and destinations are links with a real URL."
+    why: "Links with no destination break open-in-new-tab, copy link and Back, and mislead assistive technology."
+    applies_when: "The screen has anchor elements."
+    pass_when: "Every anchor has an href that is a real location; anything that only performs an action is a button."
+    evidence: dom
+    check: dead-link
+    severity: major
+    support: practice-consensus
+    sources: ["atlassian:components/button/usage", "vercel:guidelines", "wcag22:2.4.4"]
+    counters: [B5.6, B1.7]
+    examples:
+      pass: "<a href=\"/invoices/42\">Invoice 42</a> and <button type=\"button\">Mark as paid</button>"
+      fail: "<a href=\"#\" onClick={markPaid}>Mark as paid</a>"
+      na: "A page with no anchors."
+
+  - id: ACT-006
+    rule: "Interactive elements look interactive and static elements look static."
+    why: "Weak or misleading cues make people hesitate, miss controls and click things that do nothing."
+    applies_when: "The screen mixes controls with static text, headings or badges."
+    pass_when: "Controls are distinguishable at rest by shape, fill, underline or colour, and no static element shares that treatment or a pointer cursor."
+    evidence: judgement
+    severity: major
+    support: some-support
+    sources: ["nng:flat-ui-less-attention-cause-uncertainty", "hhs:10:4", "hhs:10:8", "hhs:14:13"]
+    counters: [B1.3, B1.4, A8]
+    examples:
+      pass: "Links are underlined blue; status badges are flat grey text with no hover effect."
+      fail: "Section headings are blue and bold like links; real links are plain black text."
+      na: "A screen with no controls."
+
+  - id: ACT-007
+    rule: "Each view or region has one action styled as primary."
+    why: "When several buttons claim top priority none of them guides the eye."
+    applies_when: "A view, dialog or card has two or more buttons."
+    pass_when: "At most one button per view or self-contained region uses the primary style; the rest are secondary or plain."
+    evidence: dom
+    check: primary-button-count
+    severity: major
+    support: practice-consensus
+    sources: ["govuk:components/button", "atlassian:components/button/usage", "primer:components/button", "hhs:13:14"]
+    counters: [B6.1]
+    exceptions: ["Repeated items such as table rows may each have their own row action, styled as secondary."]
+    dissent: "Apple allows one or two prominent buttons per view."
+    examples:
+      pass: "A form has a filled 'Save changes' and a plain 'Cancel'."
+      fail: "A toolbar with three filled buttons: Export, Invite and New project."
+      na: "A view with one button."
+
+  - id: ACT-008
+    rule: "A destructive action is styled and placed as secondary, never as the default."
+    why: "People press the prominent button without reading it."
+    applies_when: "A view or dialog offers an action that deletes, overwrites or cannot be undone."
+    pass_when: "That action is not the primary-styled button, is not triggered by Enter, and is set apart from frequent actions."
+    evidence: dom
+    severity: major
+    support: practice-consensus
+    sources: ["apple:buttons", "sm86:6.0/13", "sm86:6.0/8", "govuk:components/button"]
+    counters: [B7.5]
+    examples:
+      pass: "In a delete confirmation, 'Cancel' has focus and 'Delete project' is a separate red-outlined button."
+      fail: "'Delete account' is the filled blue default next to a grey 'Keep account'."
+      na: "A view with no destructive action."
+
+  - id: ACT-009
+    rule: "The screen's main action is in view when the screen opens."
+    why: "People act on what they see first and often do not scroll to look for the main control."
+    applies_when: "A screen has a main action."
+    pass_when: "At 1280x800 and at 375x667 that action is visible without scrolling, or stays fixed in view."
+    evidence: measured
+    severity: major
+    support: some-support
+    sources: ["hhs:6:3", "hhs:6:2", "hhs:6:13"]
+    counters: [B1.5, B6.8]
+    exceptions: ["Long forms, where the submit button belongs at the end of the fields."]
+    examples:
+      pass: "'New invoice' sits in the page header."
+      fail: "'New invoice' sits under a welcome banner and three stat cards, below the fold."
+      na: "A screen with no main action, such as a read-only report."
+
+  - id: ACT-010
+    rule: "A control that cannot be used right now says why in text beside it, or is absent."
+    why: "A greyed-out control with no reason leaves people guessing what they did wrong."
+    applies_when: "A control is disabled, or would be unusable in the current state."
+    pass_when: "The reason is visible as text near the control, or the control is not shown."
+    evidence: dom
+    severity: major
+    support: practice-consensus
+    sources: ["uswds:components/form", "atlassian:components/button/usage", "primer:components/button", "sm86:3.2/10", "sm86:6.0/11"]
+    counters: [B7.3]
+    exceptions: ["A button disabled only while its own request is in progress."]
+    examples:
+      pass: "'Publish' is disabled with 'Add a title to publish' beside it."
+      fail: "'Publish' is grey with no explanation; a tooltip on the disabled button is the only hint."
+      na: "No disabled controls."
+
+  - id: ACT-011
+    rule: "Everything a task needs is on the screen, with tooltips used only for extra detail."
+    why: "Tooltips are missed, vanish on touch and cannot be read at leisure."
+    applies_when: "The screen uses tooltips or hover cards."
+    pass_when: "Removing every tooltip would leave the task completable and every control identifiable."
+    evidence: judgement
+    severity: major
+    support: practice-consensus
+    sources: ["nng:tooltip-guidelines", "primer:components/tooltip/guidelines", "carbon:patterns/forms-pattern"]
+    counters: [B1.1, B3.4]
+    exceptions: ["Hover text that names a symbol whose meaning is already clear, such as a raindrop or a cloud in a forecast, is the right place for that name (COPY-016). Do not replace such a symbol with a visible word."]
+    examples:
+      pass: "The password rules are listed under the field; a tooltip adds an example."
+      fail: "The password rules appear only in a tooltip on an info icon."
+      na: "No tooltips."
+
+  - id: ACT-012
+    rule: "The same action has the same label, appearance and position on every screen."
+    why: "Consistency lets users reuse what they learned; drift makes them relearn each screen."
+    applies_when: "An action such as save, cancel, delete, create or search appears on more than one screen."
+    pass_when: "Its wording, style and position match across those screens."
+    evidence: judgement
+    severity: major
+    support: well-replicated
+    sources: ["hhs:6:2", "hhs:11:4", "sm86:3.0/6", "polson1986"]
+    counters: [B9.1, B4.6]
+    examples:
+      pass: "Every edit screen ends with 'Save changes' then 'Cancel', left aligned."
+      fail: "'Save', 'Update', 'Apply' and 'Done' are used for the same action on four screens."
+      na: "A single-screen product."
+
+  - id: ACT-013
+    rule: "Menus and popovers open on click or key press."
+    why: "Hover-opened menus misfire, are unreachable on touch and close when the pointer drifts."
+    applies_when: "The screen has a menu, dropdown or popover."
+    pass_when: "It opens and closes by click, tap, Enter or Space, and does not depend on hover."
+    evidence: walk
+    severity: major
+    support: some-support
+    sources: ["hhs:10:10", "apg:menu-button"]
+    counters: [B1.1, B2.2]
+    examples:
+      pass: "The account menu opens when its button is clicked and closes on Escape."
+      fail: "The navigation submenu appears on mouseover only."
+      na: "No menus or popovers."

@@ -1,0 +1,254 @@
+domain: access
+prefix: ACC
+title: Keyboard, focus and perception
+load_when: "Any screen. These are the accessibility requirements that shape interaction; most can be checked by script."
+rules:
+  - id: ACC-001
+    rule: "Every task can be completed with the keyboard alone."
+    why: "Many people cannot use a pointer, and many others prefer not to."
+    applies_when: "The screen has interactive elements."
+    pass_when: "Using only Tab, Shift+Tab, Enter, Space, Escape and arrow keys, each task on the screen can be finished, and focus is never trapped outside a modal."
+    evidence: walk
+    severity: blocker
+    support: practice-consensus
+    sources: ["wcag22:2.1.1", "wcag22:2.1.2", "hhs:3:7", "hhs:13:13"]
+    counters: [B1.7, B2.2]
+    examples:
+      pass: "A custom dropdown that opens with Enter, moves with arrows and closes with Escape."
+      fail: "A date picker or row menu that only responds to clicks."
+      na: "A page with nothing interactive."
+
+  - id: ACC-002
+    rule: "The focused element is visibly marked."
+    why: "Keyboard users cannot tell where they are without it."
+    applies_when: "The screen has focusable elements."
+    pass_when: "Each focusable element shows an outline or equivalent visible change when focused from the keyboard."
+    evidence: measured
+    check: focus-visible
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:2.4.7", "wcag22:2.4.13", "vercel:guidelines"]
+    counters: [B2.3]
+    examples:
+      pass: ":focus-visible { outline: 2px solid; outline-offset: 2px }"
+      fail: "*:focus { outline: none } with no replacement."
+      na: "Nothing focusable."
+
+  - id: ACC-003
+    rule: "Focus moves through the screen in the order it is read."
+    why: "A focus order that jumps around is disorienting and hides controls."
+    applies_when: "The screen has more than one focusable element."
+    pass_when: "Tab order follows visual order; no element has a positive tabindex; DOM order matches reading order."
+    evidence: dom
+    check: tabindex-positive
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:2.4.3", "wcag22:1.3.2", "hhs:3:11"]
+    counters: [B2.3]
+    examples:
+      pass: "No tabindex values other than 0 and -1."
+      fail: "tabindex=\"3\" on the submit button."
+      na: "One focusable element or none."
+
+  - id: ACC-004
+    rule: "The focused element is not covered by sticky headers, footers or banners."
+    why: "Focus that lands under a fixed bar is invisible."
+    applies_when: "The screen has fixed or sticky elements."
+    pass_when: "Tabbing through the page, each focused element is at least partly visible."
+    evidence: walk
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:2.4.11"]
+    counters: [B10.2]
+    examples:
+      pass: "scroll-padding-top equal to the sticky header's height."
+      fail: "Tabbing backwards puts focus beneath a sticky header."
+      na: "No fixed or sticky elements."
+
+  - id: ACC-005
+    rule: "Text has a contrast ratio of at least 4.5 to 1 against its background, or 3 to 1 for large text."
+    why: "Low-contrast text is the most common accessibility failure on the web."
+    applies_when: "The screen shows text."
+    pass_when: "Every text element meets 4.5:1, or 3:1 at 24px, or 18.66px bold, and above. This includes placeholders, helper text and disabled-looking labels that must be read."
+    evidence: measured
+    check: contrast
+    severity: major
+    support: some-support
+    sources: ["wcag22:1.4.3", "hhs:11:1", "webaim:2026"]
+    counters: [B10.3]
+    exceptions: ["Text in truly disabled controls and in logos."]
+    examples:
+      pass: "#595959 on white, 7:1."
+      fail: "#b5b5b5 helper text on white, 2:1."
+      na: "No text."
+
+  - id: ACC-006
+    rule: "The outlines and states of controls have a contrast of at least 3 to 1 against what is next to them."
+    why: "A field or toggle whose edge cannot be seen cannot be found."
+    applies_when: "The screen has form fields, toggles, checkboxes, icons that carry meaning, or focus indicators."
+    pass_when: "The boundary or fill that identifies each control, and each state of it, meets 3:1 against adjacent colours."
+    evidence: measured
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:1.4.11"]
+    counters: [B10.3]
+    examples:
+      pass: "Input border #767676 on white."
+      fail: "Input border #e5e5e5 on white with no fill."
+      na: "No controls."
+
+  - id: ACC-007
+    rule: "Pointer targets are at least 24 by 24 CSS pixels, or spaced so that a 24 pixel circle on each touches no other target."
+    why: "Small crowded targets cause mis-clicks, especially for people with tremor or on touch screens."
+    applies_when: "The screen has controls."
+    pass_when: "Every control passes the size or the spacing test; links inside sentences are exempt."
+    evidence: measured
+    check: target-size
+    severity: major
+    support: well-replicated
+    sources: ["wcag22:2.5.8", "mackenzie1992", "parhi2006", "sm86:1.1/13"]
+    counters: [B2.5]
+    examples:
+      pass: "Icon buttons 32px square with 8px gaps."
+      fail: "16px icon buttons side by side in a table row."
+      na: "No controls."
+
+  - id: ACC-008
+    rule: "Anything shown by colour is also shown another way."
+    why: "Colour alone is invisible to people with colour vision deficiency and to screen readers."
+    applies_when: "The screen uses colour to show status, errors, required fields, selection or series in a chart."
+    pass_when: "Each such distinction also has text, an icon or a shape."
+    evidence: judgement
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:1.4.1", "hhs:3:3", "sm86:2.6/30"]
+    counters: [B10.7]
+    examples:
+      pass: "A status column reading 'Overdue' with an icon, in red."
+      fail: "A red dot or green dot with no text."
+      na: "Colour carries no meaning on the screen."
+
+  - id: ACC-009
+    rule: "Headings form an outline: one top heading, then levels in order."
+    why: "Screen reader users navigate by headings; skipped or missing levels break the outline."
+    applies_when: "Always."
+    pass_when: "There is exactly one h1, heading elements are used for headings, and no level is skipped going down."
+    evidence: dom
+    check: heading-order
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:1.3.1", "wcag22:2.4.6", "hhs:9:7"]
+    counters: [B10.6]
+    examples:
+      pass: "h1 Invoices, h2 Overdue, h2 Paid."
+      fail: "No h1; an h2 followed by an h4; headings made of bold divs."
+      na: "Never; this rule always applies."
+
+  - id: ACC-010
+    rule: "The page has one main landmark holding its primary content."
+    why: "Landmarks let assistive technology users jump past navigation to the content."
+    applies_when: "Always."
+    pass_when: "Exactly one main element or role=main exists; navigation is in nav."
+    evidence: dom
+    check: landmarks
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:1.3.1", "wcag22:2.4.1", "hhs:3:4"]
+    counters: [B10.6]
+    examples:
+      pass: "<nav>...</nav><main>...</main>"
+      fail: "Everything in nested divs."
+      na: "Never; this rule always applies."
+
+  - id: ACC-011
+    rule: "Every image has an alt attribute: a description when it informs, empty when it decorates."
+    why: "A missing alt makes screen readers read the file name."
+    applies_when: "The screen has img elements."
+    pass_when: "Each img has alt; informative images describe their content, decorative ones have alt=\"\"."
+    evidence: dom
+    check: image-alt
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:1.1.1", "hhs:3:5", "webaim:2026"]
+    counters: [B10.5]
+    examples:
+      pass: "<img src=\"avatar.png\" alt=\"\"> beside the person's name."
+      fail: "<img src=\"chart.png\"> or alt=\"image\"."
+      na: "No images."
+
+  - id: ACC-012
+    rule: "The page declares its language."
+    why: "Screen readers choose pronunciation from it."
+    applies_when: "Always."
+    pass_when: "The html element has a lang attribute with the page's language."
+    evidence: dom
+    check: page-lang
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:3.1.1", "webaim:2026"]
+    counters: [B10.4]
+    examples:
+      pass: "<html lang=\"en\">"
+      fail: "<html>"
+      na: "Never; this rule always applies."
+
+  - id: ACC-013
+    rule: "Changes that happen without a page load are announced to assistive technology."
+    why: "A message that appears silently is missed by anyone not looking at it."
+    applies_when: "The screen shows status messages, validation results, loading states or updated counts without moving focus."
+    pass_when: "Such messages are inside a live region that exists in the page before the message is added: role status or polite aria-live for routine messages, role alert for errors."
+    evidence: dom
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:4.1.3", "primer:accessibility/patterns/accessible-notifications-and-messages", "hhs:3:7"]
+    counters: [B8.4]
+    examples:
+      pass: "<div role=\"status\"></div> present on load and filled with 'Saved'."
+      fail: "A toast div appended to the body with no role."
+      na: "No dynamic messages."
+
+  - id: ACC-014
+    rule: "A control that shows or hides content exposes whether it is open."
+    why: "Otherwise assistive technology cannot tell an open section from a closed one."
+    applies_when: "The screen has accordions, disclosure buttons, menus, comboboxes or tabs."
+    pass_when: "The trigger carries aria-expanded (or aria-selected for tabs) that changes with state, or a native details element is used."
+    evidence: dom
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:4.1.2", "apg:disclosure", "apg:menu-button", "apg:tabs"]
+    counters: [B2.4]
+    examples:
+      pass: "<button aria-expanded=\"false\" aria-controls=\"filters\">Filters</button>"
+      fail: "A div that toggles a class on click."
+      na: "Nothing expands or collapses."
+
+  - id: ACC-015
+    rule: "Movement is brief, can be stopped, and is reduced when the user asks for less motion."
+    why: "Motion distracts, delays, and makes some people ill."
+    applies_when: "The screen animates anything."
+    pass_when: "Animations run for well under half a second or can be paused; nothing moves for more than five seconds without a stop control; prefers-reduced-motion removes non-essential motion; content is never hidden awaiting a scroll animation."
+    evidence: static
+    check: reduced-motion
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:2.2.2", "apple:motion", "vercel:guidelines", "hhs:14:4"]
+    counters: [B10.8, B2.6]
+    examples:
+      pass: "A 150ms fade, disabled under @media (prefers-reduced-motion: reduce)."
+      fail: "Sections that fade in on scroll and stay invisible if the observer never fires."
+      na: "No animation."
+
+  - id: ACC-016
+    rule: "Anything done by dragging or by a gesture can also be done with a click or a key."
+    why: "Dragging is impossible for many people and undiscoverable for most."
+    applies_when: "The screen supports drag and drop, swipe or other gestures."
+    pass_when: "Each such operation has a visible control that achieves the same result."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:2.5.7", "wcag22:2.5.1", "apple:accessibility"]
+    counters: [B1.1]
+    examples:
+      pass: "Rows reorder by drag and by 'Move up' and 'Move down' in the row menu."
+      fail: "A kanban board where cards can only be dragged."
+      na: "No drag or gesture interactions."

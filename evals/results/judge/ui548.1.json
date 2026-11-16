@@ -1,0 +1,359 @@
+{
+  "verdicts": [
+    {
+      "id": "TASK-001",
+      "verdict": "pass",
+      "evidence": "lines 263-266, 278, 323, 331: every link-button has a real href (/login, /signup, mailto) and nav anchors target ids that exist (lines 284, 312, 328)"
+    },
+    {
+      "id": "TASK-002",
+      "verdict": "na",
+      "evidence": "no records, counts, metrics or charts; only fixed product copy"
+    },
+    {
+      "id": "TASK-004",
+      "verdict": "na",
+      "evidence": "one-screen page, no steps"
+    },
+    {
+      "id": "TASK-005",
+      "verdict": "na",
+      "evidence": "no inputs anywhere in lines 255-336"
+    },
+    {
+      "id": "TASK-007",
+      "verdict": "na",
+      "evidence": "no preselected values, no dialogs"
+    },
+    {
+      "id": "TASK-008",
+      "verdict": "pass",
+      "evidence": "lines 278 and 323: the main task, starting a trial, is one link to /signup in the first view and again beside the price"
+    },
+    {
+      "id": "TASK-012",
+      "verdict": "pass",
+      "evidence": "lines 273-334: hero, features, price, support and company line all map to facts in the brief; nothing extra such as testimonials or FAQ"
+    },
+    {
+      "id": "ACT-007",
+      "verdict": "pass",
+      "evidence": "lines 278, 323: one filled .button in the hero and one in the price section; Sign in (line 266, CSS 116) is a plain text link"
+    },
+    {
+      "id": "ACT-008",
+      "verdict": "na",
+      "evidence": "no destructive action"
+    },
+    {
+      "id": "ACT-010",
+      "verdict": "na",
+      "evidence": "no disabled controls"
+    },
+    {
+      "id": "ACT-011",
+      "verdict": "na",
+      "evidence": "no tooltips or title attributes"
+    },
+    {
+      "id": "COPY-001",
+      "verdict": "pass",
+      "evidence": "lines 256-334: no visible text refers to implementation, the brief, mock data or unfinished features"
+    },
+    {
+      "id": "COPY-002",
+      "verdict": "pass",
+      "evidence": "line 279: the only note, '30 days free. No card needed.', sits beside the Start free trial button it bears on; lines 320-321 terms sit above the price button"
+    },
+    {
+      "id": "COPY-003",
+      "verdict": "pass",
+      "evidence": "lines 275-332: no sentence narrates the page or its controls; headings and product statements only"
+    },
+    {
+      "id": "COPY-004",
+      "verdict": "pass",
+      "evidence": "lines 289-306: each feature description adds detail beyond its heading (channels, timings, export targets, expanded CIS name); line 276 lede adds to the h1"
+    },
+    {
+      "id": "COPY-006",
+      "verdict": "pass",
+      "evidence": "lines 275-332: no slogans, superlatives or exclamation marks; claims name concrete things (7, 14 and 30 days; Xero, QuickBooks, Sage; 12 pounds per user per month)"
+    },
+    {
+      "id": "COPY-007",
+      "verdict": "pass",
+      "evidence": "lines 266, 278, 323: 'Sign in' and 'Start free trial' start with a specific verb and are understood alone"
+    },
+    {
+      "id": "COPY-009",
+      "verdict": "pass",
+      "evidence": "lines 275-332: trade terms only; CIS is expanded as Construction Industry Scheme at line 302; no codes or developer terms"
+    },
+    {
+      "id": "COPY-011",
+      "verdict": "na",
+      "evidence": "static page with no script, no form and no server calls (lines 255-336); rule does not apply"
+    },
+    {
+      "id": "COPY-012",
+      "verdict": "na",
+      "evidence": "static page with no script, no form and no server calls (lines 255-336); rule does not apply"
+    },
+    {
+      "id": "STATE-001",
+      "verdict": "na",
+      "evidence": "no list, table or search that can be empty"
+    },
+    {
+      "id": "STATE-002",
+      "verdict": "na",
+      "evidence": "no view that can be empty"
+    },
+    {
+      "id": "STATE-003",
+      "verdict": "na",
+      "evidence": "static page with no script, no form and no server calls (lines 255-336); rule does not apply"
+    },
+    {
+      "id": "STATE-004",
+      "verdict": "na",
+      "evidence": "no action or load beyond plain link navigation"
+    },
+    {
+      "id": "STATE-005",
+      "verdict": "na",
+      "evidence": "no asynchronous data"
+    },
+    {
+      "id": "STATE-007",
+      "verdict": "na",
+      "evidence": "only fixed text; no variable values"
+    },
+    {
+      "id": "STATE-010",
+      "verdict": "na",
+      "evidence": "no edits held on the page"
+    },
+    {
+      "id": "FORM-004",
+      "verdict": "na",
+      "evidence": "no form fields"
+    },
+    {
+      "id": "FORM-005",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-006",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-007",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-008",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-009",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-013",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FORM-014",
+      "verdict": "na",
+      "evidence": "no form"
+    },
+    {
+      "id": "FB-001",
+      "verdict": "na",
+      "evidence": "no script and no action controls; the only interactive elements are plain navigation links (lines 256-331)"
+    },
+    {
+      "id": "FB-002",
+      "verdict": "na",
+      "evidence": "no actions that complete, succeed or fail on this page"
+    },
+    {
+      "id": "FB-003",
+      "verdict": "na",
+      "evidence": "no success messages"
+    },
+    {
+      "id": "FB-004",
+      "verdict": "na",
+      "evidence": "no transient messages or error states"
+    },
+    {
+      "id": "FB-006",
+      "verdict": "na",
+      "evidence": "no reversible removing or changing actions"
+    },
+    {
+      "id": "FB-007",
+      "verdict": "na",
+      "evidence": "no irreversible actions on the page"
+    },
+    {
+      "id": "FB-008",
+      "verdict": "na",
+      "evidence": "no confirmation dialogs"
+    },
+    {
+      "id": "FB-009",
+      "verdict": "na",
+      "evidence": "no optimistic updates"
+    },
+    {
+      "id": "NAV-008",
+      "verdict": "na",
+      "evidence": "no modal dialogs"
+    },
+    {
+      "id": "NAV-011",
+      "verdict": "na",
+      "evidence": "no modal dialogs"
+    },
+    {
+      "id": "DATA-001",
+      "verdict": "pass",
+      "evidence": "lines 273-282: the hero with h1, lede and trial button is the first block in main and h1 is the largest heading (CSS 141-148, 239); features and price follow"
+    },
+    {
+      "id": "DATA-002",
+      "verdict": "pass",
+      "evidence": "lines 275-279 with CSS 140, 238: the opening states what the product is plus the next step, sized by padding only (32-64px), no min-height or viewport height"
+    },
+    {
+      "id": "DATA-003",
+      "verdict": "pass",
+      "evidence": "lines 315-318: the only prominent number is the price, 12 pounds per user per month, which informs the decision to start a trial"
+    },
+    {
+      "id": "DATA-010",
+      "verdict": "na",
+      "evidence": "no filtering, search or sorting"
+    },
+    {
+      "id": "ACC-001",
+      "verdict": "pass",
+      "evidence": "lines 256-331: all interactive elements are native anchors with href, a skip link (256, CSS 76-86) and a visible focus outline (CSS 68, 137)"
+    },
+    {
+      "id": "ACC-008",
+      "verdict": "na",
+      "evidence": "colour is not used to show status, errors, selection or series"
+    },
+    {
+      "id": "ACC-013",
+      "verdict": "na",
+      "evidence": "no dynamic messages; no script"
+    },
+    {
+      "id": "ACC-014",
+      "verdict": "na",
+      "evidence": "nothing expands or collapses"
+    },
+    {
+      "id": "RESP-005",
+      "verdict": "pass",
+      "evidence": "CSS 70-74, 118, 155-160, 196, 232: single column with 16px gutters, wrapping flex rows, Sign in kept in the header; section links hidden under 720px but all sections reached by scrolling"
+    },
+    {
+      "id": "NAV-002",
+      "verdict": "na",
+      "evidence": "single-screen page; header nav is in-page anchors only and is not persistent across views"
+    },
+    {
+      "id": "NAV-005",
+      "verdict": "na",
+      "evidence": "one view with no tabs, filters or selection state"
+    },
+    {
+      "id": "NAV-006",
+      "verdict": "na",
+      "evidence": "single-view page"
+    },
+    {
+      "id": "NAV-007",
+      "verdict": "pass",
+      "evidence": "lines 263-266, 278, 323, 331: links onward to /signup, /login and the support email; skip link and anchors within the page"
+    },
+    {
+      "id": "NAV-010",
+      "verdict": "na",
+      "evidence": "no dialogs or overlays"
+    },
+    {
+      "id": "NAV-012",
+      "verdict": "na",
+      "evidence": "no stepped flow"
+    },
+    {
+      "id": "RESP-004",
+      "verdict": "pass",
+      "evidence": "CSS 125: .button min-height 48px with 24px side padding; CSS 107-110: nav links including Sign in have min-height 44px"
+    },
+    {
+      "id": "RESP-006",
+      "verdict": "na",
+      "evidence": "no fixed or sticky elements; the skip link is position absolute and off screen until focused (CSS 76-86)"
+    },
+    {
+      "id": "PAGE-001",
+      "verdict": "pass",
+      "evidence": "lines 275-276: 'Invoicing for small building and trades firms' and 'Write an invoice on your phone and send it before you leave site. Made for firms of 2 to 20 people.'"
+    },
+    {
+      "id": "PAGE-002",
+      "verdict": "pass",
+      "evidence": "CSS 95, 140-160, 238-239: 64px header, 32px (phone) or 64px (desktop) top padding, h1 of about 3 lines, 3-line lede, 48px button; roughly 420px at 375 wide and under 450px at 1280"
+    },
+    {
+      "id": "PAGE-003",
+      "verdict": "na",
+      "evidence": "no imagery"
+    },
+    {
+      "id": "PAGE-004",
+      "verdict": "pass",
+      "evidence": "lines 276, 279, 298, 316-321, 332: 2 to 20 people, 30 days free, 7/14/30 days, 12 pounds per user per month, Leeds 2021 all match the brief; no testimonials, logos or usage figures"
+    },
+    {
+      "id": "PAGE-005",
+      "verdict": "pass",
+      "evidence": "lines 315-321: figure, unit and period shown without interaction, plus 'Billed monthly. Cancel any time.'"
+    },
+    {
+      "id": "PAGE-006",
+      "verdict": "na",
+      "evidence": "no images or video"
+    },
+    {
+      "id": "PAGE-007",
+      "verdict": "na",
+      "evidence": "no announcement strip"
+    },
+    {
+      "id": "PAGE-008",
+      "verdict": "na",
+      "evidence": "no code or commands shown"
+    },
+    {
+      "id": "VIS-013",
+      "verdict": "pass",
+      "evidence": "CSS 19-21, 49-51, 66, 116, 127: a single --accent hue used for the primary button, links and focus outline; everything else neutral"
+    }
+  ]
+}

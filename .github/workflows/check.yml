@@ -1,0 +1,43 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rules:
+    name: Rules, build and checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+
+      - name: Validate rules and rebuild the generated files
+        working-directory: tools
+        run: go run . build
+
+      - name: Generated files are committed and up to date
+        run: |
+          if ! git diff --exit-code; then
+            echo "Run 'cd tools && go run . build' and commit the result."
+            exit 1
+          fi
+
+      - name: No typographic dashes in the rules or the plugin
+        run: |
+          if grep -rnP '[\x{2013}\x{2014}]' rules plugin sources/registry.yaml; then
+            echo "Use an ASCII hyphen, a comma, or reword."
+            exit 1
+          fi
+
+      - name: Checker finds the planted defects and passes the clean page
+        run: |
+          python3 -m py_compile plugin/skills/touchstone/scripts/run.py
+          bad=$(python3 plugin/skills/touchstone/scripts/run.py -s fixtures/mechanical/bad.html | grep -c '^fail' || true)
+          good=$(python3 plugin/skills/touchstone/scripts/run.py -s fixtures/mechanical/good.html | grep -c '^fail' || true)
+          echo "bad.html: $bad failing checks; good.html: $good failing checks"
+          test "$bad" -ge 40
+          test "$good" -eq 0

@@ -1,0 +1,289 @@
+domain: forms
+prefix: FORM
+title: Forms and data entry
+load_when: "Any screen where the user types, picks or submits values."
+rules:
+  - id: FORM-001
+    rule: "Every field has a label tied to it in the markup."
+    why: "Without a tied label, assistive technology announces an unnamed box and clicking the label does nothing."
+    applies_when: "The screen has input, select or textarea elements."
+    pass_when: "Each has a label element bound by for or by wrapping, or an aria-labelledby or aria-label."
+    evidence: dom
+    check: input-label
+    severity: blocker
+    support: practice-consensus
+    sources: ["wcag22:3.3.2", "wcag22:4.1.2", "wcag22:1.3.1", "hhs:13:5", "sm86:1.4/5", "webaim:2026"]
+    counters: [B7.1]
+    examples:
+      pass: "<label for=\"email\">Email address</label><input id=\"email\" type=\"email\">"
+      fail: "<input type=\"text\" placeholder=\"Email address\">"
+      na: "A screen with no fields."
+
+  - id: FORM-002
+    rule: "The label is visible text outside the field and stays visible while the user types."
+    why: "A placeholder disappears on input, so people forget what the field was for and cannot review their answers."
+    applies_when: "The screen has fields."
+    pass_when: "Each field has visible label text next to it; the placeholder, if any, is not the only label."
+    evidence: dom
+    check: visible-label
+    severity: major
+    support: practice-consensus
+    sources: ["nng:form-design-placeholders", "govuk:components/text-input", "carbon:patterns/forms-pattern", "msux:top-violations#Controls > Prompts", "sm86:1.4/5"]
+    counters: [B7.1]
+    exceptions: ["A single search field with a visible search button or icon."]
+    examples:
+      pass: "'Full name' printed above the field."
+      fail: "A field whose only name is aria-label or placeholder text."
+      na: "A screen with no fields."
+
+  - id: FORM-003
+    rule: "Labels sit directly above their fields."
+    why: "Top labels are found fastest and survive narrow screens and long translations."
+    applies_when: "A form has text fields with labels."
+    pass_when: "Each label is above its field and closer to it than to any other field."
+    evidence: dom
+    severity: minor
+    support: some-support
+    sources: ["bargas2010:5", "seckler2014", "carbon:patterns/forms-pattern", "govuk:components/text-input", "sm86:1.4/8", "hhs:13:7"]
+    counters: [B6.6]
+    exceptions: ["Checkboxes and radio buttons, whose labels sit to the right.", "Dense expert data-entry grids where left labels are established."]
+    dissent: "One eye-tracking study found right-aligned side labels fastest; Smith and Mosier accept labels above or to the left if consistent."
+    examples:
+      pass: "A stacked form: label, field, label, field."
+      fail: "Labels in a left column 200px from their fields."
+      na: "A form of only checkboxes."
+
+  - id: FORM-004
+    rule: "A field that needs a particular format states the rule before the user types."
+    why: "Stating the format up front had the largest effect on first-try success in the one controlled test of form guidelines."
+    applies_when: "A field accepts only certain formats, lengths or values."
+    pass_when: "The rule is visible as text in or under the label before any input, not only after an error."
+    evidence: dom
+    severity: major
+    support: some-support
+    sources: ["bargas2010:13", "seckler2014", "sm86:1.4/20", "sm86:1.0/24", "msux:mess-error#Text > Supplemental instructions"]
+    counters: [B7.2]
+    examples:
+      pass: "'Password', with 'At least 12 characters' under the label."
+      fail: "The length rule appears only as an error after submitting."
+      na: "No field has format constraints."
+
+  - id: FORM-005
+    rule: "Required and optional fields are told apart in words, the same way throughout."
+    why: "People skip required fields they could not identify and fill optional ones they did not need to."
+    applies_when: "A form has both required and optional fields."
+    pass_when: "The status of every field is knowable from text such as '(optional)' or 'required', and the required attribute matches."
+    evidence: dom
+    check: required-attr
+    severity: major
+    support: some-support
+    sources: ["hhs:13:1", "sm86:1.4/12", "bargas2010:4", "pauwels2009", "baymard:required-optional-form-fields", "wcag22:3.3.2"]
+    counters: [B7.2]
+    dissent: "GOV.UK marks only optional fields and uses no asterisks; Baymard marks both; USWDS uses a red asterisk with a legend. This rule requires words, whichever group is marked."
+    examples:
+      pass: "Most fields required and unmarked, the two optional ones labelled 'Phone (optional)'."
+      fail: "Red asterisks on some fields with no legend, or nothing marked at all."
+      na: "Every field is required, or every field is optional."
+
+  - id: FORM-006
+    rule: "A field is checked after the user leaves it or on submit, and never reports an error while the user is still typing."
+    why: "Errors shown mid-entry slowed people down and raised error rates in testing."
+    applies_when: "A form validates input."
+    pass_when: "Typing a partial value shows no error; the error appears on leaving the field or on submit, and clears once the value is corrected."
+    evidence: walk
+    severity: major
+    support: some-support
+    sources: ["wroblewski2009", "bargas2007", "sm86:1.7/3", "sm86:4.3/10", "sm86:4.3/16", "baymard:inline-form-validation"]
+    counters: [B7.2]
+    dissent: "GOV.UK and the Bargas-Avila guidelines validate on submit only; USWDS validates in real time. Both camps agree on not interrupting typing."
+    examples:
+      pass: "Typing 'sam@' shows nothing; tabbing away shows 'Enter a full email address, like name@example.org'."
+      fail: "'Invalid email' appears on the first keystroke."
+      na: "A form with no validation."
+
+  - id: FORM-007
+    rule: "Each error message appears next to the field it concerns."
+    why: "A list of errors far from the fields makes people hunt for what to fix."
+    applies_when: "A form can reject input."
+    pass_when: "After a failed submit, every invalid field has its message adjacent to it and is marked by more than colour."
+    evidence: walk
+    severity: major
+    support: some-support
+    sources: ["bargas2010:17", "seckler2014", "govuk:components/error-message", "msux:mess-error#User input errors", "wcag22:3.3.1", "nng:error-message-guidelines"]
+    counters: [B7.2]
+    exceptions: ["Errors that belong to no single field, shown at the top of the form."]
+    examples:
+      pass: "A red-bordered field with an icon and 'Enter the invoice number' beneath its label."
+      fail: "A toast reading 'Please fix the errors in the form'."
+      na: "A form that cannot reject input."
+
+  - id: FORM-008
+    rule: "After a failed submit, everything the user entered is still there and only the wrong part needs changing."
+    why: "Clearing a form on error was rated the most severe form failure by every expert in the guideline study."
+    applies_when: "A form can be rejected by client or server."
+    pass_when: "After a rejected submit, all values remain in their fields, including the rejected one."
+    evidence: walk
+    severity: blocker
+    support: practice-consensus
+    sources: ["bargas2010:15", "sm86:4.3/15", "sm86:4.3/14", "msux:mess-error#User input errors", "nng:error-message-guidelines"]
+    counters: [B7.2, B5.4]
+    exceptions: ["Password and card security code fields are cleared."]
+    examples:
+      pass: "A server error returns the form with all ten answers intact."
+      fail: "The page reloads to an empty form with 'Something went wrong'."
+      na: "A form that cannot be rejected."
+
+  - id: FORM-009
+    rule: "After a failed submit, focus moves to the first problem and each error is tied to its field for assistive technology."
+    why: "Keyboard and screen reader users otherwise do not learn that the submit failed."
+    applies_when: "A form can reject input."
+    pass_when: "Focus lands on an error summary or the first invalid field; invalid fields carry aria-invalid and reference their message with aria-describedby."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["govuk:components/error-summary", "primer:ui-patterns/forms", "sm86:4.3/13", "msux:mess-error#User input errors", "wcag22:3.3.1", "wcag22:4.1.3"]
+    counters: [B7.2, B8.4]
+    examples:
+      pass: "Submit with an empty required field moves focus to it and a screen reader reads its error."
+      fail: "Errors render in red text and focus stays on the submit button."
+      na: "A form that cannot reject input."
+
+  - id: FORM-010
+    rule: "Each field uses the input type that matches its data."
+    why: "The right type brings the right keyboard, autofill and built-in checks."
+    applies_when: "A field collects an email address, phone number, URL, password, number or date."
+    pass_when: "type or inputmode matches: email, tel, url, password, numeric, date."
+    evidence: dom
+    check: input-type
+    severity: minor
+    support: practice-consensus
+    sources: ["govuk:components/text-input", "wcag22:1.3.5", "christian2007", "bargas2010:8"]
+    counters: [B7.4]
+    examples:
+      pass: "<input type=\"email\" autocomplete=\"email\">"
+      fail: "<input type=\"text\" name=\"email\">"
+      na: "Only free-text fields."
+
+  - id: FORM-011
+    rule: "Fields for personal details declare what they are so the browser can fill them."
+    why: "Autofill removes typing and typing errors."
+    applies_when: "A field collects a name, email, phone, address, organisation, username, password or card detail."
+    pass_when: "The field has an autocomplete attribute with the matching token."
+    evidence: dom
+    check: autocomplete
+    severity: minor
+    support: practice-consensus
+    sources: ["wcag22:1.3.5", "govuk:components/text-input", "vercel:guidelines"]
+    counters: [B7.4]
+    examples:
+      pass: "autocomplete=\"name\", autocomplete=\"email\", autocomplete=\"new-password\"."
+      fail: "A sign-up form with no autocomplete attributes."
+      na: "No personal-detail fields."
+
+  - id: FORM-012
+    rule: "Every field accepts pasted input."
+    why: "Blocking paste defeats password managers and forces retyping of long values."
+    applies_when: "The screen has text fields."
+    pass_when: "Pasting into each field inserts the text."
+    evidence: walk
+    check: paste-blocked
+    severity: major
+    support: practice-consensus
+    sources: ["govuk:components/text-input", "vercel:guidelines", "wcag22:3.3.8"]
+    counters: [B7.4]
+    examples:
+      pass: "A one-time code field that accepts a pasted six-digit code."
+      fail: "'Confirm email' with onpaste=\"return false\"."
+      na: "No text fields."
+
+  - id: FORM-013
+    rule: "The submit button stays enabled, and an incomplete form explains what is missing when submitted."
+    why: "A disabled submit button gives no reason and cannot be focused to find one."
+    applies_when: "A form has a submit button."
+    pass_when: "The button is enabled before the form is complete; pressing it with missing input shows what is needed. It is disabled only while its own request is in flight."
+    evidence: walk
+    check: disabled-submit
+    severity: major
+    support: practice-consensus
+    sources: ["govuk:components/button", "uswds:components/form", "atlassian:components/button/usage", "msux:win-dialog-box#Commit buttons", "msux:mess-error#Design concepts > Providing necessary error messages", "sm86:1.7/5"]
+    counters: [B7.3]
+    dissent: "IBM Carbon disables the primary button until requirements are met on short, server-validated forms."
+    examples:
+      pass: "Pressing 'Create account' with an empty email focuses the email field and shows 'Enter your email address'."
+      fail: "'Create account' is grey until every field validates, with no indication why."
+      na: "A screen with no form."
+
+  - id: FORM-014
+    rule: "Pressing submit twice sends the request once."
+    why: "Double submission creates duplicate records and charges."
+    applies_when: "A form creates or changes something on a server."
+    pass_when: "A second press during the request has no effect: the button shows a busy state and is inert until the response."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["bargas2010:18", "hhs:13:20", "govuk:components/button", "vercel:guidelines"]
+    counters: [B8.1, B5.8]
+    examples:
+      pass: "'Place order' changes to 'Placing order' with a spinner and ignores further clicks."
+      fail: "Two quick clicks create two orders."
+      na: "A form with no server effect, such as a client-side filter."
+
+  - id: FORM-015
+    rule: "A form is one column, with fields sharing a row only when they form one unit."
+    why: "In multi-column forms people skip fields and read them in the wrong order."
+    applies_when: "A form has more than three fields."
+    pass_when: "Fields stack in one column; only units such as city, state and postcode, or first and last name, sit side by side."
+    evidence: dom
+    severity: minor
+    support: some-support
+    sources: ["baymard:avoid-multi-column-forms", "bargas2010:6", "carbon:patterns/forms-pattern", "primer:ui-patterns/forms"]
+    counters: [B6.6]
+    examples:
+      pass: "Eight stacked fields."
+      fail: "Unrelated fields arranged in a three-column grid."
+      na: "A form of three fields or fewer."
+
+  - id: FORM-016
+    rule: "Related fields are submitted together by one explicit action, and one form uses one saving model."
+    why: "Mixing fields that save themselves with fields that wait for Save leaves people unsure what has been saved."
+    applies_when: "A screen lets the user change more than one setting or field."
+    pass_when: "Either every change applies immediately and says so, or every change waits for one Save; the two are not mixed in one form."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:1.4/1", "sm86:1.0/9", "primer:ui-patterns/saving", "shopify:user-experience/forms"]
+    counters: [B9.1]
+    examples:
+      pass: "A profile form with one 'Save changes' button; a separate list of toggles that each apply at once and show 'Saved'."
+      fail: "In one form, the toggle saves on click while the text fields need 'Save', with nothing to tell them apart."
+      na: "A single-field form."
+
+  - id: FORM-017
+    rule: "The form asks only for what will be used."
+    why: "Every extra field costs completion."
+    applies_when: "A form is being designed or reviewed against a known purpose."
+    pass_when: "Each field is needed for the task; optional extras are behind a link or left out."
+    evidence: judgement
+    severity: minor
+    support: practice-consensus
+    sources: ["bargas2010:3", "baymard:checkout-flow-average-form-fields", "govuk:service-manual/design/form-structure", "msux:mess-confirm#Consider the design alternatives"]
+    counters: [B9.4]
+    examples:
+      pass: "Inviting a member asks for an email address and a role."
+      fail: "Inviting a member also asks for phone, job title, department and a note."
+      na: "The purpose of the form is unknown; report cannot tell."
+
+  - id: FORM-018
+    rule: "Field width reflects the expected length of the answer, and units and separators are supplied by the form."
+    why: "Width is a cue to what is wanted, and typing units or punctuation invites format errors."
+    applies_when: "A form has fields for short fixed-length values or quantities."
+    pass_when: "Short values such as postcodes and years have short fields; the unit is shown beside the field; hyphens, spaces and currency signs are not required."
+    evidence: dom
+    severity: minor
+    support: some-support
+    sources: ["bargas2010:7", "hhs:13:8", "hhs:13:16", "sm86:1.4/11", "sm86:1.4/21", "sm86:1.4/3", "govuk:components/text-input"]
+    counters: [B7.4]
+    examples:
+      pass: "A five-character postcode field; 'Weight' with 'kg' after the field."
+      fail: "Every field is full width; the hint says 'enter weight including kg'."
+      na: "Only free-text fields of open length."

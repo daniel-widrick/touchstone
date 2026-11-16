@@ -1,0 +1,192 @@
+domain: tasks
+prefix: TASK
+title: Tasks and flows
+load_when: "Any new screen or feature, and any task that takes more than one step or one screen."
+rules:
+  - id: TASK-001
+    rule: "Every button and menu item on screen performs its action when used."
+    why: "A control that looks finished and does nothing makes users doubt everything else on the screen."
+    applies_when: "The screen has at least one button or menu item."
+    pass_when: "Using each button or menu item produces the change or navigation its label names."
+    evidence: walk
+    check: dead-button
+    severity: blocker
+    support: practice-consensus
+    sources: ["catalogue:B5.6", "sm86:3.2/10", "sm86:3.1.3/18"]
+    counters: [B5.6]
+    exceptions: ["A control for a feature that is not available to this user may be shown disabled with the reason in text beside it (see ACT-010)."]
+    examples:
+      pass: "Export downloads a CSV of the rows on screen."
+      fail: "Export has no handler; clicking it does nothing."
+      na: "A read-only report with no buttons."
+
+  - id: TASK-002
+    rule: "Everything shown as data is real data, or the view says it has none."
+    why: "Invented numbers and sample records look authoritative and are false."
+    applies_when: "The screen displays records, counts, metrics or charts."
+    pass_when: "Each value comes from the application's data source, and no sample, placeholder or leftover text is visible."
+    evidence: static
+    check: leftover-text
+    severity: blocker
+    support: practice-consensus
+    sources: ["catalogue:B5.7", "catalogue:B3.6", "sm86:2.0/1"]
+    counters: [B5.7, B3.6, B5.6]
+    exceptions: ["A prototype the user asked to be filled with sample data, where the sample data is labelled as such once, outside the product UI."]
+    examples:
+      pass: "The revenue tile reads from the orders query and shows 'No orders yet' when the query is empty."
+      fail: "A tile shows '+12% this month' from a hardcoded string; a footer says 'Coming soon'."
+      na: "A static settings form with no displayed data."
+
+  - id: TASK-003
+    rule: "Ask for each piece of information once and reuse it wherever it is needed again."
+    why: "Re-entering known data wastes effort and invites mismatched answers."
+    applies_when: "The same data item is needed in more than one field, step or screen of a task."
+    pass_when: "The second and later uses are filled in from the first entry, or shown for confirmation."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:1.0/1", "hhs:13:6", "wcag22:3.3.7", "sm86:1.8/10"]
+    counters: [B11.1]
+    exceptions: ["Re-entry required for security, such as confirming a new password."]
+    examples:
+      pass: "The billing address is prefilled from the shipping address with a 'Use a different address' option."
+      fail: "Step 3 asks again for the email typed in step 1."
+      na: "A single-field search box."
+
+  - id: TASK-004
+    rule: "Each step shows the earlier answers and results it depends on."
+    why: "People cannot reliably carry information in their heads from one screen to the next."
+    applies_when: "A step's choices depend on something entered or shown on an earlier step or screen."
+    pass_when: "That earlier information is visible on the step without navigating away."
+    evidence: walk
+    severity: major
+    support: well-replicated
+    sources: ["hhs:2:5", "sm86:2.0/11", "sm86:3.4/1", "sm86:3.1.1/3"]
+    counters: [B11.1]
+    examples:
+      pass: "The seat-selection step shows the chosen flight and date above the seat map."
+      fail: "A confirm step says 'Apply these changes?' without listing the changes."
+      na: "A one-screen task."
+
+  - id: TASK-005
+    rule: "Work in progress survives going back, a failed submission and an accidental reload."
+    why: "Losing typed input is the most costly interruption a form can cause."
+    applies_when: "A task has more than about five inputs, more than one step, or free text longer than a line."
+    pass_when: "After Back then Forward, after a server error, and after reload, the entered values are still present."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:3.3/4", "sm86:3.3/5", "sm86:6.0/5", "sm86:6.0/3", "sm86:3.3/10"]
+    counters: [B11.1]
+    exceptions: ["Secrets such as passwords and card numbers are not persisted."]
+    examples:
+      pass: "A four-step application keeps answers in the URL or session; reload returns to the same step with values intact."
+      fail: "Pressing Back from step 3 and returning shows an empty step 2."
+      na: "A two-field login form."
+
+  - id: TASK-006
+    rule: "Fields and choices open on the most likely value when one can be predicted."
+    why: "Most people keep the default, so a good default finishes the task for them."
+    applies_when: "A field or choice has a value that is common, known from context, or was the user's last choice."
+    pass_when: "That value is shown in the control when the form opens and can be changed like any other entry."
+    evidence: judgement
+    severity: minor
+    support: well-replicated
+    sources: ["sm86:1.8/1", "sm86:1.8/4", "hhs:13:18", "johnson2003"]
+    counters: [B11.2]
+    exceptions: ["Choices where a default would be presumptuous or legally sensitive, such as consent."]
+    examples:
+      pass: "The date range opens on 'Last 30 days'; the country opens on the account's country."
+      fail: "Every visit starts with an empty date range and 'Select country'."
+      na: "A free-text comment field."
+
+  - id: TASK-007
+    rule: "Default values and default actions are the ones that cannot lose data, cost money or reduce privacy."
+    why: "Defaults are accepted without reading, so a risky default is a decision made for the user."
+    applies_when: "A control, dialog or form has a preselected value or a default button."
+    pass_when: "The preselected value and the action triggered by Enter are the safe, reversible ones."
+    evidence: dom
+    severity: major
+    support: well-replicated
+    sources: ["sm86:6.0/13", "johnson2003", "apple:alerts"]
+    counters: [B7.5]
+    examples:
+      pass: "In 'Delete project?', focus starts on Cancel and Enter does not delete."
+      fail: "A sharing dialog opens with 'Anyone with the link' preselected."
+      na: "A screen with no preselected values and no dialogs."
+
+  - id: TASK-008
+    rule: "The most common task on a screen is completed on that screen in the fewest actions."
+    why: "Every extra click and screen change costs time and loses context."
+    applies_when: "A screen exists mainly to support one frequent task."
+    pass_when: "That task can be finished without opening another screen or dialog, unless the extra step protects against data loss."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["hhs:16:5", "sm86:3.0/2", "sm86:2.7.2/1"]
+    counters: [B2.7]
+    exceptions: ["Destructive actions deliberately take an extra step."]
+    examples:
+      pass: "A status is changed from a menu in the table row."
+      fail: "Changing a status means opening a detail page, clicking Edit, then saving in a dialog."
+      na: "A screen with no dominant task, such as a home page of links."
+
+  - id: TASK-009
+    rule: "A multi-step flow shows the steps, the current one, and lets the user return to an earlier step and change it."
+    why: "People change their minds and make mistakes; a one-way flow forces them to start over."
+    applies_when: "A task is split across two or more steps."
+    pass_when: "The current step is indicated, earlier steps can be reopened, and changing one keeps the later answers that are still valid."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:3.3/5", "sm86:3.5/13", "sm86:1.4/2", "govuk:patterns/question-pages", "nng:wizards"]
+    counters: [B11.1]
+    examples:
+      pass: "A review step lists every answer with a Change link that returns to the review afterwards."
+      fail: "A wizard with Next only; the only way to fix step 1 is to reload."
+      na: "A single-step form."
+
+  - id: TASK-010
+    rule: "The system fills in whatever it can work out itself."
+    why: "Asking users to calculate, look up or convert what the system already knows adds work and errors."
+    applies_when: "A value can be derived from data already entered or already held."
+    pass_when: "The value is computed and shown, not requested."
+    evidence: judgement
+    severity: minor
+    support: practice-consensus
+    sources: ["sm86:1.8/8", "sm86:1.8/7", "hhs:2:4"]
+    counters: [B11.2]
+    examples:
+      pass: "The total updates as line items change."
+      fail: "The form asks for both date of birth and age."
+      na: "A form whose every field is independent."
+
+  - id: TASK-011
+    rule: "The same kind of task follows the same steps in the same order everywhere in the product."
+    why: "What users learn on one screen should transfer to the next."
+    applies_when: "Two or more screens support the same kind of task, such as create, edit, delete or filter."
+    pass_when: "Those screens use the same sequence, the same control types and the same labels for the shared steps."
+    evidence: judgement
+    severity: major
+    support: well-replicated
+    sources: ["hhs:2:3", "sm86:3.0/6", "polson1986"]
+    counters: [B9.1]
+    examples:
+      pass: "Projects and invoices are both created from a 'New' button top right that opens a page with Save at the bottom."
+      fail: "Projects are created in a dialog, invoices on a page, tags inline, each with a differently named save button."
+      na: "A product with one screen."
+
+  - id: TASK-012
+    rule: "Every section, feature and piece of content on the screen serves a task the brief or the user named."
+    why: "Unrequested extras crowd the real task and have to be maintained."
+    applies_when: "A screen is being built or changed from a stated request."
+    pass_when: "Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honouring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra."
+    evidence: judgement
+    severity: major
+    support: practice-consensus
+    sources: ["catalogue:B9.4", "sm86:2.0/2", "hhs:16:7"]
+    counters: [B9.4, B4.4, B9.5]
+    examples:
+      pass: "Asked for a table of invoices with a status filter, the screen has the table and the filter."
+      fail: "The same request also produces stat cards, an activity feed and a 'Quick tips' panel. (Leaving out a dark theme is not a pass on this rule; see VIS-011.)"
+      na: "An audit of a screen with no known brief; report it as cannot tell."

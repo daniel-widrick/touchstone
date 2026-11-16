@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Vite App</title>
+<style>
+  body { font: 15px/1.4 system-ui, sans-serif; margin: 24px; color: #222; background: #fff; }
+  button { font: inherit; padding: 8px 14px; border: 1px solid #999; border-radius: 6px; background: #fff; }
+  button:focus, a:focus, input:focus { outline: none; }
+  .primary { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .faint { color: #b5b5b5; }
+  .row { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .row .actions { opacity: 0; margin-left: auto; }
+  .row:hover .actions { opacity: 1; }
+  .tiny { width: 16px; height: 16px; padding: 0; }
+  .clicky { cursor: pointer; text-decoration: underline; }
+  .wide { width: 1700px; background: #f3f3f3; padding: 4px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.05); display: flex; align-items: flex-end; justify-content: flex-end; padding: 16px; pointer-events: none; }
+  .overlay button { pointer-events: auto; }
+  .note { background: #fff8db; border: 1px solid #e6d27a; padding: 8px; margin: 8px 0; }
+  [role=dialog] { border: 1px solid #999; padding: 12px; margin: 8px 0; width: 280px; }
+  input { font: inherit; padding: 6px; }
+  .glow { background: linear-gradient(90deg, #6366f1, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .slow { transition: all 1.2s; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #22c55e; animation: throb 1.5s infinite; }
+  @keyframes throb { 50% { transform: scale(1.6); } }
+  .reveal { opacity: 0; transition: opacity .6s; }
+  .shout { text-transform: uppercase; text-align: justify; line-height: 1.1; font-family: Georgia, serif; }
+  .narrow { width: 70px; }
+  .s1 { font-size: 11px; font-family: "Courier New", monospace; } .s2 { font-size: 17px; font-family: Verdana, sans-serif; } .s3 { font-size: 19px; font-family: "Times New Roman", serif; }
+  .s4 { font-size: 21px; } .s5 { font-size: 23px; } .s6 { font-size: 27px; }
+</style>
+</head>
+<body>
+<!-- Every defect here is planted. See fixtures/mechanical/expected.txt. -->
+
+<h2>Team settings</h2>
+<h4>Members</h4>
+
+<p>Welcome to your team settings page. This page lets you manage the members of your team, and it was designed to be simple and intuitive so that you can get things done quickly. Below you will find a list of members followed by a form which you can use in order to invite a new member to the team by entering their details.</p>
+
+<div class="note">Note: this page uses mock data and does not persist changes yet.</div>
+<div class="note">Disclaimer: some features may not work as expected.</div>
+<div class="note">Tip: hover over a row to see what you can do with it.</div>
+
+<div class="row">
+  <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="24" height="24">
+  <span>Jane Doe</span>
+  <span class="faint">Owner</span>
+  <span class="actions">
+    <button onclick="void 0">Edit</button>
+    <button onclick="void 0">Remove</button>
+  </span>
+</div>
+<div class="row">
+  <span>undefined of undefined</span>
+  <span class="clicky">View profile</span>
+  <div onclick="void 0">Save</div>
+</div>
+
+<p>
+  <button class="tiny" onclick="void 0" aria-label="Sort">^</button>
+  <button onclick="void 0"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></button>
+  <button onclick="void 0" aria-label="Filter"><svg width="16" height="16" viewBox="0 0 16 16"><rect width="12" height="12" x="2" y="2"/></svg></button>
+  <button>Export</button>
+  <a href="#">Click here</a>
+  <a>Billing</a>
+  <a href="/docs/roles">Learn more</a>
+  <span tabindex="3">Skip</span>
+</p>
+
+<table>
+  <tr><td>Plan</td><td>Seats</td></tr>
+  <tr><td>Team</td><td>12</td></tr>
+</table>
+
+<form onsubmit="return false">
+  <p><label>Team name <input type="text" name="team"></label></p>
+  <p><label>Nickname (optional) <input type="text" name="nick"></label></p>
+  <p><input type="text" name="email" placeholder="Email address"></p>
+  <p><input type="text" name="fullname" aria-label="Full name" onpaste="return false"></p>
+  <p>
+    <button class="primary" type="submit" disabled>Submit</button>
+    <button class="primary" type="button" onclick="void 0">Invite</button>
+    <button class="primary" type="button" onclick="void 0">Save changes</button>
+  </p>
+</form>
+
+<p>Error: connect ECONNREFUSED 127.0.0.1:5432</p>
+<p>Audit log: Coming soon</p>
+<p>Lorem ipsum dolor sit amet.</p>
+<p>(c) 2023 Acme Inc</p>
+
+<h3 class="glow">Supercharge your team with a seamless workflow</h3>
+<p class="shout">This paragraph is set in capitals and justified with tight lines, in a fourth typeface, and it runs long enough across the full width of the page to count as running prose for the purposes of the line length, line height and text style measurements that the checker makes on every block of text.</p>
+<p><span class="dot"></span> <span class="s1">Live</span> <span class="s2">Synced</span> <span class="s3">Ready</span> <span class="s4">Now</span> <span class="s5">Up</span> <span class="s6">OK</span></p>
+<p><button class="slow narrow" onclick="void 0">Add a new team member</button></p>
+<section class="reveal"><p>This section stays invisible until a script that watches the scroll position decides to show it.</p></section>
+
+<div class="wide">A block that is wider than any phone.</div>
+
+<div role="dialog"><p>Remove this member?</p><button onclick="void 0">OK</button></div>
+<div role="dialog" aria-label="Second dialog"><button onclick="void 0">Close panel</button></div>
+
+<div class="overlay"><button onclick="void 0">Dismiss overlay</button></div>
+</body>
+</html>

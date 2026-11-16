@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a meeting room</title>
+<style>
+  :root {
+    --text: #1a1d23;
+    --muted: #4a5160;
+    --line: #6b7280;
+    --soft: #d5d9e0;
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --primary: #1d4ed8;
+    --primary-dark: #173fae;
+    --selected: #eef3ff;
+    --error: #b42318;
+    --error-bg: #fef3f2;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 16px; overflow-wrap: anywhere; }
+  h2 { font-size: 1.125rem; line-height: 1.3; margin: 0 0 12px; }
+  h1:focus, h2:focus { outline: none; }
+  p { margin: 0 0 12px; }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .when {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+  .field { margin-bottom: 16px; min-width: 0; }
+  .when .field { margin-bottom: 0; }
+  .when { margin-bottom: 16px; }
+  label, .label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .opt { font-weight: 400; color: var(--muted); }
+  input[type="date"], input[type="time"], input[type="number"], input[type="text"], select, textarea {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  input[type="number"] { max-width: 110px; }
+  textarea { min-height: 88px; resize: vertical; }
+  [aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
+  :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .error { color: var(--error); font-size: 0.9375rem; margin: 6px 0 0; }
+  .error::before { content: "Error: "; font-weight: 600; }
+  .btn {
+    display: inline-block;
+    min-height: 44px;
+    padding: 9px 18px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn:hover { background: #eef0f3; }
+  .btn-primary { color: #fff; background: var(--primary); border-color: var(--primary); }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn[aria-disabled="true"] { cursor: progress; }
+  .rooms-body { min-height: 48px; }
+  .rooms-body p:last-child { margin-bottom: 0; }
+  .notice {
+    color: var(--error);
+    background: var(--error-bg);
+    border-left: 4px solid var(--error);
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .room-list { display: grid; gap: 8px; margin-bottom: 24px; }
+  .room {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 14px;
+    font-weight: 400;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .room:hover { background: #f3f5f8; }
+  .room:has(input:checked) { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); background: var(--selected); }
+  .room input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--primary); }
+  .room-text { min-width: 0; overflow-wrap: anywhere; }
+  .room-name { display: block; font-weight: 600; }
+  .room-meta { display: block; color: var(--muted); font-size: 0.9375rem; }
+  .check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 400; margin: 0; cursor: pointer; }
+  .check input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--primary); }
+  .summary { font-weight: 600; overflow-wrap: anywhere; }
+  dl { margin: 0 0 20px; }
+  dl > div { display: grid; grid-template-columns: 170px 1fr; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--soft); }
+  dt { color: var(--muted); }
+  dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; min-width: 0; }
+  @media (max-width: 480px) {
+    .panel { padding: 16px; }
+    dl > div { grid-template-columns: 1fr; }
+    .btn { width: 100%; }
+  }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+  <div id="form-view">
+    <h1 id="form-title" tabindex="-1">Book a meeting room</h1>
+
+    <form id="criteria" class="panel" novalidate>
+      <div class="when">
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" required>
+          <p class="error" id="date-error" hidden></p>
+        </div>
+        <div class="field">
+          <label for="start">Start time</label>
+          <input type="time" id="start" name="start" step="300" required>
+          <p class="error" id="start-error" hidden></p>
+        </div>
+        <div class="field">
+          <label for="minutes">Length</label>
+          <select id="minutes" name="minutes">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="90">1 hour 30 minutes</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+            <option value="240">4 hours</option>
+            <option value="480">8 hours</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="people">Number of people</label>
+        <input type="number" id="people" name="people" min="1" step="1" inputmode="numeric" value="2" required>
+        <p class="error" id="people-error" hidden></p>
+      </div>
+      <button type="submit" class="btn btn-primary" id="find">Find rooms</button>
+    </form>
+
+    <section class="panel" id="rooms-section" aria-labelledby="rooms-heading" hidden>
+      <h2 id="rooms-heading" tabindex="-1">Free rooms</h2>
+      <div class="rooms-body" id="rooms-body"></div>
+
+      <form id="booking" novalidate hidden>
+        <div class="room-list" id="room-list" role="radiogroup" aria-labelledby="rooms-heading"></div>
+
+        <h2>Meeting details</h2>
+        <div class="field">
+          <label for="title">Meeting title</label>
+          <input type="text" id="title" name="title" autocomplete="off" required>
+          <p class="error" id="title-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="check" for="catering">
+            <input type="checkbox" id="catering" name="catering">
+            <span>Ask for catering</span>
+          </label>
+          <p class="error" id="catering-error" hidden></p>
+        </div>
+        <div class="field">
+          <label for="note">Note for reception <span class="opt">(optional)</span></label>
+          <textarea id="note" name="note" rows="3"></textarea>
+        </div>
+
+        <p class="summary" id="summary"></p>
+        <div class="notice" id="book-error" role="alert" hidden></div>
+        <button type="submit" class="btn btn-primary" id="book">Book room</button>
+      </form>
+    </section>
+  </div>
+
+  <div id="done-view" hidden>
+    <h1 id="done-title" tabindex="-1"></h1>
+    <div class="panel">
+      <dl id="done-details"></dl>
+      <button type="button" class="btn btn-primary" id="another">Book another room</button>
+    </div>
+  </div>
+
+  <div class="sr" id="live" role="status" aria-live="polite"></div>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const rooms = [
+    { id: 'r1', name: 'Harbour', floor: 1, capacity: 4, features: ['screen'] },
+    { id: 'r2', name: 'Lighthouse', floor: 1, capacity: 8, features: ['screen', 'video'] },
+    { id: 'r3', name: 'Quay', floor: 2, capacity: 12, features: ['screen', 'video', 'whiteboard'] },
+    { id: 'r4', name: 'Breakwater Boardroom and Client Suite', floor: 3, capacity: 20, features: ['screen', 'video', 'whiteboard', 'catering'] },
+    { id: 'r5', name: 'Tidepool', floor: 2, capacity: 2, features: [] },
+  ];
+  return {
+    // criteria: { date: 'YYYY-MM-DD', start: 'HH:MM', minutes: number, people: number }
+    async findRooms(c) {
+      await wait(); maybeFail('find rooms');
+      if (q.get('empty') === '1') return [];
+      if (new Date(c.date + 'T' + c.start) < new Date()) { const e = new Error('VALIDATION: start_in_past'); e.code = 'PAST'; throw e; }
+      return rooms.filter((r) => r.capacity >= c.people && !(r.id === 'r2' && c.start < '12:00')).map((r) => ({ ...r }));
+    },
+    // booking: { roomId, date, start, minutes, people, title, catering: boolean, note }
+    async createBooking(b) {
+      await wait(); maybeFail('create booking');
+      if (!b.title || !b.title.trim()) { const e = new Error('VALIDATION: title_required'); e.code = 'VALIDATION'; throw e; }
+      if (b.catering && !rooms.find((r) => r.id === b.roomId).features.includes('catering')) { const e = new Error('CONFLICT: room_has_no_catering'); e.code = 'NO_CATERING'; throw e; }
+      return { id: 'bk_' + Math.floor(Math.random() * 90000 + 10000), ...b };
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    formView: $('form-view'), doneView: $('done-view'),
+    criteria: $('criteria'), date: $('date'), start: $('start'), minutes: $('minutes'), people: $('people'), find: $('find'),
+    section: $('rooms-section'), heading: $('rooms-heading'), body: $('rooms-body'),
+    booking: $('booking'), list: $('room-list'), title: $('title'), catering: $('catering'), note: $('note'),
+    summary: $('summary'), bookError: $('book-error'), book: $('book'),
+    doneTitle: $('done-title'), doneDetails: $('done-details'), another: $('another'), live: $('live'),
+  };
+  const DRAFT_KEY = 'room-booking-draft';
+  const FEATURES = { screen: 'Screen', video: 'Video calls', whiteboard: 'Whiteboard', catering: 'Catering' };
+
+  // status: idle | loading | ready | empty | failed | stale
+  const state = { status: 'idle', searched: null, rooms: [], roomId: null, booking: false };
+
+  /* ---------- formatting ---------- */
+  const pad = (n) => String(n).padStart(2, '0');
+  const dateStr = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const toDate = (date, time) => {
+    const [y, m, d] = date.split('-').map(Number);
+    const [h, mi] = (time || '00:00').split(':').map(Number);
+    return new Date(y, m - 1, d, h, mi);
+  };
+  const fmtDate = (date) => {
+    const d = toDate(date);
+    const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString(undefined, opts);
+  };
+  const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  const fmtWhen = (c) => {
+    const s = toDate(c.date, c.start);
+    const e = new Date(s.getTime() + c.minutes * 60000);
+    const nextDay = e.getDate() !== s.getDate() ? ' the next day' : '';
+    return fmtDate(c.date) + ', ' + fmtTime(s) + ' to ' + fmtTime(e) + nextDay;
+  };
+  const fmtLength = (min) => {
+    const h = Math.floor(min / 60), m = min % 60;
+    const parts = [];
+    if (h) parts.push(h + (h === 1 ? ' hour' : ' hours'));
+    if (m) parts.push(m + ' minutes');
+    return parts.join(' ');
+  };
+  const fmtPeople = (n) => n + (n === 1 ? ' person' : ' people');
+
+  /* ---------- defaults and draft ---------- */
+  function defaultWhen() {
+    const d = new Date(Date.now() + 5 * 60000);
+    d.setSeconds(0, 0);
+    d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
+    if (d.getHours() < 8) d.setHours(9, 0);
+    if (d.getHours() >= 18) { d.setDate(d.getDate() + 1); d.setHours(9, 0); }
+    while (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() + 1); d.setHours(9, 0); }
+    return { date: dateStr(d), start: pad(d.getHours()) + ':' + pad(d.getMinutes()) };
+  }
+  function resetForm() {
+    const w = defaultWhen();
+    el.date.value = w.date; el.start.value = w.start; el.minutes.value = '60'; el.people.value = '2';
+    el.title.value = ''; el.catering.checked = false; el.note.value = '';
+    [el.date, el.start, el.people, el.title, el.catering].forEach((i) => setError(i, ''));
+    el.bookError.hidden = true;
+    Object.assign(state, { status: 'idle', searched: null, rooms: [], roomId: null });
+    render();
+  }
+  function saveDraft() {
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+        date: el.date.value, start: el.start.value, minutes: el.minutes.value, people: el.people.value,
+        title: el.title.value, catering: el.catering.checked, note: el.note.value,
+        roomId: state.roomId, searched: state.status !== 'idle' && state.status !== 'stale',
+      }));
+    } catch (e) { /* storage unavailable: the form still works */ }
+  }
+  function clearDraft() { try { sessionStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+  function loadDraft() {
+    let d = null;
+    try { d = JSON.parse(sessionStorage.getItem(DRAFT_KEY)); } catch (e) {}
+    if (!d) return false;
+    el.minutes.value = d.minutes || '60';
+    if (!el.minutes.value) el.minutes.value = '60';
+    el.people.value = d.people || '';
+    el.title.value = d.title || '';
+    el.catering.checked = !!d.catering;
+    el.note.value = d.note || '';
+    state.roomId = d.roomId || null;
+    const valid = /^\d{4}-\d\d-\d\d$/.test(d.date || '') && /^\d\d:\d\d$/.test(d.start || '');
+    if (valid && toDate(d.date, d.start) > new Date()) {
+      el.date.value = d.date; el.start.value = d.start;
+      return !!d.searched;
+    }
+    return false;
+  }
+
+  /* ---------- field errors ---------- */
+  function setError(input, msg) {
+    const box = $(input.id + '-error');
+    box.textContent = msg;
+    box.hidden = !msg;
+    if (msg) { input.setAttribute('aria-invalid', 'true'); input.setAttribute('aria-describedby', box.id); }
+    else { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
+  }
+  const say = (text) => { el.live.textContent = text; };
+
+  /* ---------- criteria ---------- */
+  const readCriteria = () => ({
+    date: el.date.value, start: el.start.value,
+    minutes: Number(el.minutes.value), people: Number(el.people.value),
+  });
+  const same = (a, b) => a && b && a.date === b.date && a.start === b.start && a.minutes === b.minutes && a.people === b.people;
+
+  function validateCriteria() {
+    let first = null;
+    const fail = (input, msg) => { setError(input, msg); first = first || input; };
+    const today = dateStr(new Date());
+    setError(el.date, ''); setError(el.start, ''); setError(el.people, '');
+    if (!el.date.value) fail(el.date, 'Choose a date.');
+    else if (el.date.value < today) fail(el.date, 'Choose today or a later date.');
+    if (!el.start.value) fail(el.start, 'Choose a start time.');
+    else if (el.date.value && el.date.value >= today && toDate(el.date.value, el.start.value) < new Date()) {
+      fail(el.start, 'That time has passed. Choose a later time.');
+    }
+    const n = Number(el.people.value);
+    if (!el.people.value.trim() || !Number.isInteger(n) || n < 1) fail(el.people, 'Enter a whole number, 1 or more.');
+    return first;
+  }
+
+  async function search(focusHeading, restoring) {
+    if (state.status === 'loading') return;
+    const bad = validateCriteria();
+    if (bad) { bad.focus(); return; }
+    const c = readCriteria();
+    state.searched = c;
+    state.status = 'loading';
+    render();
+    say('Finding rooms');
+    if (focusHeading) el.heading.focus();
+    let rooms = null, code = null;
+    try { rooms = await api.findRooms(c); } catch (e) { code = (e && e.code) || 'ERROR'; }
+
+    if (code === 'PAST') {
+      state.status = 'idle';
+      render();
+      setError(el.start, 'That time has passed. Choose a later time.');
+      el.start.focus();
+    } else if (code) {
+      state.status = 'failed';
+      render();
+    } else {
+      state.rooms = rooms.slice().sort((a, b) => a.capacity - b.capacity);
+      state.status = rooms.length ? 'ready' : 'empty';
+      pickRoom();
+      renderRooms();
+      if (!same(readCriteria(), state.searched)) state.status = 'stale';
+      render();
+      if (state.status === 'ready') say(el.heading.textContent);
+      else if (state.status === 'empty') say('No rooms free');
+    }
+    saveDraft();
+    if (!restoring && !el.section.hidden) el.section.scrollIntoView({ block: 'nearest' });
+  }
+
+  function pickRoom() {
+    if (state.rooms.some((r) => r.id === state.roomId)) return;
+    const withCatering = state.rooms.find((r) => r.features.includes('catering'));
+    const best = el.catering.checked && withCatering ? withCatering : state.rooms[0];
+    state.roomId = best ? best.id : null;
+  }
+  const selectedRoom = () => state.rooms.find((r) => r.id === state.roomId) || null;
+
+  /* ---------- rendering ---------- */
+  function render() {
+    const s = state.status;
+    el.section.hidden = s === 'idle';
+    el.booking.hidden = s !== 'ready';
+    el.find.classList.toggle('btn-primary', s !== 'ready');
+    el.find.textContent = s === 'loading' ? 'Finding rooms...' : 'Find rooms';
+    if (s === 'loading') el.find.setAttribute('aria-disabled', 'true'); else el.find.removeAttribute('aria-disabled');
+
+    el.body.textContent = '';
+    el.body.hidden = s === 'ready';
+    const p = (text, cls, role) => {
+      const n = document.createElement('p');
+      n.textContent = text;
+      if (cls) n.className = cls;
+      if (role) n.setAttribute('role', role);
+      el.body.appendChild(n);
+      return n;
+    };
+    let heading = 'Free rooms';
+    if (s === 'loading') {
+      p('Finding rooms...');
+    } else if (s === 'ready') {
+      heading = state.rooms.length === 1 ? '1 room free' : state.rooms.length + ' rooms free';
+    } else if (s === 'empty') {
+      heading = 'No rooms free';
+      p('Nothing is free for ' + fmtPeople(state.searched.people) + ' on ' + fmtWhen(state.searched) + '. Try another time or a shorter meeting.');
+    } else if (s === 'failed') {
+      p('Could not load the rooms because the connection failed.', 'notice', 'alert');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn'; b.textContent = 'Try again';
+      b.addEventListener('click', () => search(true));
+      el.body.appendChild(b);
+    } else if (s === 'stale') {
+      p('The time or number of people changed. Find rooms again to see what is free. Your meeting details are kept.');
+    }
+    el.heading.textContent = heading;
+    if (s === 'ready') updateBookingInfo();
+  }
+
+  function renderRooms() {
+    el.list.textContent = '';
+    state.rooms.forEach((r) => {
+      const label = document.createElement('label');
+      label.className = 'room';
+      const input = document.createElement('input');
+      input.type = 'radio'; input.name = 'room'; input.value = r.id; input.id = 'room-' + r.id;
+      input.checked = r.id === state.roomId;
+      label.htmlFor = input.id;
+      const text = document.createElement('span');
+      text.className = 'room-text';
+      const name = document.createElement('span');
+      name.className = 'room-name'; name.textContent = r.name;
+      const meta = document.createElement('span');
+      meta.className = 'room-meta';
+      const feats = r.features.map((f) => FEATURES[f] || (f.charAt(0).toUpperCase() + f.slice(1)));
+      meta.textContent = ['Floor ' + r.floor, 'seats ' + r.capacity].concat(feats.map((f) => f.toLowerCase())).join(', ');
+      text.append(name, meta);
+      label.append(input, text);
+      el.list.appendChild(label);
+    });
+  }
+
+  function cateringProblem() {
+    const room = selectedRoom();
+    if (!el.catering.checked || !room || room.features.includes('catering')) return '';
+    const others = state.rooms.filter((r) => r.features.includes('catering')).map((r) => r.name);
+    return room.name + ' has no catering. ' + (others.length
+      ? 'Choose ' + others.join(' or ') + ', or untick this box.'
+      : 'No free room at this time has catering. Untick this box, or try another time.');
+  }
+
+  function updateBookingInfo() {
+    const room = selectedRoom();
+    setError(el.catering, cateringProblem());
+    el.summary.textContent = room && state.searched
+      ? room.name + ', ' + fmtWhen(state.searched) + ', ' + fmtPeople(state.searched.people)
+      : '';
+  }
+
+  /* ---------- booking ---------- */
+  async function book() {
+    if (state.booking || state.status !== 'ready') return;
+    const room = selectedRoom();
+    let first = null;
+    if (!room) { first = el.list.querySelector('input'); }
+    setError(el.title, el.title.value.trim() ? '' : 'Enter a title for the meeting.');
+    if (!el.title.value.trim()) first = first || el.title;
+    const cp = cateringProblem();
+    setError(el.catering, cp);
+    if (cp) first = first || el.catering;
+    if (first) { first.focus(); return; }
+
+    state.booking = true;
+    el.bookError.hidden = true;
+    el.book.textContent = 'Booking...';
+    el.book.setAttribute('aria-disabled', 'true');
+    say('Booking ' + room.name);
+    const request = {
+      roomId: room.id, ...state.searched,
+      title: el.title.value.trim(), catering: el.catering.checked, note: el.note.value.trim(),
+    };
+    let result = null, code = null;
+    try { result = await api.createBooking(request); } catch (e) { code = (e && e.code) || 'ERROR'; }
+    state.booking = false;
+    el.book.textContent = 'Book room';
+    el.book.removeAttribute('aria-disabled');
+
+    if (code === 'VALIDATION') {
+      setError(el.title, 'Enter a title for the meeting.'); el.title.focus();
+    } else if (code === 'NO_CATERING') {
+      setError(el.catering, room.name + ' has no catering. Choose another room, or untick this box.'); el.catering.focus();
+    } else if (code) {
+      el.bookError.textContent = 'The room was not booked because the connection failed. Your details are kept, so you can book again.';
+      el.bookError.hidden = false;
+    } else {
+      clearDraft();
+      history.pushState({ booking: result, room: { name: room.name, floor: room.floor } }, '', '#booked');
+      resetForm();
+      route(true);
+    }
+  }
+
+  /* ---------- views ---------- */
+  function showDone(data) {
+    const b = data.booking, room = data.room;
+    el.doneTitle.textContent = room.name + ' is booked';
+    document.title = 'Booked: ' + room.name + ', ' + fmtWhen(b);
+    el.doneDetails.textContent = '';
+    const row = (k, v) => {
+      const d = document.createElement('div');
+      const dt = document.createElement('dt'); dt.textContent = k;
+      const dd = document.createElement('dd'); dd.textContent = v;
+      d.append(dt, dd); el.doneDetails.appendChild(d);
+    };
+    row('Meeting title', b.title);
+    row('Room', room.name + ', floor ' + room.floor);
+    row('When', fmtWhen(b) + ' (' + fmtLength(b.minutes) + ')');
+    row('People', String(b.people));
+    row('Catering', b.catering ? 'Asked for' : 'Not asked for');
+    row('Note for reception', b.note || 'None');
+    row('Booking reference', b.id);
+  }
+  function route(moveFocus) {
+    const data = history.state;
+    const done = !!(data && data.booking && data.room);
+    if (done) showDone(data); else document.title = 'Book a meeting room';
+    el.formView.hidden = done;
+    el.doneView.hidden = !done;
+    if (moveFocus) {
+      (done ? el.doneTitle : $('form-title')).focus();
+      window.scrollTo(0, 0);
+    }
+  }
+
+  /* ---------- events ---------- */
+  el.criteria.addEventListener('submit', (e) => { e.preventDefault(); search(false); });
+  el.criteria.addEventListener('input', (e) => {
+    if (e.target.getAttribute('aria-invalid')) setError(e.target, '');
+    if (state.status !== 'idle' && state.status !== 'loading') {
+      const back = same(readCriteria(), state.searched);
+      const next = !back ? 'stale' : (state.rooms.length ? 'ready' : 'empty');
+      if (state.status === 'failed' && back) { /* keep the failure message */ }
+      else if (next !== state.status) { state.status = next; render(); }
+    }
+    saveDraft();
+  });
+  el.booking.addEventListener('submit', (e) => { e.preventDefault(); book(); });
+  el.booking.addEventListener('input', (e) => {
+    if (e.target === el.title && el.title.getAttribute('aria-invalid')) setError(el.title, '');
+    saveDraft();
+  });
+  el.booking.addEventListener('change', (e) => {
+    if (e.target.name === 'room') state.roomId = e.target.value;
+    if (e.target.name === 'room' || e.target === el.catering) updateBookingInfo();
+    saveDraft();
+  });
+  el.another.addEventListener('click', () => {
+    history.pushState(null, '', location.pathname + location.search);
+    route(true);
+  });
+  window.addEventListener('popstate', () => route(true));
+
+  /* ---------- start ---------- */
+  el.date.min = dateStr(new Date());
+  resetForm();
+  const resume = loadDraft();
+  if (location.hash === '#booked' && !(history.state && history.state.booking)) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  route(false);
+  if (resume && el.doneView.hidden) search(false, true);
+})();
+</script>
+</body>
+</html>

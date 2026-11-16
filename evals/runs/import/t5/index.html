@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import contacts</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #1a1d21;
+    --muted: #55606c;
+    --line: #d5d9de;
+    --control: #7b8591;
+    --bg: #ffffff;
+    --soft: #f4f5f7;
+    --primary: #1d4ed8;
+    --primary-dark: #1a3fae;
+    --error: #b42318;
+    --error-bg: #fdeeec;
+    --ok: #17663a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 20px 24px 48px; }
+  h1 { font-size: 24px; line-height: 1.2; margin: 0 0 12px; }
+  h2 { font-size: 20px; line-height: 1.25; margin: 0 0 6px; }
+  h2:focus { outline: none; }
+  h2:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; border-radius: 2px; }
+  p { margin: 0 0 12px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  [hidden] { display: none !important; }
+
+  .steps { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 20px; padding: 0 0 10px; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .steps li { padding: 2px 0; border-bottom: 3px solid transparent; }
+  .steps li[aria-current] { color: var(--text); font-weight: 700; border-bottom-color: var(--primary); }
+
+  label, legend { font-weight: 600; }
+  .hint { color: var(--muted); margin: 2px 0 6px; }
+  textarea {
+    display: block; width: 100%; min-height: 240px; padding: 10px 12px; resize: vertical;
+    font: 16px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--control); border-radius: 6px; white-space: pre; overflow: auto;
+  }
+  textarea[aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
+  textarea[readonly] { background: var(--soft); }
+  .field { margin-bottom: 16px; }
+  input[type="file"] { display: block; max-width: 100%; font: inherit; font-size: 16px; padding: 6px 0; min-height: 44px; }
+  input[type="file"]::file-selector-button {
+    font: inherit; min-height: 40px; padding: 6px 14px; margin-right: 12px;
+    color: var(--text); background: var(--bg); border: 1px solid var(--control); border-radius: 6px; cursor: pointer;
+  }
+
+  .msg:empty { display: none; }
+  .msg { margin: 6px 0 0; }
+  .msg.error { color: var(--error); font-weight: 600; }
+  .msg.error::before { content: "Problem: "; }
+  .failure { border-left: 4px solid var(--error); padding: 2px 0 2px 12px; margin: 0 0 16px; }
+  .failure .msg { margin: 0 0 8px; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 20px; }
+  button {
+    font: inherit; font-weight: 600; min-height: 44px; padding: 8px 16px; border-radius: 6px; cursor: pointer;
+    color: var(--text); background: var(--bg); border: 1px solid var(--control);
+  }
+  button:hover { background: var(--soft); }
+  button.primary { color: #fff; background: var(--primary); border-color: var(--primary); }
+  button.primary:hover { background: var(--primary-dark); }
+  button[aria-disabled="true"] { cursor: progress; opacity: 1; background: var(--soft); color: var(--muted); border-color: var(--control); }
+  button:focus-visible, textarea:focus-visible, input:focus-visible {
+    outline: 3px solid var(--primary); outline-offset: 2px;
+  }
+  button.primary:focus-visible { box-shadow: 0 0 0 2px #fff inset; }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; }
+  legend { float: left; padding: 0; margin-right: 18px; line-height: 44px; }
+  .choice { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 400; cursor: pointer; }
+  .choice input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
+
+  .count { color: var(--muted); margin: 0 0 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+  thead th { position: sticky; top: 0; background: var(--soft); border-bottom: 1px solid var(--control); white-space: nowrap; z-index: 1; }
+  .num { text-align: right; white-space: nowrap; width: 1%; font-variant-numeric: tabular-nums; }
+  td.bad { background: var(--error-bg); font-weight: 600; }
+  .blank { color: var(--muted); font-weight: 400; }
+  td.problem { color: var(--error); font-weight: 600; min-width: 180px; }
+  td.problem.none { color: var(--muted); font-weight: 400; }
+  td.problem ul { margin: 0; padding: 0; list-style: none; }
+
+  progress { display: block; width: 100%; max-width: 560px; height: 18px; margin: 12px 0 6px; accent-color: var(--primary); }
+  .big { font-size: 18px; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 700px) {
+    main { padding: 16px 16px 40px; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    tr { border: 1px solid var(--line); border-radius: 6px; margin-bottom: 10px; padding: 4px 0; }
+    td { border: 0; padding: 4px 10px 4px 104px; position: relative; min-height: 30px; }
+    td::before { content: attr(data-label); position: absolute; left: 10px; top: 4px; width: 88px; color: var(--muted); font-weight: 400; }
+    td.num { text-align: left; width: 100%; font-weight: 700; }
+    td.problem { min-width: 0; }
+    .actions button { flex: 1 1 100%; }
+    fieldset { display: block; }
+    legend { float: none; line-height: inherit; margin: 0; }
+    .choice { display: flex; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Import contacts</h1>
+
+  <ol class="steps" aria-label="Steps">
+    <li id="step-1" aria-current="step">1. Add contacts</li>
+    <li id="step-2">2. Check rows</li>
+    <li id="step-3">3. Import</li>
+  </ol>
+
+  <div id="live" class="sr" role="status" aria-live="polite"></div>
+
+  <!-- Step 1 -->
+  <section id="view-input" aria-labelledby="step-1">
+    <form id="form-input" novalidate>
+      <div class="field">
+        <label for="csv">Contacts as CSV text</label>
+        <p class="hint" id="csv-hint">Columns: name, email, phone, company. Name and email are required.</p>
+        <textarea id="csv" name="csv" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="csv-hint csv-error"></textarea>
+        <p class="msg error" id="csv-error" role="alert"></p>
+      </div>
+      <div class="field">
+        <label for="file">Or choose a CSV file</label>
+        <input type="file" id="file" accept=".csv,.tsv,.txt,text/csv,text/plain" aria-describedby="file-status">
+        <p class="msg" id="file-status" role="status"></p>
+        <button type="button" id="undo-file" hidden>Undo: put back the text that was here</button>
+      </div>
+      <div class="failure" id="check-failure" hidden>
+        <p class="msg error" id="check-error" role="alert"></p>
+        <button type="button" id="check-retry">Try again</button>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary" id="check-btn">Check contacts</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Step 2 -->
+  <section id="view-review" aria-labelledby="review-title" hidden>
+    <h2 id="review-title" tabindex="-1"></h2>
+    <p id="review-sub"></p>
+    <p id="review-note" hidden>The first line has no column names, so the columns were read in this order: name, email, phone, company.</p>
+    <div class="actions">
+      <button type="button" class="primary" id="import-btn"></button>
+      <button type="button" id="back-btn">Back to edit contacts</button>
+    </div>
+    <fieldset id="filter">
+      <legend>Show</legend>
+      <label class="choice"><input type="radio" name="filter" value="bad" id="filter-bad"> <span id="filter-bad-label"></span></label>
+      <label class="choice"><input type="radio" name="filter" value="all" id="filter-all"> <span id="filter-all-label"></span></label>
+    </fieldset>
+    <p class="count" id="table-count" role="status"></p>
+    <table id="rows-table" aria-describedby="table-count">
+      <thead>
+        <tr>
+          <th scope="col" class="num">Row</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">Company</th>
+          <th scope="col">Problem</th>
+        </tr>
+      </thead>
+      <tbody id="rows-body"></tbody>
+    </table>
+    <div class="actions" id="more-wrap" hidden>
+      <button type="button" id="more-btn"></button>
+    </div>
+  </section>
+
+  <!-- Step 3: running -->
+  <section id="view-import" aria-labelledby="import-title" hidden>
+    <h2 id="import-title" tabindex="-1"></h2>
+    <progress id="bar" value="0" max="1" aria-labelledby="import-title"></progress>
+    <p class="big" id="bar-text"></p>
+    <div class="actions">
+      <button type="button" id="stop-btn">Stop import</button>
+    </div>
+    <p class="hint">If you stop, contacts already imported stay in the CRM.</p>
+  </section>
+
+  <!-- Step 3: outcome -->
+  <section id="view-result" aria-labelledby="result-title" hidden>
+    <h2 id="result-title" tabindex="-1"></h2>
+    <p id="result-text"></p>
+    <p id="result-skipped" hidden></p>
+    <div class="actions">
+      <button type="button" class="primary" id="result-primary"></button>
+      <button type="button" id="result-secondary" hidden></button>
+    </div>
+  </section>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms || 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  return {
+    // rows: [{ name, email, phone, company }]. Resolves to [{ row: index, field, code }] where code is
+    // 'REQUIRED', 'EMAIL_FORMAT', 'PHONE_FORMAT' or 'DUPLICATE_IN_CRM'.
+    async validateImport(rows) {
+      await wait(); maybeFail('validate import');
+      const out = [];
+      rows.forEach((r, i) => {
+        if (!r.name || !r.name.trim()) out.push({ row: i, field: 'name', code: 'REQUIRED' });
+        if (!r.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) out.push({ row: i, field: 'email', code: r.email ? 'EMAIL_FORMAT' : 'REQUIRED' });
+        else if (/@example\.org$/.test(r.email)) out.push({ row: i, field: 'email', code: 'DUPLICATE_IN_CRM' });
+        if (r.phone && !/^[+\d][\d\s()-]{5,}$/.test(r.phone)) out.push({ row: i, field: 'phone', code: 'PHONE_FORMAT' });
+      });
+      return out;
+    },
+    // Imports the rows in batches. Calls onProgress(done, total) as it goes. Takes roughly 8 to 15 seconds.
+    // signal is an optional AbortSignal; aborting stops the import, and rows already imported stay imported.
+    // Resolves to { imported, skipped }. May reject part way; error.imported says how many rows were saved.
+    async runImport(rows, onProgress, signal) {
+      const total = rows.length; let done = 0;
+      const steps = 12, f = q.get('fail');
+      const failAt = f === '1' ? 5 : (f !== '0' && Math.random() < 0.25 ? 3 + Math.floor(Math.random() * 7) : -1);
+      for (let s = 1; s <= steps; s++) {
+        await wait(650 + Math.random() * 600);
+        if (signal && signal.aborted) { const e = new Error('ABORTED'); e.code = 'ABORTED'; e.imported = done; throw e; }
+        if (s === failAt) { const e = new Error('ETIMEDOUT: upstream timed out during batch ' + s); e.code = 'ETIMEDOUT'; e.imported = done; throw e; }
+        done = Math.min(total, Math.round((total * s) / steps)); if (onProgress) onProgress(done, total);
+      }
+      return { imported: total, skipped: 0 };
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-US');
+  const count = (n, one, many) => fmt(n) + ' ' + (n === 1 ? one : many);
+  const FIELDS = ['name', 'email', 'phone', 'company'];
+  const LABELS = { name: 'Name', email: 'Email', phone: 'Phone', company: 'Company' };
+  const ALIASES = {
+    name: ['name', 'fullname', 'contactname', 'contact'],
+    email: ['email', 'emailaddress', 'mail'],
+    phone: ['phone', 'phonenumber', 'telephone', 'tel', 'mobile'],
+    company: ['company', 'companyname', 'organisation', 'organization', 'employer'],
+  };
+  const PAGE = 200;
+  const STORE = 'import-contacts-draft';
+  const BASE_URL = location.pathname + location.search;
+
+  const S = {
+    view: 'input', busy: false,
+    rows: [], bad: [], good: [], headerless: false, checkedText: null,
+    filter: 'bad', shown: PAGE,
+    queue: [], total: 0, saved: 0, serverSkipped: 0, controller: null, outcome: null, lastMark: 0,
+    undoText: null,
+  };
+
+  const csv = $('csv');
+  const say = (text) => { $('live').textContent = ''; setTimeout(() => { $('live').textContent = text; }, 30); };
+
+  // ---------- draft kept across reloads ----------
+  const saveDraft = () => { try { sessionStorage.setItem(STORE, csv.value); } catch (e) {} };
+  try { const d = sessionStorage.getItem(STORE); if (d) csv.value = d; } catch (e) {}
+  let saveTimer = 0;
+  csv.addEventListener('input', () => {
+    clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 300);
+    hideUndo();
+  });
+
+  // ---------- CSV ----------
+  function detectDelimiter(text) {
+    const line = text.split(/\r?\n/).find((l) => l.trim() !== '') || '';
+    let best = ',', bestN = 0;
+    [',', ';', '\t'].forEach((d) => { const n = line.split(d).length - 1; if (n > bestN) { best = d; bestN = n; } });
+    return best;
+  }
+  function parseCsv(text) {
+    text = text.replace(/^\uFEFF/, '');
+    const delim = detectDelimiter(text);
+    const recs = []; let cells = [], cur = '', inQ = false, quoteRec = -1, i = 0;
+    const n = text.length;
+    const endCell = () => { cells.push(cur); cur = ''; };
+    const endRec = () => { endCell(); recs.push(cells); cells = []; };
+    while (i < n) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i += 2; continue; } inQ = false; i++; continue; }
+        cur += c; i++; continue;
+      }
+      if (c === '"' && cur.trim() === '') { inQ = true; cur = ''; quoteRec = recs.length; i++; continue; }
+      if (c === delim) { endCell(); i++; continue; }
+      if (c === '\r') { if (text[i + 1] === '\n') i++; endRec(); i++; continue; }
+      if (c === '\n') { endRec(); i++; continue; }
+      cur += c; i++;
+    }
+    if (cur !== '' || cells.length) endRec();
+    return { recs, unclosed: inQ ? quoteRec + 1 : 0 };
+  }
+  // Returns { rows, headerless } or { error }.
+  function readContacts(text) {
+    if (!text.trim()) return { error: 'There are no contacts yet. Paste CSV text or choose a file.' };
+    const { recs, unclosed } = parseCsv(text);
+    if (unclosed) return { error: 'Row ' + fmt(unclosed) + ' opens a quotation mark (") that is never closed. Close it or remove it.' };
+    const first = recs.findIndex((r) => r.some((c) => c.trim() !== ''));
+    const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
+    const head = recs[first].map(norm);
+    const map = {};
+    FIELDS.forEach((f) => { const at = head.findIndex((h) => ALIASES[f].includes(h)); if (at >= 0) map[f] = at; });
+    const headerless = Object.keys(map).length === 0;
+    if (headerless) FIELDS.forEach((f, i) => { map[f] = i; });
+    else {
+      const missing = ['name', 'email'].filter((f) => !(f in map));
+      if (missing.length) {
+        return { error: 'The first line has no "' + missing.join('" or "') + '" column. It needs the column names: name, email, phone, company.' };
+      }
+    }
+    const rows = [];
+    for (let i = headerless ? first : first + 1; i < recs.length; i++) {
+      const r = recs[i];
+      if (!r.some((c) => c.trim() !== '')) continue;
+      const row = { rowNo: i + 1, issues: [] };
+      FIELDS.forEach((f) => { row[f] = (f in map && r[map[f]] != null ? r[map[f]] : '').trim(); });
+      rows.push(row);
+    }
+    if (!rows.length) return { error: 'There are no contacts below the column names. Add at least one row.' };
+    return { rows, headerless };
+  }
+  const plain = (r) => ({ name: r.name, email: r.email, phone: r.phone, company: r.company });
+  function toCsv(rows) {
+    const cell = (v) => (/[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+    return [FIELDS.join(',')].concat(rows.map((r) => FIELDS.map((f) => cell(r[f])).join(','))).join('\n') + '\n';
+  }
+  function problemText(issue) {
+    const what = LABELS[issue.field] || 'Value';
+    switch (issue.code) {
+      case 'REQUIRED': return what + ' is missing';
+      case 'EMAIL_FORMAT': return 'Email is not a valid address';
+      case 'PHONE_FORMAT': return 'Phone is not a valid number';
+      case 'DUPLICATE_IN_CRM': return 'Already in the CRM with this email';
+      default: return what + ' was not accepted';
+    }
+  }
+
+  // ---------- views ----------
+  const VIEWS = { input: 1, review: 2, import: 3, result: 3 };
+  const TITLES = { input: 'Import contacts', review: 'Check rows - Import contacts', import: 'Importing - Import contacts', result: 'Import outcome - Import contacts' };
+  function show(view) {
+    S.view = view;
+    Object.keys(VIEWS).forEach((v) => { $('view-' + v).hidden = v !== view; });
+    [1, 2, 3].forEach((n) => {
+      if (n === VIEWS[view]) $('step-' + n).setAttribute('aria-current', 'step');
+      else $('step-' + n).removeAttribute('aria-current');
+    });
+    document.title = TITLES[view];
+    $('live').textContent = '';
+    window.scrollTo(0, 0);
+    const target = view === 'input' ? csv : $(view + '-title');
+    target.focus({ preventScroll: true });
+  }
+  const clearReviewUrl = () => { try { history.replaceState(null, '', BASE_URL); } catch (e) {} };
+
+  // ---------- step 1 ----------
+  function fieldError(text) {
+    $('csv-error').textContent = text;
+    if (text) csv.setAttribute('aria-invalid', 'true'); else csv.removeAttribute('aria-invalid');
+  }
+  function checkFailure(text) {
+    $('check-error').textContent = text;
+    $('check-failure').hidden = !text;
+  }
+  function hideUndo() { S.undoText = null; $('undo-file').hidden = true; }
+
+  $('file').addEventListener('change', async (ev) => {
+    const input = ev.target, file = input.files && input.files[0];
+    if (!file) return;
+    const status = $('file-status');
+    status.className = 'msg';
+    if (file.size > 5 * 1024 * 1024) {
+      status.className = 'msg error';
+      status.textContent = file.name + ' is larger than 5 MB. Split it into smaller files and import them one at a time.';
+      input.value = ''; return;
+    }
+    status.textContent = 'Reading ' + file.name + '...';
+    try {
+      const buf = await file.arrayBuffer();
+      let text = new TextDecoder('utf-8').decode(buf);
+      if (text.includes('\uFFFD')) { try { text = new TextDecoder('windows-1252').decode(buf); } catch (e) {} }
+      const before = csv.value;
+      csv.value = text; saveDraft(); fieldError(''); checkFailure('');
+      const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '').length;
+      if (before.trim() && before !== text) {
+        S.undoText = before; $('undo-file').hidden = false;
+        status.textContent = file.name + ' loaded, ' + count(lines, 'line', 'lines') + '. It replaced the text that was in the box.';
+      } else {
+        hideUndo();
+        status.textContent = file.name + ' loaded, ' + count(lines, 'line', 'lines') + '.';
+      }
+    } catch (e) {
+      status.className = 'msg error';
+      status.textContent = 'Could not read ' + file.name + '. Choose the file again, or open it and paste its text into the box.';
+    }
+    input.value = '';
+  });
+  $('undo-file').addEventListener('click', () => {
+    if (S.undoText == null) return;
+    csv.value = S.undoText; saveDraft(); hideUndo();
+    $('file-status').className = 'msg';
+    $('file-status').textContent = 'The earlier text is back in the box.';
+    csv.focus();
+  });
+
+  async function check() {
+    if (S.busy) return;
+    checkFailure('');
+    const parsed = readContacts(csv.value);
+    if (parsed.error) { fieldError(parsed.error); csv.focus(); return; }
+    fieldError('');
+    const btn = $('check-btn');
+    const n = parsed.rows.length;
+    S.busy = true; csv.readOnly = true;
+    btn.setAttribute('aria-disabled', 'true');
+    btn.textContent = 'Checking ' + count(n, 'row', 'rows') + '...';
+    say('Checking ' + count(n, 'row', 'rows'));
+    let issues = null;
+    for (let attempt = 0; attempt < 3 && !issues; attempt++) {
+      try { issues = await api.validateImport(parsed.rows.map(plain)); } catch (e) { issues = null; }
+    }
+    S.busy = false; csv.readOnly = false;
+    btn.removeAttribute('aria-disabled');
+    btn.textContent = 'Check contacts';
+    $('live').textContent = '';
+    if (!issues) {
+      checkFailure('The contacts could not be checked because the server did not answer. Nothing was imported, and your contacts are still in the box.');
+      return;
+    }
+    issues.forEach((it) => { if (parsed.rows[it.row]) parsed.rows[it.row].issues.push(it); });
+    S.rows = parsed.rows;
+    S.headerless = parsed.headerless;
+    S.bad = S.rows.filter((r) => r.issues.length);
+    S.good = S.rows.filter((r) => !r.issues.length);
+    S.checkedText = csv.value;
+    S.filter = S.bad.length ? 'bad' : 'all';
+    S.shown = PAGE;
+    renderReview();
+    show('review');
+    try { if (!(history.state && history.state.v === 'review')) history.pushState({ v: 'review' }, '', '#check'); } catch (e) {}
+  }
+  $('form-input').addEventListener('submit', (ev) => { ev.preventDefault(); check(); });
+  $('check-retry').addEventListener('click', () => { $('check-btn').focus(); check(); });
+
+  // ---------- step 2 ----------
+  function renderReview() {
+    const all = S.rows.length, bad = S.bad.length, good = S.good.length;
+    const title = $('review-title'), sub = $('review-sub'), imp = $('import-btn'), back = $('back-btn');
+    if (!bad) {
+      title.textContent = all === 1 ? 'The 1 row is ready to import' : 'All ' + fmt(all) + ' rows are ready to import';
+      sub.hidden = true;
+    } else if (!good) {
+      title.textContent = all === 1 ? 'The 1 row has a problem and cannot be imported' : 'All ' + fmt(all) + ' rows have problems. None can be imported';
+      sub.hidden = false;
+      sub.textContent = 'Go back, correct the rows, and check again.';
+    } else {
+      title.textContent = fmt(good) + ' of ' + count(all, 'row', 'rows') + (good === 1 ? ' is' : ' are') + ' ready to import';
+      sub.hidden = false;
+      sub.textContent = count(bad, 'row has', 'rows have') + ' problems and will be skipped. Go back to correct ' + (bad === 1 ? 'it' : 'them') + ', or import the rest now.';
+    }
+    $('review-note').hidden = !S.headerless;
+    imp.hidden = !good;
+    imp.textContent = 'Import ' + count(good, 'contact', 'contacts');
+    back.className = good ? '' : 'primary';
+    $('filter').hidden = !(bad && good);
+    $('filter-bad-label').textContent = 'Rows with problems (' + fmt(bad) + ')';
+    $('filter-all-label').textContent = 'All rows (' + fmt(all) + ')';
+    $('filter-bad').checked = S.filter === 'bad';
+    $('filter-all').checked = S.filter === 'all';
+    renderTable();
+  }
+  function cellFor(row, f) {
+    const td = document.createElement('td');
+    td.setAttribute('data-label', LABELS[f]);
+    if (row.issues.some((it) => it.field === f)) td.className = 'bad';
+    if (row[f]) td.textContent = row[f];
+    else { const s = document.createElement('span'); s.className = 'blank'; s.textContent = '(blank)'; td.appendChild(s); }
+    return td;
+  }
+  function renderTable() {
+    const list = S.filter === 'bad' ? S.bad : S.rows;
+    const body = $('rows-body');
+    const shown = Math.min(S.shown, list.length);
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < shown; i++) {
+      const row = list[i];
+      const tr = document.createElement('tr');
+      const no = document.createElement('td');
+      no.className = 'num'; no.setAttribute('data-label', 'Row'); no.textContent = fmt(row.rowNo);
+      tr.appendChild(no);
+      FIELDS.forEach((f) => tr.appendChild(cellFor(row, f)));
+      const p = document.createElement('td');
+      p.setAttribute('data-label', 'Problem');
+      if (row.issues.length) {
+        p.className = 'problem';
+        const ul = document.createElement('ul');
+        row.issues.forEach((it) => { const li = document.createElement('li'); li.textContent = problemText(it); ul.appendChild(li); });
+        p.appendChild(ul);
+      } else { p.className = 'problem none'; p.textContent = 'None'; }
+      tr.appendChild(p);
+      frag.appendChild(tr);
+    }
+    body.textContent = '';
+    body.appendChild(frag);
+    const kind = S.filter === 'bad' ? (list.length === 1 ? 'row with problems' : 'rows with problems') : (list.length === 1 ? 'row' : 'rows');
+    $('table-count').textContent = shown < list.length
+      ? 'Showing the first ' + fmt(shown) + ' of ' + fmt(list.length) + ' ' + kind + '.'
+      : 'Showing ' + (list.length > 1 ? 'all ' : '') + fmt(list.length) + ' ' + kind + '.';
+    $('more-wrap').hidden = shown >= list.length;
+    $('more-btn').textContent = 'Show ' + fmt(Math.min(PAGE, list.length - shown)) + ' more rows';
+  }
+  ['filter-bad', 'filter-all'].forEach((id) => $(id).addEventListener('change', (ev) => {
+    if (!ev.target.checked) return;
+    S.filter = ev.target.value; S.shown = PAGE; renderTable();
+  }));
+  $('more-btn').addEventListener('click', () => {
+    const first = S.shown;
+    S.shown += PAGE; renderTable();
+    const tr = $('rows-body').children[first];
+    if (tr) { tr.tabIndex = -1; tr.focus(); }
+  });
+  $('back-btn').addEventListener('click', () => {
+    if (history.state && history.state.v === 'review') history.back();
+    else show('input');
+  });
+
+  // ---------- step 3 ----------
+  function setProgress(done) {
+    const bar = $('bar');
+    bar.max = S.total; bar.value = done;
+    const text = fmt(done) + ' of ' + count(S.total, 'contact', 'contacts') + ' imported';
+    bar.setAttribute('aria-valuetext', text);
+    $('bar-text').textContent = text;
+    const mark = Math.floor((done / S.total) * 4);
+    if (mark > S.lastMark && mark < 4) { S.lastMark = mark; say(text); }
+  }
+  async function runImport() {
+    if (S.busy || !S.queue.length) return;
+    S.busy = true; S.outcome = null;
+    S.controller = new AbortController();
+    const stop = $('stop-btn');
+    stop.removeAttribute('aria-disabled'); stop.textContent = 'Stop import';
+    $('import-title').textContent = 'Importing ' + count(S.total, 'contact', 'contacts');
+    S.lastMark = Math.floor((S.saved / S.total) * 4);
+    setProgress(S.saved);
+    show('import');
+    const base = S.saved;
+    let kind;
+    try {
+      const res = await api.runImport(S.queue.map(plain), (done) => setProgress(base + done), S.controller.signal);
+      const imported = res && Number.isFinite(res.imported) ? res.imported : S.queue.length;
+      S.saved = base + imported;
+      S.serverSkipped += (res && res.skipped) || 0;
+      S.queue = [];
+      kind = 'done';
+    } catch (e) {
+      if (e && Number.isFinite(e.imported)) {
+        S.saved = base + e.imported;
+        S.queue = S.queue.slice(e.imported);
+        kind = e.code === 'ABORTED' ? 'stopped' : 'failed';
+      } else kind = 'unknown';
+    }
+    S.busy = false; S.controller = null;
+    renderResult(kind);
+    show('result');
+  }
+  $('import-btn').addEventListener('click', () => {
+    S.queue = S.good.slice(); S.total = S.queue.length; S.saved = 0; S.serverSkipped = 0;
+    runImport();
+  });
+  $('stop-btn').addEventListener('click', () => {
+    const stop = $('stop-btn');
+    if (!S.controller || stop.getAttribute('aria-disabled') === 'true') return;
+    S.controller.abort();
+    stop.setAttribute('aria-disabled', 'true');
+    stop.textContent = 'Stopping...';
+    say('Stopping the import');
+  });
+
+  function renderResult(kind) {
+    S.outcome = kind;
+    const title = $('result-title'), text = $('result-text'), skipped = $('result-skipped');
+    const primary = $('result-primary'), secondary = $('result-secondary');
+    const left = S.queue.length, bad = S.bad.length;
+    const savedLine = S.saved ? 'The ' + count(S.saved, 'imported contact is', 'imported contacts are') + ' saved in the CRM. ' : '';
+    skipped.hidden = true; secondary.hidden = true;
+    if (kind === 'done') {
+      title.textContent = count(S.saved, 'contact', 'contacts') + ' imported';
+      text.hidden = !S.serverSkipped;
+      text.textContent = S.serverSkipped ? 'The server skipped ' + count(S.serverSkipped, 'more contact', 'more contacts') + '.' : '';
+      if (bad) {
+        skipped.hidden = false;
+        skipped.textContent = count(bad, 'row with problems was', 'rows with problems were') + ' not imported.';
+        secondary.hidden = false;
+        secondary.textContent = 'Edit the ' + count(bad, 'skipped row', 'skipped rows');
+      }
+      primary.textContent = 'Import more contacts';
+      csv.value = ''; saveDraft();
+    } else if (kind === 'unknown') {
+      title.textContent = 'The import stopped part way';
+      text.hidden = false;
+      text.textContent = 'The server did not say how many contacts it saved. Look in the CRM to see which ones arrived before importing these again.';
+      primary.textContent = 'Edit these contacts';
+    } else {
+      title.textContent = S.saved
+        ? 'Import stopped after ' + fmt(S.saved) + ' of ' + count(S.total, 'contact', 'contacts')
+        : (kind === 'failed' ? 'The import failed. No contacts were imported' : 'Import stopped. No contacts were imported');
+      text.hidden = false;
+      text.textContent = (kind === 'failed' ? 'The server stopped answering. ' : '') + savedLine
+        + count(left, 'contact is', 'contacts are') + ' still to import.';
+      primary.textContent = S.saved ? 'Import the remaining ' + count(left, 'contact', 'contacts') : 'Import ' + count(left, 'contact', 'contacts');
+      secondary.hidden = false;
+      secondary.textContent = 'Edit the rows not yet imported';
+    }
+  }
+  // Put the rows that are not in the CRM back into the box, in their original order.
+  function editLeftover(rows, note) {
+    rows = rows.slice().sort((a, b) => a.rowNo - b.rowNo);
+    csv.value = rows.length ? toCsv(rows) : '';
+    saveDraft(); fieldError(''); checkFailure(''); hideUndo();
+    $('file-status').className = 'msg';
+    $('file-status').textContent = note;
+    S.rows = []; S.checkedText = null; S.outcome = null;
+    show('input');
+    csv.setSelectionRange(0, 0); csv.scrollTop = 0;
+  }
+  function leaveResult() {
+    if (S.outcome === 'done') editLeftover([], '');
+    else editLeftover(S.queue.concat(S.bad), 'The box now holds the ' + count(S.queue.length + S.bad.length, 'row', 'rows') + ' not yet imported.');
+  }
+  $('result-primary').addEventListener('click', () => {
+    if (S.outcome === 'done') { clearReviewUrl(); editLeftover([], ''); }
+    else if (S.outcome === 'unknown') { clearReviewUrl(); leaveResult(); }
+    else runImport();
+  });
+  $('result-secondary').addEventListener('click', () => {
+    clearReviewUrl();
+    if (S.outcome === 'done') editLeftover(S.bad, 'The box now holds the ' + count(S.bad.length, 'skipped row', 'skipped rows') + '.');
+    else leaveResult();
+  });
+
+  // ---------- browser Back, reload, leaving ----------
+  window.addEventListener('popstate', (ev) => {
+    const onReview = ev.state && ev.state.v === 'review';
+    if (S.view === 'import') { try { history.pushState({ v: 'review' }, '', '#check'); } catch (e) {} return; }
+    if (onReview) {
+      if (S.view === 'input' && S.rows.length && S.checkedText === csv.value) show('review');
+      else if (S.view === 'input') clearReviewUrl();
+      return;
+    }
+    if (S.view === 'review') show('input');
+    else if (S.view === 'result') leaveResult();
+  });
+  window.addEventListener('beforeunload', (ev) => {
+    if (S.view === 'import') { ev.preventDefault(); ev.returnValue = ''; }
+  });
+  if (location.hash === '#check') clearReviewUrl();
+})();
+</script>
+</body>
+</html>

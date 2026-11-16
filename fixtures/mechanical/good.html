@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings - Northwind</title>
+<style>
+  body { font: 16px/1.4 system-ui, sans-serif; margin: 24px; color: #222; background: #fff; }
+  button, .button { font: inherit; padding: 8px 14px; min-height: 32px; border: 1px solid #767676; border-radius: 6px; background: #fff; color: #222; }
+  .primary { background: #3730a3; color: #fff; border-color: #3730a3; }
+  .muted { color: #595959; }
+  .row { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #ddd; }
+  .row { flex-wrap: wrap; }
+  .row .actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+  label { display: block; margin: 12px 0 4px; }
+  input { font: inherit; padding: 6px; min-height: 32px; border: 1px solid #767676; border-radius: 4px; }
+  table { border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 4px 16px 4px 0; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  a { color: #1d4ed8; }
+  .lede { max-width: 60ch; line-height: 1.5; }
+  button { transition: background-color 120ms; }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  :root { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e7e5e0; background: #16181c; }
+    button, .button, input { background: #1e2127; color: #e7e5e0; border-color: #8a909c; }
+    .primary { background: #a5b4fc; color: #16181c; border-color: #a5b4fc; }
+    .muted { color: #a9afba; }
+    .row { border-color: #343842; }
+    a { color: #93c5fd; }
+  }
+</style>
+</head>
+<body>
+<!-- The same screen as bad.html with the planted defects fixed. ux-check should report no failures. -->
+<main>
+<h1>Team settings</h1>
+
+<h2>Members</h2>
+<p class="lede">Owners can invite people, change what each person is allowed to do, and remove anyone who has left. A removed person loses access at once and can be invited again later.</p>
+<div class="tools">
+  <button type="button" onclick="void 0">Sort by name</button>
+  <button type="button" onclick="void 0">Filter members</button>
+  <button type="button" onclick="void 0">Export members as CSV</button>
+  <a href="/billing">Billing</a>
+  <a href="/docs/roles">How roles work</a>
+</div>
+
+<div class="row">
+  <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="24" height="24" alt="">
+  <span>Priya Raman</span>
+  <span class="muted">Owner</span>
+  <span class="actions">
+    <button type="button" onclick="void 0">Edit Priya Raman</button>
+    <button type="button" onclick="void 0">Remove Priya Raman</button>
+  </span>
+</div>
+<div class="row">
+  <span>Tomas Okafor</span>
+  <span class="muted">Member</span>
+  <span class="actions">
+    <a href="/members/tomas">View Tomas Okafor</a>
+    <button type="button" onclick="void 0">Remove Tomas Okafor</button>
+  </span>
+</div>
+
+<h2>Plan</h2>
+<table>
+  <tr><th scope="col">Plan</th><th scope="col">Seats</th></tr>
+  <tr><td>Team</td><td>12</td></tr>
+</table>
+
+<h2>Invite a member</h2>
+<form onsubmit="return false">
+  <label for="email">Email address</label>
+  <input id="email" type="email" name="email" autocomplete="email" required>
+  <label for="fullname">Full name</label>
+  <input id="fullname" type="text" name="fullname" autocomplete="name" required>
+  <label for="note">Note for the invite (optional)</label>
+  <input id="note" type="text" name="note">
+  <p><button class="primary" type="submit">Send invite</button></p>
+</form>
+</main>
+</body>
+</html>

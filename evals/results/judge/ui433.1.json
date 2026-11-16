@@ -1,0 +1,314 @@
+{
+  "verdicts": [
+    {
+      "id": "TASK-001",
+      "verdict": "pass",
+      "evidence": "lines 499-500, 581, 627-632, 688-716: every button (Complete job, Move to another day, Move job, Cancel, Add note, dialog buttons, Clear search 481-482, Try again 295-296, Undo move 661-662) has a listener that does what its label says; day links get real hrefs 408-411"
+    },
+    {
+      "id": "TASK-002",
+      "verdict": "pass",
+      "evidence": "lines 430-431, 523, 461-471, 552-565: all rows, job details and notes come from api.listJobs/getJob; counts at 484-488 are computed from the loaded list; no hardcoded sample values or placeholder text"
+    },
+    {
+      "id": "TASK-004",
+      "verdict": "pass",
+      "evidence": "line 693: the confirm dialog title is set to 'Complete <ref> for <customer>?' and 215 states the consequence; the move form (182-191) sits inline on the job page under the job's date and details"
+    },
+    {
+      "id": "TASK-005",
+      "verdict": "pass",
+      "evidence": "lines 573-576: note draft saved to sessionStorage per job on input; 510 restores it on return and reload; 595-600 leave the textarea untouched on a server error; search text is kept in the URL (496)"
+    },
+    {
+      "id": "TASK-007",
+      "verdict": "pass",
+      "evidence": "line 695: dialog focus is put on 'Keep job open', so Enter does not complete; dialog is not a form; 611 preselects a valid future date for the move, which is undoable or warned (613)"
+    },
+    {
+      "id": "TASK-008",
+      "verdict": "pass",
+      "evidence": "lines 155-161: list and search are on the day screen; 199-206 add note inline on the job screen; move is an inline panel (182); only the irreversible complete takes a dialog"
+    },
+    {
+      "id": "TASK-012",
+      "verdict": "pass",
+      "evidence": "lines 148-207: list, search, job details, notes, add note, move, complete all map to the brief; day links (150-154) support viewing days a job was moved to; phone link is customer detail; no stat cards or extra panels"
+    },
+    {
+      "id": "ACT-007",
+      "verdict": "pass",
+      "evidence": "lines 179-180: job actions have one primary (Complete job), Move is plain; 188-189 and 204 are plain; dialog 218-219 has one primary"
+    },
+    {
+      "id": "ACT-008",
+      "verdict": "fail",
+      "evidence": "line 219: the irreversible 'Complete job and send invoice' button has class primary (filled accent, CSS 47) while the safe 'Keep job open' is plain; the trigger at 179 is also primary and sits beside the routine Move button"
+    },
+    {
+      "id": "ACT-010",
+      "verdict": "pass",
+      "evidence": "lines 301-310: buttons are aria-disabled only while their own request runs, with a busy label; 560 hides the Complete and Move actions on a completed job rather than disabling them; 720 cancel is inert only during the completion request"
+    },
+    {
+      "id": "ACT-011",
+      "verdict": "na",
+      "evidence": "no title attributes, tooltips or hover cards anywhere in the markup or script"
+    },
+    {
+      "id": "COPY-001",
+      "verdict": "pass",
+      "evidence": "all visible strings (145-219, 439-440, 479-488, 533-537, 585-599, 636-659, 711-752) concern jobs, notes, dates and signal; nothing mentions implementation, mock data or the brief"
+    },
+    {
+      "id": "COPY-002",
+      "verdict": "pass",
+      "evidence": "line 613: the only hint ('Once moved, the job cannot be moved back to today.') shows in the move form only when it is true; 215 consequence text sits in the confirm dialog at the decision"
+    },
+    {
+      "id": "COPY-003",
+      "verdict": "pass",
+      "evidence": "lines 149-206: headings and labels only ('Find a job by customer, address or reference', 'New date', 'Add a note'); no sentence narrates the page or tells the user how to operate controls"
+    },
+    {
+      "id": "COPY-004",
+      "verdict": "pass",
+      "evidence": "lines 398, 488, 554: heading, count line and meta line each carry different facts; 613 hint does not restate the 'New date' label; dialog description 215 adds the consequence, not the title"
+    },
+    {
+      "id": "COPY-006",
+      "verdict": "pass",
+      "evidence": "no greetings, slogans, superlatives or exclamation marks in any string; headings are 'Jobs today, <date>' (397) and the customer name (552)"
+    },
+    {
+      "id": "COPY-007",
+      "verdict": "pass",
+      "evidence": "lines 179-219, 481, 661, 753-754: labels are 'Complete job', 'Move to another day', 'Move job', 'Add note', 'Keep job open', 'Complete job and send invoice', 'Clear search', 'Undo move', 'Try again', 'Cancel'; no OK, Submit, Yes or Done"
+    },
+    {
+      "id": "COPY-009",
+      "verdict": "pass",
+      "evidence": "lines 354-356: status enum mapped to 'To do' and 'Complete'; 333-339 dates shown as today, tomorrow or 'Tue 17 Nov'; job_ ids appear only in the URL hash, the visible reference is the HH- ref; error codes are never shown"
+    },
+    {
+      "id": "COPY-011",
+      "verdict": "pass",
+      "evidence": "lines 439-440, 535-537, 598-599, 636-638, 652-656, 746-752: each message names what did not happen and the next step ('Check your signal and try again', 'Choose a date after today'); raw ECONNRESET text is never rendered"
+    },
+    {
+      "id": "COPY-012",
+      "verdict": "pass",
+      "evidence": "messages use 'Could not load', 'was not added', 'was not moved', prefixed 'Problem:' (69, 128); no 'failed', 'invalid', 'oops', exclamation marks or capitals"
+    },
+    {
+      "id": "STATE-001",
+      "verdict": "pass",
+      "evidence": "line 479: 'No jobs booked for today.' with the Tomorrow and Yesterday links directly above (150-154), engineers cannot create jobs; 485 no-match line has Clear search; 566 'No notes yet.' sits above the Add a note form"
+    },
+    {
+      "id": "STATE-002",
+      "verdict": "pass",
+      "evidence": "lines 479 (nothing booked), 481-485 (no match, with Clear search) and 438-441 (alert 'Could not load the jobs' with Try again and an empty status) are three distinct messages with distinct actions"
+    },
+    {
+      "id": "STATE-003",
+      "verdict": "pass",
+      "evidence": "lines 434-441 and 528-538: failed loads show an alert in place with Try again and keep any cached list; 595-600 and 651-656 keep the note text and move form with an inline message; 738-752 complete failure is verified and reported in the dialog"
+    },
+    {
+      "id": "STATE-004",
+      "verdict": "pass",
+      "evidence": "lines 453, 490, 520-521: 'Loading jobs', 'Updating', 'Loading notes', 'Loading job' spinners appear at once; 587, 640, 724, 728 busy button labels; worst case is 3 read retries (315-321), about 4.5s, under ten seconds"
+    },
+    {
+      "id": "STATE-005",
+      "verdict": "pass",
+      "evidence": "lines 451-455: with no cached entry the status shows only 'Loading jobs' and no count or empty text; 563-568 'No notes yet.' is written only once job.notes exists, otherwise 'Loading notes' (520)"
+    },
+    {
+      "id": "STATE-007",
+      "verdict": "pass",
+      "evidence": "line 27 overflow-wrap anywhere on body; 89 and 102 grid columns use minmax(0, fr) so long names and addresses wrap; list has no fixed height; nowrap only on short ref and status (98-99); empty notes handled at 566"
+    },
+    {
+      "id": "STATE-010",
+      "verdict": "pass",
+      "evidence": "lines 573-576 and 510: an unsent note is stored per job in sessionStorage on every keystroke and restored when the job is reopened or the page reloads; cleared only after a successful add (592)"
+    },
+    {
+      "id": "FORM-004",
+      "verdict": "fail",
+      "evidence": "lines 183-186: the date field is labelled only 'New date'; the after-today rule is enforced by min (610) and stated only as the error 'Choose a date after today.' (637); the hint at 613 is conditional and does not state the rule"
+    },
+    {
+      "id": "FORM-005",
+      "verdict": "na",
+      "evidence": "each form has a single field (search 156-157, move date 183-184, note 200-201); no form mixes required and optional fields"
+    },
+    {
+      "id": "FORM-006",
+      "verdict": "pass",
+      "evidence": "lines 576 and 499: input listeners only save the draft or filter; validation runs only in submit handlers (585, 636-638) and the error is cleared on the next valid submit (586, 639)"
+    },
+    {
+      "id": "FORM-007",
+      "verdict": "pass",
+      "evidence": "lines 185 and 202: error paragraphs sit directly under their field; 128 prefixes 'Problem: ' text and 83 adds the border colour, so the mark is not colour alone"
+    },
+    {
+      "id": "FORM-008",
+      "verdict": "pass",
+      "evidence": "lines 585, 595-600, 636-638, 651-656: rejected submits return without touching field values; the textarea is cleared only on success (592)"
+    },
+    {
+      "id": "FORM-009",
+      "verdict": "pass",
+      "evidence": "lines 585, 597, 636-638, 652: focus moves to the invalid field; 579 and 625 set aria-invalid; 184 and 201 tie the fields to their error text with aria-describedby; errors are role=alert"
+    },
+    {
+      "id": "FORM-013",
+      "verdict": "pass",
+      "evidence": "lines 188, 204: submit buttons are never disabled before use; 585 and 636 show what is missing on an incomplete submit; aria-disabled is set only during the request (587, 640)"
+    },
+    {
+      "id": "FORM-014",
+      "verdict": "pass",
+      "evidence": "lines 583, 634, 717: noteBusy, moveBusy and completeBusy guards return early on a second press; setBusy (301-306) shows a spinner and 'Adding note', 'Moving job', 'Completing job'"
+    },
+    {
+      "id": "FB-001",
+      "verdict": "pass",
+      "evidence": "line 46 button:active state; setBusy runs synchronously before the await (587, 640, 724); route (383-392) swaps views at once with a loading line; search filters on each input event (499)"
+    },
+    {
+      "id": "FB-002",
+      "verdict": "pass",
+      "evidence": "lines 592 new note rendered in the list; 644 and 659 meta line updates plus 'Moved from ... to ...'; 711-713 'Job complete. The invoice has been emailed'; every failure branch writes a message (595-600, 651-656, 731-756)"
+    },
+    {
+      "id": "FB-003",
+      "verdict": "pass",
+      "evidence": "line 713 reports the emailed invoice, which is not otherwise visible; 659-675 the moved message carries the from date and the Undo control; 'Note added.' (593) goes only to the screen-reader region"
+    },
+    {
+      "id": "FB-004",
+      "verdict": "pass",
+      "evidence": "no setTimeout dismissal anywhere except the 50ms announce at 312; alerts and field errors stay in place until the next attempt or action (427, 519, 586, 616); the Undo message persists (676)"
+    },
+    {
+      "id": "FB-006",
+      "verdict": "pass",
+      "evidence": "lines 640-644: the move runs with no confirmation; 660-675 offers 'Undo move' whenever the server can restore the old date; 613 warns beforehand when the job cannot go back to today"
+    },
+    {
+      "id": "FB-007",
+      "verdict": "pass",
+      "evidence": "lines 693, 215, 218-219, 695: dialog names the ref and customer, says the invoice is emailed at once and 'This cannot be reversed', buttons are 'Keep job open' and 'Complete job and send invoice', focus starts on Keep"
+    },
+    {
+      "id": "FB-008",
+      "verdict": "pass",
+      "evidence": "the only confirmation is the complete-job dialog (213-221, 688-696), guarding the one irreversible action that emails an invoice; move, add note and cancel have none"
+    },
+    {
+      "id": "FB-009",
+      "verdict": "na",
+      "evidence": "no optimistic updates: note, move and complete all await the server before changing the view (589-592, 642-644, 725)"
+    },
+    {
+      "id": "NAV-008",
+      "verdict": "pass",
+      "evidence": "lines 213-221, 688-694: the one modal holds a single decision with two buttons and opens only from the Complete job button"
+    },
+    {
+      "id": "NAV-011",
+      "verdict": "pass",
+      "evidence": "lines 694-695 showModal on a native dialog with focus set inside; Escape closes via native cancel (698 blocks it only mid-request); 699-702 returns focus to Complete job, or to the result message at 714; Keep job open is a visible close"
+    },
+    {
+      "id": "DATA-001",
+      "verdict": "pass",
+      "evidence": "lines 148-161: day view is heading, compact day links, search, then the job list as the largest block; 164-206: job view leads with customer, details and actions, notes below"
+    },
+    {
+      "id": "DATA-002",
+      "verdict": "pass",
+      "evidence": "line 145 is a one-line brand bar; the view opens on the 'Jobs today' heading (149) and the list, with no hero or greeting panel"
+    },
+    {
+      "id": "DATA-003",
+      "verdict": "pass",
+      "evidence": "line 488: the only summary is 'N jobs: X to do, Y complete.', which tells the engineer how much of the day's work is left; no cards or charts"
+    },
+    {
+      "id": "DATA-010",
+      "verdict": "pass",
+      "evidence": "lines 481-485: with a search active the status reads 'N of M jobs match \"q\".' beside a 'Clear search' button; the query also stays visible in the search box"
+    },
+    {
+      "id": "ACC-001",
+      "verdict": "pass",
+      "evidence": "all controls are native a, button, input, textarea and dialog elements (150-219, 462); busy buttons use aria-disabled so they stay focusable (305); no click-only div controls"
+    },
+    {
+      "id": "ACC-008",
+      "verdict": "pass",
+      "evidence": "lines 354-356: status is the text 'To do' or a check mark plus 'Complete' as well as colour; errors carry the 'Problem: ' text prefix (69, 128) as well as red"
+    },
+    {
+      "id": "ACC-013",
+      "verdict": "pass",
+      "evidence": "lines 159-160, 167-168, 185, 192-193, 196-197, 202, 211, 216: role=status and role=alert regions exist in the initial markup and are filled later; 312 announces 'Note added.' through #sr-status"
+    },
+    {
+      "id": "ACC-014",
+      "verdict": "pass",
+      "evidence": "line 180: move-toggle has aria-expanded and aria-controls; 615 and 621 set it to true and false as the panel opens and closes"
+    },
+    {
+      "id": "RESP-005",
+      "verdict": "pass",
+      "evidence": "lines 88-91: rows are a three-column grid that stacks work and address below the name at phone width; 121-122 and 130 buttons wrap; 137 dialog width is min(28rem, 100vw - 32px); 30 16px gutters"
+    },
+    {
+      "id": "NAV-002",
+      "verdict": "na",
+      "evidence": "no persistent section navigation: line 145 is a plain brand bar and the product is one list with a detail view; the day links (150-154) are relative day steps, with the current day in the heading"
+    },
+    {
+      "id": "NAV-005",
+      "verdict": "pass",
+      "evidence": "lines 371-382: day, search text and open job are in the hash (#/day/<date>?q=, #/job/<id>); 496 replaceState on each search change; 765 route(true) restores the view from the URL on load"
+    },
+    {
+      "id": "NAV-006",
+      "verdict": "pass",
+      "evidence": "lines 764 and 383-392: hashchange drives routing; 385 saves scroll per day and 418-420 restore the scroll and focus the opened row on return; search text returns from the URL (403); an open dialog is closed, not reopened (764)"
+    },
+    {
+      "id": "NAV-007",
+      "verdict": "pass",
+      "evidence": "line 165: the job view always shows the back link, including not-found and load-failure states (533-537), since it sits outside #job-body; the day view always has day links (150-154) and Try again on failure (441)"
+    },
+    {
+      "id": "NAV-010",
+      "verdict": "pass",
+      "evidence": "line 213: a native dialog element with aria-labelledby=cd-title and aria-describedby, opened with showModal (694)"
+    },
+    {
+      "id": "NAV-012",
+      "verdict": "na",
+      "evidence": "no stepped flow; move and add note are single inline forms and complete is one confirmation"
+    },
+    {
+      "id": "RESP-004",
+      "verdict": "pass",
+      "evidence": "lines 41 buttons min-height 48px; 51 small buttons 44px; 75 day links 44px; 81 inputs 48px; 90 rows min-height 48px with 12px padding; 112 and 120 back and phone links 44px"
+    },
+    {
+      "id": "RESP-006",
+      "verdict": "na",
+      "evidence": "no position fixed or sticky anywhere in the CSS (8-142); the header bar and all controls scroll with the page"
+    }
+  ]
+}

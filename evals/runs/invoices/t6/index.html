@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Northwind</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #1a1d21;
+    --muted: #55606c;
+    --line: #d9dde2;
+    --control: #76808b;
+    --bg: #ffffff;
+    --band: #f4f5f7;
+    --focus: #1d4ed8;
+    --danger: #b42318;
+    --danger-bg: #fdf1ef;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 56px; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 1240px; margin: 0 auto; padding: 20px 24px 48px; }
+  h1 { font-size: 22px; line-height: 1.2; margin: 0; }
+  h2 { font-size: 18px; line-height: 1.3; margin: 0 0 8px; }
+  p { margin: 0; }
+
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+
+  .btn {
+    font: inherit; font-size: 14px; line-height: 1.2;
+    min-height: 32px; padding: 5px 12px;
+    color: var(--text); background: #fff;
+    border: 1px solid var(--control); border-radius: 6px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: var(--band); }
+  .btn:active { background: #e7e9ed; }
+  .btn.danger { color: var(--danger); border-color: var(--danger); }
+  .btn.danger:hover { background: var(--danger-bg); }
+  .btn[aria-disabled="true"] { cursor: progress; color: var(--muted); border-color: var(--control); background: var(--band); }
+
+  .tools { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 28px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 280px; max-width: 400px; }
+  .field label, .group-label { font-size: 13px; font-weight: 600; }
+  .field input {
+    font: inherit; font-size: 16px; height: 36px; padding: 4px 10px; width: 100%;
+    color: var(--text); background: #fff;
+    border: 1px solid var(--control); border-radius: 6px;
+  }
+  .filter { display: flex; flex-direction: column; gap: 4px; }
+  .filter-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .filter-btns .btn { min-height: 36px; }
+  .filter-btns .btn[aria-pressed="true"] { background: #e3e6ea; border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); font-weight: 600; }
+  .count { color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+  .summary-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 34px; margin-bottom: 6px; }
+  #summary { color: var(--muted); font-size: 14px; }
+
+  #state:empty { display: none; }
+  #state { margin: 0 0 10px; }
+  .panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; }
+  .panel.big { padding: 40px 16px; justify-content: center; text-align: center; min-height: 160px; }
+  .panel.problem { border-color: var(--danger); background: var(--danger-bg); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--band); color: var(--text);
+    font-size: 13px; font-weight: 600; text-align: left;
+    padding: 9px 12px; border-bottom: 1px solid var(--control); white-space: nowrap;
+  }
+  tbody th, tbody td { padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; text-align: left; }
+  tbody th { font-weight: 600; white-space: nowrap; }
+  tbody tr:hover { background: #fafbfc; }
+  .c-issued, .c-due { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  thead .c-amt, tbody .c-amt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .c-cust { overflow-wrap: anywhere; min-width: 160px; }
+  .c-act { width: 290px; }
+  .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-height: 32px; }
+  .acts .note { color: var(--muted); }
+  .acts .err { color: var(--danger); flex-basis: 100%; }
+
+  .badge { display: inline-block; font-size: 13px; font-weight: 600; line-height: 1.2; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--control); color: var(--text); background: #fff; white-space: nowrap; }
+  .badge.overdue { color: #fff; background: var(--danger); border-color: var(--danger); }
+  .badge.draft { border-style: dashed; }
+  .badge.paid { color: var(--muted); border-color: var(--line); background: var(--band); }
+  .sub { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .c-status .late { color: var(--danger); margin-left: 2px; font-size: 13px; white-space: nowrap; }
+
+  .pager { display: flex; align-items: center; gap: 12px; margin-top: 14px; min-height: 36px; }
+  .pager p { color: var(--muted); font-size: 14px; }
+
+  dialog { border: 1px solid var(--control); border-radius: 10px; padding: 22px 24px; width: min(440px, calc(100vw - 32px)); color: var(--text); box-shadow: 0 12px 40px rgba(0, 0, 0, .25); }
+  dialog::backdrop { background: rgba(20, 24, 30, .5); }
+  #del-error { color: var(--danger); margin-top: 10px; }
+  #del-error:empty { display: none; }
+  .dialog-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .dialog-acts .btn { min-height: 40px; padding: 8px 16px; }
+
+  @media (max-width: 900px) {
+    main { padding: 16px 16px 40px; }
+    .btn, .filter-btns .btn { min-height: 44px; padding: 8px 14px; }
+    .field input { height: 44px; }
+    .field { max-width: none; flex-basis: 100%; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    table, tbody, tbody th, tbody td { display: block; }
+    tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 0; border-bottom: 1px solid var(--control); }
+    tbody tr:hover { background: none; }
+    tbody th, tbody td { padding: 0; border: 0; }
+    .c-num { grid-column: 1; grid-row: 1; font-size: 15px; }
+    tbody .c-amt { grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 600; }
+    .c-cust { grid-column: 1 / -1; min-width: 0; }
+    .c-status { grid-column: 1 / -1; margin: 2px 0; }
+    .c-issued { grid-column: 1; }
+    .c-due { grid-column: 2; text-align: right; }
+    .c-issued::before, .c-due::before { content: attr(data-label) " "; color: var(--muted); }
+    .c-act { grid-column: 1 / -1; width: auto; margin-top: 6px; }
+    .c-act:empty { display: none; }
+    .acts { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn { transition: background-color .08s; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1 id="title" tabindex="-1">Invoices</h1>
+    <button type="button" class="btn" id="refresh">Refresh</button>
+  </div>
+
+  <div class="tools">
+    <div class="field">
+      <label for="q">Search by customer or invoice number</label>
+      <input type="search" id="q" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="filter" role="group" aria-labelledby="status-label">
+      <span class="group-label" id="status-label">Status</span>
+      <div class="filter-btns" id="filters">
+        <button type="button" class="btn" data-status="all" aria-pressed="true">All<span class="count"></span></button>
+        <button type="button" class="btn" data-status="overdue" aria-pressed="false">Overdue<span class="count"></span></button>
+        <button type="button" class="btn" data-status="sent" aria-pressed="false">Sent<span class="count"></span></button>
+        <button type="button" class="btn" data-status="draft" aria-pressed="false">Draft<span class="count"></span></button>
+        <button type="button" class="btn" data-status="paid" aria-pressed="false">Paid<span class="count"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-row">
+    <p id="summary" role="status" tabindex="-1"></p>
+    <button type="button" class="btn" id="clear" hidden>Clear search and filter</button>
+  </div>
+
+  <div id="state" role="status" tabindex="-1"></div>
+
+  <table id="table" role="table" aria-label="Invoices" hidden>
+    <thead role="rowgroup">
+      <tr role="row">
+        <th role="columnheader" scope="col">Invoice</th>
+        <th role="columnheader" scope="col">Customer</th>
+        <th role="columnheader" scope="col">Issued</th>
+        <th role="columnheader" scope="col">Due</th>
+        <th role="columnheader" scope="col" class="c-amt">Amount</th>
+        <th role="columnheader" scope="col">Status</th>
+        <th role="columnheader" scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody role="rowgroup" id="rows"></tbody>
+  </table>
+
+  <div class="pager" id="pager" hidden>
+    <button type="button" class="btn" id="prev">Previous page</button>
+    <p id="pageinfo"></p>
+    <button type="button" class="btn" id="next">Next page</button>
+  </div>
+
+  <div class="sr-only" id="announcer" role="status" aria-live="polite"></div>
+</main>
+
+<dialog id="del" aria-labelledby="del-title" aria-describedby="del-desc">
+  <h2 id="del-title">Delete draft?</h2>
+  <p id="del-desc"></p>
+  <p id="del-error" role="alert"></p>
+  <div class="dialog-acts">
+    <button type="button" class="btn" id="del-keep" autofocus>Keep draft</button>
+    <button type="button" class="btn danger" id="del-go">Delete draft</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const customers = ['Acme Ltd', 'Brightside Bakery', 'Castellan Freight and Logistics International', 'Dovetail Joinery', 'Eastfield Primary School', 'Fennel & Rye', 'Greyfriars Dental', 'Harbour Lights Hotel', 'Ivy Lane Books', 'Juniper Health'];
+  const statuses = ['draft', 'sent', 'sent', 'paid', 'paid', 'paid', 'overdue', 'overdue'];
+  let invoices = q.get('empty') === '1' ? [] : Array.from({ length: 46 }, (_, i) => ({
+    id: 'inv_' + (9000 + i), number: 'NW-' + (2041 + i), customer: customers[i % customers.length],
+    issued: new Date(2026, 8, 1 + i).toISOString(), due: new Date(2026, 9, 1 + i).toISOString(),
+    amount: Math.round((120 + ((i * 7919) % 48000)) * 100) / 100 + (i % 9 === 0 ? 1250000 : 0), currency: 'GBP',
+    status: statuses[i % statuses.length], reminderSentAt: null,
+  }));
+  return {
+    async listInvoices() { await wait(); maybeFail('list invoices'); return invoices.map((x) => ({ ...x })); },
+    async markPaid(id) { await wait(); maybeFail('mark paid'); const x = invoices.find((v) => v.id === id); x.status = 'paid'; return { ...x }; },
+    async sendReminder(id) { await wait(); maybeFail('send reminder'); const x = invoices.find((v) => v.id === id); x.reminderSentAt = new Date().toISOString(); return { ...x }; },
+    async deleteInvoice(id) { await wait(); maybeFail('delete invoice'); invoices = invoices.filter((v) => v.id !== id); return { ok: true }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const PAGE_SIZE = 25;
+  const HOLD_MS = 6000;
+  const STATUSES = ['all', 'overdue', 'sent', 'draft', 'paid'];
+  const STATUS_NAME = { draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' };
+  const NO_ANSWER = 'The server did not respond.';
+
+  const $ = (id) => document.getElementById(id);
+  const els = {
+    q: $('q'), filters: $('filters'), summary: $('summary'), clear: $('clear'), state: $('state'),
+    table: $('table'), rows: $('rows'), pager: $('pager'), prev: $('prev'), next: $('next'),
+    pageinfo: $('pageinfo'), refresh: $('refresh'), announcer: $('announcer'),
+    del: $('del'), delTitle: $('del-title'), delDesc: $('del-desc'), delError: $('del-error'),
+    delKeep: $('del-keep'), delGo: $('del-go'),
+  };
+
+  const params = new URLSearchParams(location.search);
+  const st = {
+    invoices: null,          // null until the first successful load
+    loading: false,
+    loadError: false,
+    q: params.get('q') || '',
+    status: STATUSES.includes(params.get('status')) ? params.get('status') : 'all',
+    page: Math.max(1, parseInt(params.get('page'), 10) || 1),
+    ops: new Map(),          // invoice id -> { type, phase: 'held' | 'sending' | 'failed', timer, startedAt }
+    keep: new Set(),         // rows that stay in the current view after they change status
+    deleting: null,          // { id, busy }
+  };
+  let loadSeq = 0;
+
+  /* ---------- helpers ---------- */
+
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const k in attrs || {}) {
+      if (attrs[k] === null || attrs[k] === undefined || attrs[k] === false) continue;
+      if (k === 'class') el.className = attrs[k]; else el.setAttribute(k, attrs[k]);
+    }
+    for (const kid of kids) if (kid !== null && kid !== undefined && kid !== false) el.append(kid);
+    return el;
+  }
+
+  const money = (amount, currency) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency || 'GBP' }).format(amount);
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const stampFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const day = (iso) => (iso ? dateFmt.format(new Date(iso)) : 'Not set');
+  const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  function daysLate(iso) {
+    const due = new Date(iso); due.setHours(0, 0, 0, 0);
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    return Math.round((now - due) / 86400000);
+  }
+
+  let announceTimer = 0;
+  function announce(msg) {
+    els.announcer.textContent = '';
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(() => { els.announcer.textContent = msg; }, 60);
+  }
+
+  function shownStatus(inv) {
+    const op = st.ops.get(inv.id);
+    return op && op.type === 'paid' && op.phase !== 'failed' ? 'paid' : inv.status;
+  }
+
+  function matches(inv) {
+    const q = st.q.trim().toLowerCase();
+    if (!q) return true;
+    if (inv.customer.toLowerCase().includes(q)) return true;
+    const n = norm(q);
+    return n !== '' && norm(inv.number).includes(n);
+  }
+
+  function visible() {
+    return (st.invoices || []).filter((inv) =>
+      matches(inv) && (st.status === 'all' || shownStatus(inv) === st.status || st.keep.has(inv.id)));
+  }
+
+  function syncUrl() {
+    const p = new URLSearchParams(location.search);
+    const put = (k, v) => { if (v) p.set(k, v); else p.delete(k); };
+    put('q', st.q.trim());
+    put('status', st.status === 'all' ? '' : st.status);
+    put('page', st.page > 1 ? String(st.page) : '');
+    const s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '')); } catch (e) { /* file URLs in some browsers */ }
+  }
+
+  const isFiltered = () => st.q.trim() !== '' || st.status !== 'all';
+
+  /* ---------- rendering ---------- */
+
+  function actionCell(inv) {
+    const op = st.ops.get(inv.id);
+    const key = (a) => inv.id + ':' + a;
+    const btn = (act, label, cls) => h('button', {
+      type: 'button', class: 'btn' + (cls ? ' ' + cls : ''), 'data-act': act, 'data-key': key(act),
+      'aria-label': label + ', ' + inv.number,
+    }, label);
+    const box = h('div', { class: 'acts' });
+
+    if (op && op.phase === 'held') {
+      box.append(h('span', { class: 'note' }, op.type === 'paid' ? 'Marked paid' : 'Sending reminder…'), btn('undo', 'Undo'));
+    } else if (op && op.phase === 'sending') {
+      box.append(h('span', { class: 'note' }, op.type === 'paid' ? 'Saving…' : 'Sending reminder…'));
+    } else if (op && op.phase === 'failed') {
+      box.append(
+        h('span', { class: 'err' }, (op.type === 'paid' ? 'Not marked as paid. ' : 'Reminder not sent. ') + NO_ANSWER),
+        btn('retry', 'Try again'), btn('dismiss', 'Dismiss'));
+    } else if (inv.status === 'overdue') {
+      box.append(btn('paid', 'Mark paid'), btn('reminder', 'Send reminder'));
+    } else if (inv.status === 'sent') {
+      box.append(btn('paid', 'Mark paid'));
+    } else if (inv.status === 'draft') {
+      box.append(btn('delete', 'Delete', 'danger'));
+    } else {
+      return null;
+    }
+    return box;
+  }
+
+  function rowFor(inv) {
+    const status = shownStatus(inv);
+    const statusCell = h('td', { role: 'cell', class: 'c-status' }, h('span', { class: 'badge ' + status }, STATUS_NAME[status] || status));
+    if (status === 'overdue') {
+      const d = daysLate(inv.due);
+      if (d > 0) statusCell.append(' ', h('span', { class: 'late' }, 'by ' + d + (d === 1 ? ' day' : ' days')));
+      if (inv.reminderSentAt) statusCell.append(h('span', { class: 'sub' }, 'Reminder sent ' + stampFmt.format(new Date(inv.reminderSentAt))));
+    }
+    return h('tr', { role: 'row', 'data-id': inv.id },
+      h('th', { role: 'rowheader', scope: 'row', class: 'c-num', tabindex: '-1' }, inv.number),
+      h('td', { role: 'cell', class: 'c-cust' }, inv.customer),
+      h('td', { role: 'cell', class: 'c-issued', 'data-label': 'Issued' }, day(inv.issued)),
+      h('td', { role: 'cell', class: 'c-due', 'data-label': 'Due' }, day(inv.due)),
+      h('td', { role: 'cell', class: 'c-amt' }, money(inv.amount, inv.currency)),
+      statusCell,
+      h('td', { role: 'cell', class: 'c-act' }, actionCell(inv)));
+  }
+
+  function renderState(list) {
+    const kids = [];
+    let cls = 'panel';
+    if (st.invoices === null) {
+      cls += ' big';
+      if (st.loadError) {
+        cls += ' problem';
+        kids.push(h('p', null, 'Invoices could not be loaded. ' + NO_ANSWER), h('button', { type: 'button', class: 'btn', 'data-act': 'reload' }, 'Try again'));
+      } else {
+        kids.push(h('p', null, 'Loading invoices…'));
+      }
+    } else if (st.loadError) {
+      cls += ' problem';
+      kids.push(h('p', null, 'The list could not be refreshed, so it may be out of date. ' + NO_ANSWER), h('button', { type: 'button', class: 'btn', 'data-act': 'reload' }, 'Try again'));
+    } else if (st.invoices.length === 0) {
+      cls += ' big';
+      kids.push(h('p', null, 'There are no invoices yet. New invoices appear here once they are created.'));
+    } else if (list.length === 0) {
+      cls += ' big';
+      const q = st.q.trim();
+      const what = st.status === 'all' ? 'No invoices' : 'No ' + st.status + ' invoices';
+      kids.push(h('p', null, what + (q ? ' match "' + q + '".' : '.')), h('button', { type: 'button', class: 'btn', 'data-act': 'clear' }, 'Clear search and filter'));
+    }
+    const sig = cls + '|' + kids.map((k) => k.textContent).join('|');
+    if (els.state.dataset.sig === sig) return;
+    const hadFocus = els.state.contains(document.activeElement);
+    els.state.dataset.sig = sig;
+    els.state.replaceChildren(kids.length ? h('div', { class: cls }, ...kids) : '');
+    if (hadFocus) (els.state.querySelector('button') || (kids.length ? els.state : els.summary)).focus();
+  }
+
+  function render(focusKey) {
+    const active = document.activeElement;
+    let key = focusKey || null;
+    let rowId = null;
+    if (!key && els.rows.contains(active)) {
+      key = active.dataset.key || null;
+      const tr = active.closest('tr');
+      rowId = tr ? tr.dataset.id : null;
+    } else if (key) {
+      rowId = key.split(':')[0];
+    }
+
+    const list = visible();
+    const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (st.page > pages) st.page = pages;
+    const from = (st.page - 1) * PAGE_SIZE;
+    const slice = list.slice(from, from + PAGE_SIZE);
+
+    // filter buttons and counts
+    const counts = { all: 0, overdue: 0, sent: 0, draft: 0, paid: 0 };
+    for (const inv of st.invoices || []) { counts.all++; const s = shownStatus(inv); if (s in counts) counts[s]++; }
+    for (const b of els.filters.querySelectorAll('button')) {
+      b.setAttribute('aria-pressed', String(b.dataset.status === st.status));
+      b.querySelector('.count').textContent = st.invoices === null ? '' : String(counts[b.dataset.status]);
+    }
+
+    // summary
+    let summary = '';
+    if (st.invoices !== null && list.length > 0) {
+      const kind = st.status === 'all' ? '' : st.status + ' ';
+      const q = st.q.trim();
+      const noun = list.length === 1 ? 'invoice' : 'invoices';
+      summary = pages > 1
+        ? 'Showing ' + (from + 1) + ' to ' + (from + slice.length) + ' of ' + list.length + ' ' + kind + noun
+        : list.length + ' ' + kind + noun;
+      if (q) summary += ' matching "' + q + '"';
+    }
+    if (els.summary.textContent !== summary) els.summary.textContent = summary;
+    els.clear.hidden = !(isFiltered() && list.length > 0);
+
+    renderState(list);
+
+    // rows
+    els.table.hidden = slice.length === 0;
+    els.rows.replaceChildren(...slice.map(rowFor));
+
+    // pager
+    els.pager.hidden = pages <= 1;
+    els.prev.hidden = st.page <= 1;
+    els.next.hidden = st.page >= pages;
+    els.pageinfo.textContent = 'Page ' + st.page + ' of ' + pages;
+
+    els.refresh.textContent = st.loading && st.invoices !== null ? 'Refreshing…' : 'Refresh';
+    els.refresh.setAttribute('aria-disabled', String(st.loading));
+
+    // put focus back where it was
+    if (key || rowId) {
+      let target = key ? els.rows.querySelector('[data-key="' + key + '"]') : null;
+      if (!target && rowId) {
+        const tr = els.rows.querySelector('tr[data-id="' + rowId + '"]');
+        if (tr) target = tr.querySelector('button') || tr.querySelector('th');
+      }
+      if (!target) target = els.rows.querySelector('button') || (els.summary.textContent ? els.summary : els.q);
+      target.focus();
+    }
+    syncUrl();
+  }
+
+  /* ---------- loading ---------- */
+
+  async function load() {
+    if (st.loading) return;
+    const seq = ++loadSeq;
+    st.loading = true;
+    st.loadError = false;
+    render();
+    try {
+      const data = await api.listInvoices();
+      if (seq !== loadSeq) return;
+      const first = st.invoices === null;
+      st.invoices = data;
+      st.loading = false;
+      render();
+      if (!first) announce('Invoices refreshed.');
+    } catch (e) {
+      if (seq !== loadSeq) return;
+      st.loading = false;
+      st.loadError = true;
+      render();
+    }
+  }
+
+  /* ---------- mark paid and send reminder: held for a few seconds so they can be undone ---------- */
+
+  const find = (id) => (st.invoices || []).find((v) => v.id === id);
+
+  function startOp(id, type) {
+    const inv = find(id);
+    if (!inv || (st.ops.has(id) && st.ops.get(id).phase !== 'failed')) return;
+    st.ops.set(id, { type, phase: 'held', startedAt: Date.now(), timer: setTimeout(() => commit(id), HOLD_MS) });
+    st.keep.add(id);
+    announce(type === 'paid'
+      ? inv.number + ' marked paid. Undo is available for a few seconds.'
+      : 'Sending reminder for ' + inv.number + '. Undo is available for a few seconds.');
+    render(id + ':undo');
+  }
+
+  function undoOp(id) {
+    const op = st.ops.get(id);
+    if (!op || op.phase !== 'held' || Date.now() - op.startedAt < 400) return;
+    clearTimeout(op.timer);
+    st.ops.delete(id);
+    const inv = find(id);
+    announce(op.type === 'paid' ? 'Undone. ' + inv.number + ' is not marked paid.' : 'Undone. No reminder was sent for ' + inv.number + '.');
+    render(id + ':' + op.type);
+  }
+
+  async function commit(id) {
+    const op = st.ops.get(id);
+    if (!op || op.phase === 'sending') return;
+    clearTimeout(op.timer);
+    op.phase = 'sending';
+    render();
+    const number = (find(id) || {}).number || 'The invoice';
+    try {
+      const updated = op.type === 'paid' ? await api.markPaid(id) : await api.sendReminder(id);
+      const i = (st.invoices || []).findIndex((v) => v.id === id);
+      if (i >= 0) st.invoices[i] = updated;
+      st.ops.delete(id);
+      announce(op.type === 'paid' ? number + ' saved as paid.' : 'Reminder sent for ' + number + '.');
+    } catch (e) {
+      op.phase = 'failed';
+      announce((op.type === 'paid' ? number + ' was not marked as paid. ' : 'The reminder for ' + number + ' was not sent. ') + NO_ANSWER);
+    }
+    render();
+  }
+
+  // Anything still inside its undo window is sent when the page is left.
+  window.addEventListener('pagehide', () => {
+    for (const [id, op] of st.ops) {
+      if (op.phase !== 'held') continue;
+      clearTimeout(op.timer);
+      (op.type === 'paid' ? api.markPaid(id) : api.sendReminder(id)).catch(() => {});
+    }
+  });
+
+  /* ---------- delete a draft: permanent, so it asks first ---------- */
+
+  function setDeleteBusy(busy) {
+    st.deleting.busy = busy;
+    els.delGo.textContent = busy ? 'Deleting…' : 'Delete draft';
+    els.delGo.setAttribute('aria-disabled', String(busy));
+    els.delKeep.setAttribute('aria-disabled', String(busy));
+  }
+
+  function openDelete(id) {
+    const inv = find(id);
+    if (!inv) return;
+    st.deleting = { id, busy: false };
+    els.delTitle.textContent = 'Delete draft ' + inv.number + '?';
+    els.delDesc.textContent = 'Draft invoice for ' + inv.customer + ', ' + money(inv.amount, inv.currency) + '. Deleting it is permanent and cannot be undone.';
+    els.delError.textContent = '';
+    setDeleteBusy(false);
+    els.del.showModal();
+    els.delKeep.focus();
+  }
+
+  function closeDelete(focusKey) {
+    st.deleting = null;
+    if (els.del.open) els.del.close();
+    render(focusKey);
+  }
+
+  async function confirmDelete() {
+    const d = st.deleting;
+    if (!d || d.busy) return;
+    const inv = find(d.id);
+    els.delError.textContent = '';
+    setDeleteBusy(true);
+    try {
+      await api.deleteInvoice(d.id);
+    } catch (e) {
+      setDeleteBusy(false);
+      els.delError.textContent = (inv ? inv.number : 'The draft') + ' was not deleted and is still in the list. ' + NO_ANSWER;
+      els.delGo.textContent = 'Try deleting again';
+      els.delGo.focus();
+      return;
+    }
+    const trs = [...els.rows.querySelectorAll('tr')];
+    const at = trs.findIndex((tr) => tr.dataset.id === d.id);
+    const neighbour = at >= 0 ? (trs[at + 1] || trs[at - 1]) : null;
+    st.invoices = st.invoices.filter((v) => v.id !== d.id);
+    st.keep.delete(d.id);
+    announce('Draft ' + (inv ? inv.number : '') + ' deleted.');
+    closeDelete(neighbour ? neighbour.dataset.id + ':row' : 'none:row');
+  }
+
+  els.delGo.addEventListener('click', confirmDelete);
+  els.delKeep.addEventListener('click', () => {
+    if (st.deleting && st.deleting.busy) return;
+    closeDelete(st.deleting ? st.deleting.id + ':delete' : null);
+  });
+  els.del.addEventListener('cancel', (e) => {       // Escape
+    e.preventDefault();
+    if (st.deleting && st.deleting.busy) return;
+    closeDelete(st.deleting ? st.deleting.id + ':delete' : null);
+  });
+
+  /* ---------- events ---------- */
+
+  els.rows.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const id = b.closest('tr').dataset.id;
+    const act = b.dataset.act;
+    if (act === 'paid' || act === 'reminder') startOp(id, act);
+    else if (act === 'undo') undoOp(id);
+    else if (act === 'retry') commit(id);
+    else if (act === 'dismiss') { const t = st.ops.get(id).type; st.ops.delete(id); render(id + ':' + t); }
+    else if (act === 'delete') openDelete(id);
+  });
+
+  function setView(change) {
+    change();
+    st.page = 1;
+    st.keep.clear();
+    render();
+  }
+
+  els.q.value = st.q;
+  els.q.addEventListener('input', () => setView(() => { st.q = els.q.value; }));
+
+  els.filters.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-status]');
+    if (b) setView(() => { st.status = b.dataset.status; });
+  });
+
+  function clearView() {
+    els.q.value = '';
+    setView(() => { st.q = ''; st.status = 'all'; });
+    els.q.focus();
+  }
+  els.clear.addEventListener('click', clearView);
+
+  els.state.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'reload') { els.state.focus(); load(); }
+    else if (b.dataset.act === 'clear') clearView();
+  });
+
+  els.refresh.addEventListener('click', load);
+
+  function turnPage(by) {
+    st.page += by;
+    render();
+    const same = by < 0 ? els.prev : els.next;
+    (same.hidden ? (by < 0 ? els.next : els.prev) : same).focus();
+    els.summary.scrollIntoView({ block: 'start' });
+  }
+  els.prev.addEventListener('click', () => turnPage(-1));
+  els.next.addEventListener('click', () => turnPage(1));
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Northwind</title>
+<style>
+  :root {
+    --text: #1a1f24;
+    --muted: #56606b;
+    --line: #d5d9df;
+    --ctl: #76808c;
+    --bg: #ffffff;
+    --soft: #f3f5f7;
+    --accent: #1d4ed8;
+    --danger: #b42318;
+    --danger-bg: #fdecea;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 1120px; margin: 0 auto; padding: 16px 24px 48px; }
+  [hidden] { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; min-height: 36px; }
+  h1 { font-size: 22px; line-height: 1.2; margin: 0; }
+  .fresh { display: flex; align-items: center; gap: 12px; color: var(--muted); min-height: 32px; }
+
+  .btn {
+    font: inherit; color: var(--text); background: #fff; border: 1px solid var(--ctl); border-radius: 6px;
+    min-height: 32px; padding: 0 12px; cursor: pointer; white-space: nowrap; scroll-margin-top: 56px;
+  }
+  .btn:hover { background: var(--soft); }
+  .btn:active { background: #e3e7ec; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #1a43bd; }
+  .btn.danger { color: var(--danger); border-color: var(--danger); }
+  .btn.danger:hover { background: var(--danger-bg); }
+  .btn[aria-disabled="true"] { color: var(--muted); cursor: default; background: var(--soft); }
+
+  .tools { display: flex; gap: 12px 24px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .field.search { flex: 1 1 300px; max-width: 420px; }
+  .field label, .field .lab { font-weight: 600; font-size: 13px; }
+  input[type="search"] {
+    font: inherit; color: var(--text); background: #fff; border: 1px solid var(--ctl); border-radius: 6px;
+    height: 36px; padding: 0 10px; width: 100%;
+  }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg .btn { min-height: 36px; }
+  .seg .btn .n { color: var(--muted); margin-left: 2px; font-variant-numeric: tabular-nums; }
+  .seg .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .seg .btn[aria-pressed="true"] .n { color: #fff; }
+
+  .summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 40px; margin-top: 8px; color: var(--muted); }
+  .summary .btn { min-height: 28px; }
+  #summary:focus-visible { outline-offset: 4px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    position: sticky; top: 0; z-index: 1; background: var(--soft); text-align: left; font-size: 13px; font-weight: 600;
+    padding: 9px 12px; box-shadow: inset 0 -1px 0 var(--ctl); white-space: nowrap;
+  }
+  tbody th, tbody td { padding: 5px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; text-align: left; height: 43px; }
+  tbody th { font-weight: 600; white-space: nowrap; }
+  .c-amt { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .c-due { white-space: nowrap; }
+  .c-cust { overflow-wrap: anywhere; }
+  .c-act { width: 1%; white-space: nowrap; }
+  .mlabel { display: none; }
+  .badge { display: inline-block; background: var(--danger-bg); color: #912018; font-weight: 600; border-radius: 4px; padding: 1px 7px; }
+  .days { color: #912018; margin-left: 2px; white-space: nowrap; }
+  .sub { color: var(--muted); font-size: 12.5px; }
+  .quiet { color: var(--muted); }
+  .acts { display: flex; gap: 8px; align-items: center; }
+  .acts.wrap { flex-wrap: wrap; }
+  .optext { color: var(--muted); white-space: normal; }
+  .err { color: var(--danger); white-space: normal; flex: 1 1 100%; min-width: 220px; }
+  tr.failed td.c-act { padding-top: 8px; padding-bottom: 8px; }
+  tr.gone td { color: var(--muted); background: var(--soft); }
+  td[tabindex]:focus-visible { outline-offset: -2px; }
+
+  .spin {
+    display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px;
+    border: 2px solid #b8c0ca; border-top-color: var(--accent); border-radius: 50%;
+  }
+  .bar { display: block; height: 12px; border-radius: 3px; background: #e6e9ed; }
+  @media (prefers-reduced-motion: no-preference) {
+    .spin { animation: spin 0.8s linear infinite; }
+    .bar { animation: pulse 1.2s ease-in-out infinite alternate; }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+
+  .panel { border: 1px solid var(--line); border-radius: 8px; padding: 28px 20px; text-align: center; }
+  .panel p { margin: 0 0 12px; font-size: 15px; }
+  .panel .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  #loadError p { color: var(--danger); }
+  .more { display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--muted); }
+
+  dialog { border: 1px solid var(--ctl); border-radius: 10px; padding: 20px; width: min(440px, calc(100vw - 32px)); color: var(--text); }
+  dialog::backdrop { background: rgba(16, 24, 40, 0.5); }
+  dialog h2 { font-size: 17px; margin: 0 0 8px; overflow-wrap: anywhere; }
+  dialog p { margin: 0 0 20px; overflow-wrap: anywhere; }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+  @media (max-width: 760px) {
+    body { font-size: 15px; }
+    main { padding: 12px 16px 40px; }
+    input[type="search"] { font-size: 16px; height: 44px; }
+    .btn, .seg .btn, .summary .btn { min-height: 44px; }
+    .field.search { max-width: none; flex-basis: 100%; }
+    table, tbody { display: block; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    tbody th, tbody td { display: block; padding: 0; border: 0; height: auto; width: auto; }
+    .c-num { grid-area: 1 / 1; }
+    .c-amt { grid-area: 1 / 2; font-weight: 600; }
+    .c-cust { grid-area: 2 / 1 / 3 / 3; }
+    .c-due { grid-area: 3 / 1; color: var(--muted); }
+    .c-status { grid-area: 3 / 2; text-align: right; }
+    .c-act { grid-area: 4 / 1 / 5 / 3; white-space: normal; }
+    .c-act:empty { display: none; }
+    .c-act { width: auto; }
+    .acts { flex-wrap: wrap; margin-top: 8px; }
+    .mlabel { display: inline; }
+    tr.gone { display: block; padding: 0; }
+    tr.gone td { padding: 12px; }
+    tr.skel td:nth-child(n+4) { display: none; }
+    tr.skel td { padding: 4px 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <h1>Invoices</h1>
+    <div class="fresh">
+      <span id="fresh" role="status"></span>
+      <button type="button" class="btn" id="refresh" hidden>Refresh</button>
+    </div>
+  </div>
+
+  <div class="tools">
+    <div class="field search">
+      <label for="q">Search by customer or invoice number</label>
+      <input type="search" id="q" autocomplete="off" spellcheck="false" enterkeyhint="search">
+    </div>
+    <div class="field">
+      <span class="lab" id="statusLab">Status</span>
+      <div class="seg" role="group" aria-labelledby="statusLab" id="filters">
+        <button type="button" class="btn" data-status="all" aria-pressed="true">All <span class="n"></span></button>
+        <button type="button" class="btn" data-status="overdue" aria-pressed="false">Overdue <span class="n"></span></button>
+        <button type="button" class="btn" data-status="sent" aria-pressed="false">Sent <span class="n"></span></button>
+        <button type="button" class="btn" data-status="draft" aria-pressed="false">Draft <span class="n"></span></button>
+        <button type="button" class="btn" data-status="paid" aria-pressed="false">Paid <span class="n"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <span id="summary" role="status" tabindex="-1"></span>
+    <button type="button" class="btn" id="clear" hidden></button>
+  </div>
+
+  <div class="panel" id="loadError" hidden>
+    <p id="loadErrorText" role="alert"></p>
+    <div class="row"><button type="button" class="btn primary" id="retryLoad">Try again</button></div>
+  </div>
+
+  <table id="table" role="table" aria-label="Invoices">
+    <thead role="rowgroup">
+      <tr role="row">
+        <th role="columnheader" scope="col">Invoice</th>
+        <th role="columnheader" scope="col">Customer</th>
+        <th role="columnheader" scope="col" aria-sort="ascending">Due</th>
+        <th role="columnheader" scope="col" class="c-amt">Amount</th>
+        <th role="columnheader" scope="col">Status</th>
+        <th role="columnheader" scope="col"><span class="sr">Actions</span></th>
+      </tr>
+    </thead>
+    <tbody role="rowgroup" id="rows"></tbody>
+  </table>
+
+  <div class="panel" id="empty" hidden>
+    <p id="emptyText" role="status"></p>
+    <div class="row">
+      <button type="button" class="btn" id="emptyClearSearch" hidden>Clear search</button>
+      <button type="button" class="btn" id="emptyShowAll" hidden>Show all statuses</button>
+      <button type="button" class="btn" id="emptyRefresh" hidden>Refresh</button>
+    </div>
+  </div>
+
+  <div class="more" id="more" hidden>
+    <span id="moreText" role="status"></span>
+    <button type="button" class="btn" id="showMore">Show more</button>
+  </div>
+
+  <div class="sr" id="live" role="status" aria-live="polite"></div>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgTitle" aria-describedby="dlgBody">
+  <h2 id="dlgTitle"></h2>
+  <p id="dlgBody"></p>
+  <div class="row">
+    <button type="button" class="btn primary" id="dlgKeep">Keep draft</button>
+    <button type="button" class="btn danger" id="dlgDelete">Delete draft</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const customers = ['Acme Ltd', 'Brightside Bakery', 'Castellan Freight and Logistics International', 'Dovetail Joinery', 'Eastfield Primary School', 'Fennel & Rye', 'Greyfriars Dental', 'Harbour Lights Hotel', 'Ivy Lane Books', 'Juniper Health'];
+  const statuses = ['draft', 'sent', 'sent', 'paid', 'paid', 'paid', 'overdue', 'overdue'];
+  let invoices = q.get('empty') === '1' ? [] : Array.from({ length: 46 }, (_, i) => ({
+    id: 'inv_' + (9000 + i), number: 'NW-' + (2041 + i), customer: customers[i % customers.length],
+    issued: new Date(2026, 8, 1 + i).toISOString(), due: new Date(2026, 9, 1 + i).toISOString(),
+    amount: Math.round((120 + ((i * 7919) % 48000)) * 100) / 100 + (i % 9 === 0 ? 1250000 : 0), currency: 'GBP',
+    status: statuses[i % statuses.length], reminderSentAt: null,
+  }));
+  return {
+    async listInvoices() { await wait(); maybeFail('list invoices'); return invoices.map((x) => ({ ...x })); },
+    async markPaid(id) { await wait(); maybeFail('mark paid'); const x = invoices.find((v) => v.id === id); x.status = 'paid'; return { ...x }; },
+    async sendReminder(id) { await wait(); maybeFail('send reminder'); const x = invoices.find((v) => v.id === id); x.reminderSentAt = new Date().toISOString(); return { ...x }; },
+    async deleteInvoice(id) { await wait(); maybeFail('delete invoice'); invoices = invoices.filter((v) => v.id !== id); return { ok: true }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const HOLD_SECONDS = 5;
+  const PAGE = 50;
+  const STATUSES = ['overdue', 'sent', 'draft', 'paid'];
+  const NO_SERVER = 'The server did not respond.';
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    q: $('q'), filters: $('filters'), summary: $('summary'), clear: $('clear'), rows: $('rows'), table: $('table'),
+    empty: $('empty'), emptyText: $('emptyText'), emptyClearSearch: $('emptyClearSearch'), emptyShowAll: $('emptyShowAll'),
+    emptyRefresh: $('emptyRefresh'), loadError: $('loadError'), loadErrorText: $('loadErrorText'), retryLoad: $('retryLoad'),
+    fresh: $('fresh'), refresh: $('refresh'), more: $('more'), moreText: $('moreText'), showMore: $('showMore'),
+    live: $('live'), dlg: $('dlg'), dlgTitle: $('dlgTitle'), dlgBody: $('dlgBody'), dlgKeep: $('dlgKeep'), dlgDelete: $('dlgDelete'),
+  };
+
+  const params = new URLSearchParams(location.search);
+  const state = {
+    invoices: [], loaded: false, loading: false, loadFailed: false, refreshFailed: false, updatedAt: null,
+    q: params.get('q') || '',
+    status: STATUSES.includes(params.get('status')) ? params.get('status') : 'all',
+    keep: new Set(), limit: PAGE,
+  };
+  const ops = new Map(); // invoice id -> { type, phase: 'hold' | 'sending' | 'failed', secs, timer, started }
+
+  /* ---------- formatting ---------- */
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const dayFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+  const timeFmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const numFmt = new Intl.NumberFormat('en-GB');
+  const fmtDate = (iso) => { const d = new Date(iso); return isNaN(d) ? 'No date' : dateFmt.format(d); };
+  const fmtMoney = (inv) => {
+    if (typeof inv.amount !== 'number' || isNaN(inv.amount)) return 'No amount';
+    try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: inv.currency || 'GBP' }).format(inv.amount); }
+    catch (e) { return numFmt.format(inv.amount) + ' ' + inv.currency; }
+  };
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const daysOverdue = (iso) => { const d = new Date(iso); return isNaN(d) ? 0 : Math.round((startOfDay(new Date()) - startOfDay(d)) / 864e5); };
+  const fmtWhen = (iso) => {
+    const d = new Date(iso);
+    const sameDay = startOfDay(d).getTime() === startOfDay(new Date()).getTime();
+    return (sameDay ? 'today' : dayFmt.format(d)) + ', ' + timeFmt.format(d);
+  };
+  const statusName = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Unknown';
+  const plural = (n, word) => numFmt.format(n) + ' ' + word + (n === 1 ? '' : 's');
+
+  /* ---------- helpers ---------- */
+  function h(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const k in attrs || {}) {
+      if (attrs[k] === null || attrs[k] === undefined || attrs[k] === false) continue;
+      if (k === 'class') n.className = attrs[k]; else n.setAttribute(k, attrs[k]);
+    }
+    for (const kid of kids) if (kid !== null && kid !== undefined && kid !== false) n.append(kid);
+    return n;
+  }
+  let sayTimer;
+  function say(text) {
+    el.live.textContent = '';
+    clearTimeout(sayTimer);
+    sayTimer = setTimeout(() => { el.live.textContent = text; }, 60);
+  }
+  const find = (id) => state.invoices.find((v) => v.id === id);
+  const live = () => state.invoices.filter((v) => !v.deleted);
+  const squash = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  function matches(inv, q) {
+    const text = q.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!text) return true;
+    if (String(inv.customer || '').toLowerCase().includes(text)) return true;
+    const sq = squash(text);
+    return sq !== '' && squash(String(inv.number || '')).includes(sq);
+  }
+  function visible() {
+    return state.invoices.filter((inv) => {
+      if (inv.deleted) return state.keep.has(inv.id);
+      if (state.keep.has(inv.id)) return true;
+      if (!matches(inv, state.q)) return false;
+      return state.status === 'all' || inv.status === state.status;
+    }).sort((a, b) => String(a.due).localeCompare(String(b.due)) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true }));
+  }
+  function syncUrl() {
+    const p = new URLSearchParams(location.search);
+    if (state.q.trim()) p.set('q', state.q.trim()); else p.delete('q');
+    if (state.status !== 'all') p.set('status', state.status); else p.delete('status');
+    const s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) { /* file URLs may refuse */ }
+  }
+
+  /* ---------- rows ---------- */
+  const OP_TEXT = {
+    paid: { hold: 'Marking as paid in ', sending: 'Marking as paid...', failed: 'Could not mark as paid. ' + NO_SERVER },
+    reminder: { hold: 'Sending reminder in ', sending: 'Sending reminder...', failed: 'Reminder not sent. ' + NO_SERVER },
+    delete: { sending: 'Deleting...', failed: 'Could not delete. ' + NO_SERVER },
+  };
+  const btn = (act, key, label, name, cls) =>
+    h('button', { type: 'button', class: 'btn' + (cls ? ' ' + cls : ''), 'data-act': act, 'data-fk': key, 'aria-label': name }, label);
+
+  function actionCell(inv) {
+    const td = h('td', { role: 'cell', class: 'c-act' });
+    const op = ops.get(inv.id);
+    const who = inv.number + ', ' + inv.customer;
+    let box;
+    if (!op) {
+      const list = [];
+      if (inv.status === 'sent' || inv.status === 'overdue') list.push(btn('paid', 'paid', 'Mark paid', 'Mark paid: ' + who));
+      if (inv.status === 'overdue') list.push(btn('reminder', 'reminder', 'Send reminder', 'Send reminder: ' + who));
+      if (inv.status === 'draft') list.push(btn('delete', 'delete', 'Delete', 'Delete draft ' + who, 'danger'));
+      if (!list.length) return td;
+      box = h('div', { class: 'acts' }, ...list);
+    } else if (op.phase === 'hold') {
+      op.secsEl = h('span', {}, op.secs + 's');
+      box = h('div', { class: 'acts' }, h('span', { class: 'optext' }, OP_TEXT[op.type].hold, op.secsEl),
+        btn('undo', 'undo', 'Undo', 'Undo: ' + (op.type === 'paid' ? 'do not mark ' + inv.number + ' as paid' : 'do not send reminder for ' + inv.number)));
+    } else if (op.phase === 'sending') {
+      box = h('div', { class: 'acts' }, h('span', { class: 'optext' }, h('span', { class: 'spin', 'aria-hidden': 'true' }), OP_TEXT[op.type].sending));
+    } else {
+      box = h('div', { class: 'acts wrap' }, h('span', { class: 'err' }, OP_TEXT[op.type].failed),
+        btn('retry', 'retry', 'Try again', 'Try again: ' + who), btn('dismiss', 'dismiss', 'Dismiss', 'Dismiss error for ' + inv.number));
+    }
+    td.append(box);
+    return td;
+  }
+
+  function buildRow(inv) {
+    if (inv.deleted) {
+      return h('tr', { role: 'row', class: 'gone', 'data-id': inv.id },
+        h('td', { role: 'cell', colspan: '6', tabindex: '-1', 'data-fk': 'status' }, 'Draft ' + inv.number + ' for ' + inv.customer + ' deleted'));
+    }
+    const op = ops.get(inv.id);
+    const status = h('td', { role: 'cell', class: 'c-status', tabindex: '-1', 'data-fk': 'status' });
+    if (inv.status === 'overdue') {
+      const days = daysOverdue(inv.due);
+      status.append(h('span', { class: 'badge' }, 'Overdue'));
+      if (days >= 1) status.append(' ', h('span', { class: 'days' }, plural(days, 'day')));
+    } else {
+      status.append(h('span', { class: inv.status === 'paid' ? 'quiet' : null }, statusName(inv.status)));
+    }
+    if (inv.reminderSentAt && inv.status !== 'paid') status.append(h('div', { class: 'sub' }, 'Reminder sent ' + fmtWhen(inv.reminderSentAt)));
+    return h('tr', { role: 'row', 'data-id': inv.id, class: op && op.phase === 'failed' ? 'failed' : null },
+      h('th', { role: 'rowheader', scope: 'row', class: 'c-num' }, inv.number || 'No number'),
+      h('td', { role: 'cell', class: 'c-cust' }, inv.customer || 'No customer'),
+      h('td', { role: 'cell', class: 'c-due' }, h('span', { class: 'mlabel' }, 'Due '), fmtDate(inv.due)),
+      h('td', { role: 'cell', class: 'c-amt' }, fmtMoney(inv)),
+      status,
+      actionCell(inv));
+  }
+
+  function rowEl(id) { return el.rows.querySelector('tr[data-id="' + CSS.escape(id) + '"]'); }
+
+  function renderRow(id, focusKey) {
+    const old = rowEl(id);
+    const inv = find(id);
+    if (!old || !inv) return;
+    const had = old.contains(document.activeElement);
+    const prevKey = had ? document.activeElement.getAttribute('data-fk') : null;
+    const tr = buildRow(inv);
+    old.replaceWith(tr);
+    if (had) {
+      const pick = (k) => k && tr.querySelector('[data-fk="' + k + '"]');
+      (pick(focusKey) || pick(prevKey) || pick('status')).focus();
+    }
+  }
+
+  /* ---------- whole view ---------- */
+  function render() {
+    const active = document.activeElement;
+    const activeRow = active && active.closest ? active.closest('#rows tr') : null;
+    const refocus = activeRow ? { id: activeRow.dataset.id, key: active.getAttribute('data-fk') } : null;
+
+    const all = live();
+    const firstLoad = state.loading && !state.loaded;
+    const rows = state.loaded ? visible() : [];
+    const shownCount = rows.filter((v) => !v.deleted).length;
+
+    // Filter buttons and their counts.
+    for (const b of el.filters.querySelectorAll('button')) {
+      const s = b.dataset.status;
+      b.setAttribute('aria-pressed', String(s === state.status));
+      b.querySelector('.n').textContent = !state.loaded ? '' : numFmt.format(s === 'all' ? all.length : all.filter((v) => v.status === s).length);
+    }
+
+    // Freshness and refresh.
+    el.refresh.hidden = !state.loaded || all.length === 0;
+    if (state.loaded) {
+      const busy = state.loading;
+      el.refresh.textContent = busy ? 'Refreshing...' : 'Refresh';
+      el.refresh.setAttribute('aria-disabled', String(busy));
+      const at = timeFmt.format(state.updatedAt);
+      el.fresh.textContent = state.refreshFailed && !busy ? 'Could not refresh. Showing invoices from ' + at + '.' : 'Updated ' + at;
+      el.fresh.style.color = state.refreshFailed && !busy ? 'var(--danger)' : '';
+    } else {
+      el.fresh.textContent = '';
+    }
+
+    // Load failure in place of the table.
+    const failed = state.loadFailed && !state.loaded && !state.loading;
+    el.loadError.hidden = !failed;
+    el.loadErrorText.textContent = failed ? 'Could not load invoices. ' + NO_SERVER : '';
+
+    // Summary line.
+    const q = state.q.trim();
+    const filtered = q !== '' || state.status !== 'all';
+    let summary = '';
+    if (firstLoad) summary = 'Loading invoices...';
+    else if (state.loaded && all.length && (shownCount || rows.length)) {
+      if (!filtered) summary = plural(all.length, 'invoice');
+      else {
+        const parts = [];
+        if (state.status !== 'all') parts.push(state.status);
+        if (q) parts.push('matching "' + q + '"');
+        summary = numFmt.format(shownCount) + ' of ' + plural(all.length, 'invoice') + ': ' + parts.join(', ');
+      }
+    }
+    if (el.summary.textContent !== summary) el.summary.textContent = summary;
+    const showClear = state.loaded && filtered && rows.length > 0;
+    el.clear.hidden = !showClear;
+    if (showClear) el.clear.textContent = q && state.status !== 'all' ? 'Clear search and filter' : q ? 'Clear search' : 'Clear filter';
+
+    // Table body.
+    el.table.hidden = failed || (state.loaded && rows.length === 0);
+    el.table.setAttribute('aria-busy', String(firstLoad));
+    if (firstLoad) {
+      const widths = [60, 150, 80, 70, 60, 110];
+      el.rows.replaceChildren(...Array.from({ length: 10 }, () =>
+        h('tr', { role: 'row', class: 'skel', 'aria-hidden': 'true' }, ...widths.map((w) => h('td', { role: 'cell' }, h('span', { class: 'bar', style: 'width:' + w + 'px' }))))));
+    } else {
+      el.rows.replaceChildren(...rows.slice(0, state.limit).map(buildRow));
+    }
+
+    // More.
+    const hasMore = state.loaded && rows.length > state.limit;
+    el.more.hidden = !hasMore;
+    if (hasMore) {
+      el.moreText.textContent = 'Showing ' + numFmt.format(state.limit) + ' of ' + numFmt.format(rows.length);
+      el.showMore.textContent = 'Show ' + Math.min(PAGE, rows.length - state.limit) + ' more';
+    } else el.moreText.textContent = '';
+
+    // Empty states.
+    const isEmpty = state.loaded && rows.length === 0;
+    el.empty.hidden = !isEmpty;
+    let emptyText = '';
+    el.emptyClearSearch.hidden = el.emptyShowAll.hidden = el.emptyRefresh.hidden = true;
+    if (isEmpty) {
+      if (!all.length) {
+        emptyText = 'No invoices yet.';
+        el.emptyRefresh.hidden = false;
+        el.emptyRefresh.textContent = state.loading ? 'Refreshing...' : 'Refresh';
+        el.emptyRefresh.setAttribute('aria-disabled', String(state.loading));
+      } else if (q) {
+        emptyText = 'No ' + (state.status === 'all' ? '' : state.status + ' ') + 'invoices match "' + q + '".';
+        el.emptyClearSearch.hidden = false;
+        if (state.status !== 'all') {
+          const elsewhere = all.filter((v) => matches(v, q)).length;
+          if (elsewhere) {
+            emptyText += ' ' + plural(elsewhere, 'invoice') + ' with another status ' + (elsewhere === 1 ? 'matches.' : 'match.');
+            el.emptyShowAll.hidden = false;
+          }
+        }
+      } else {
+        emptyText = 'No ' + state.status + ' invoices.';
+        el.emptyShowAll.hidden = false;
+      }
+    }
+    if (el.emptyText.textContent !== emptyText) el.emptyText.textContent = emptyText;
+
+    if (refocus) {
+      const tr = rowEl(refocus.id);
+      const target = tr && ((refocus.key && tr.querySelector('[data-fk="' + refocus.key + '"]')) || tr.querySelector('[data-fk="status"]'));
+      if (target) target.focus({ preventScroll: true });
+    }
+  }
+
+  /* ---------- loading ---------- */
+  async function load() {
+    if (state.loading) return;
+    state.loading = true;
+    render();
+    try {
+      const list = await api.listInvoices();
+      state.invoices = list;
+      state.keep.clear();
+      for (const [id, op] of ops) if (!list.some((v) => v.id === id)) { clearInterval(op.timer); ops.delete(id); }
+      state.loaded = true; state.loadFailed = false; state.refreshFailed = false; state.updatedAt = new Date();
+      state.loading = false;
+      render();
+      say(plural(live().length, 'invoice') + ' loaded.');
+    } catch (e) {
+      state.loading = false;
+      if (state.loaded) state.refreshFailed = true; else state.loadFailed = true;
+      render();
+      if (!state.loaded && (document.activeElement === el.summary || document.activeElement === document.body)) el.retryLoad.focus();
+    }
+  }
+
+  /* ---------- row actions ---------- */
+  function startHold(id, type) {
+    const inv = find(id);
+    if (!inv || ops.has(id)) return;
+    const op = { type, phase: 'hold', secs: HOLD_SECONDS, started: Date.now() };
+    op.timer = setInterval(() => {
+      op.secs -= 1;
+      if (op.secs <= 0) { clearInterval(op.timer); send(id); }
+      else if (op.secsEl) op.secsEl.textContent = op.secs + 's';
+    }, 1000);
+    ops.set(id, op);
+    renderRow(id, 'undo');
+    say((type === 'paid' ? 'Marking ' + inv.number + ' as paid' : 'Sending reminder for ' + inv.number) + ' in ' + HOLD_SECONDS + ' seconds. Undo is available.');
+  }
+
+  function undo(id) {
+    const op = ops.get(id), inv = find(id);
+    if (!op || op.phase !== 'hold') return;
+    if (Date.now() - op.started < 500) return; // a double click on the original button must not land on Undo
+    clearInterval(op.timer);
+    ops.delete(id);
+    renderRow(id, op.type);
+    say(op.type === 'paid' ? inv.number + ' not marked as paid.' : 'Reminder for ' + inv.number + ' not sent.');
+  }
+
+  async function send(id, type) {
+    let op = ops.get(id);
+    if (!op) { op = { type }; ops.set(id, op); }
+    op.phase = 'sending';
+    renderRow(id);
+    const number = (find(id) || {}).number;
+    try {
+      let updated = null;
+      if (op.type === 'paid') updated = await api.markPaid(id);
+      else if (op.type === 'reminder') updated = await api.sendReminder(id);
+      else await api.deleteInvoice(id);
+      if (ops.get(id) !== op) return;
+      ops.delete(id);
+      const inv = find(id);
+      if (inv) {
+        if (op.type === 'delete') inv.deleted = true; else Object.assign(inv, updated);
+        state.keep.add(id);
+      }
+      render();
+      say(op.type === 'paid' ? number + ' marked as paid.' : op.type === 'reminder' ? 'Reminder sent for ' + number + '.' : 'Draft ' + number + ' deleted.');
+    } catch (e) {
+      if (ops.get(id) !== op) return;
+      op.phase = 'failed';
+      renderRow(id, 'retry');
+      say(OP_TEXT[op.type].failed.replace('. ', ' for ' + number + '. '));
+    }
+  }
+
+  function askDelete(id) {
+    const inv = find(id);
+    if (!inv) return;
+    el.dlgTitle.textContent = 'Permanently delete draft ' + inv.number + '?';
+    el.dlgBody.textContent = inv.customer + ', ' + fmtMoney(inv) + ', due ' + fmtDate(inv.due) + '.';
+    el.dlg.dataset.id = id;
+    el.dlg.showModal();
+    el.dlgKeep.focus();
+  }
+
+  el.rows.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    const id = b.closest('tr').dataset.id;
+    const act = b.dataset.act;
+    if (act === 'paid' || act === 'reminder') startHold(id, act);
+    else if (act === 'undo') undo(id);
+    else if (act === 'delete') askDelete(id);
+    else if (act === 'retry') send(id);
+    else if (act === 'dismiss') { const t = ops.get(id).type; ops.delete(id); renderRow(id, t); }
+  });
+
+  el.dlgKeep.addEventListener('click', () => el.dlg.close());
+  el.dlg.addEventListener('click', (ev) => { if (ev.target === el.dlg) el.dlg.close(); });
+  el.dlgDelete.addEventListener('click', () => {
+    const id = el.dlg.dataset.id;
+    el.dlg.close();
+    const tr = rowEl(id);
+    if (tr && !tr.contains(document.activeElement)) { const s = tr.querySelector('[data-fk="status"]'); if (s) s.focus(); }
+    send(id, 'delete');
+  });
+
+  /* ---------- search and filter ---------- */
+  function viewChanged() {
+    state.keep.clear();
+    state.invoices = state.invoices.filter((v) => !v.deleted);
+    state.limit = PAGE;
+    syncUrl();
+    render();
+  }
+  el.q.value = state.q;
+  el.q.addEventListener('input', () => { state.q = el.q.value; viewChanged(); });
+  el.filters.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-status]');
+    if (!b) return;
+    state.status = b.dataset.status;
+    viewChanged();
+  });
+  function clearSearch() { state.q = ''; el.q.value = ''; }
+  el.clear.addEventListener('click', () => { clearSearch(); state.status = 'all'; viewChanged(); el.q.focus(); });
+  el.emptyClearSearch.addEventListener('click', () => { clearSearch(); viewChanged(); el.q.focus(); });
+  el.emptyShowAll.addEventListener('click', () => { state.status = 'all'; viewChanged(); el.filters.querySelector('[data-status="all"]').focus(); });
+  el.showMore.addEventListener('click', () => {
+    const from = state.limit;
+    state.limit += PAGE;
+    render();
+    const first = el.rows.children[from];
+    const target = first && first.querySelector('[data-fk="status"]');
+    if (target) target.focus();
+  });
+
+  el.refresh.addEventListener('click', load);
+  el.emptyRefresh.addEventListener('click', load);
+  el.retryLoad.addEventListener('click', () => { load(); el.summary.focus(); });
+
+  window.addEventListener('beforeunload', (ev) => {
+    for (const op of ops.values()) if (op.phase === 'hold' || op.phase === 'sending') { ev.preventDefault(); ev.returnValue = ''; return; }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

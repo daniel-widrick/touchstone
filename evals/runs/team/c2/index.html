@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --ink: #1c1b18;
+    --muted: #615e56;
+    --line: #dedbd2;
+    --line-strong: #a9a59a;
+    --accent: #1f5a4c;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3efea;
+    --danger: #a3261d;
+    --danger-soft: #fbeae7;
+    --ok: #1f6a45;
+    --skeleton: #e7e4dc;
+    --shadow: 0 1px 2px rgba(28, 27, 24, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151614;
+      --surface: #1f201d;
+      --ink: #eeece6;
+      --muted: #a8a59b;
+      --line: #35362f;
+      --line-strong: #6b6a60;
+      --accent: #7fcdb4;
+      --accent-ink: #0f1f1a;
+      --accent-soft: #223a33;
+      --danger: #ff9c90;
+      --danger-soft: #3d201c;
+      --ok: #86d3a6;
+      --skeleton: #2b2c27;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 800px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.top { margin-bottom: 24px; }
+  .eyebrow { margin: 0; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  h1 { margin: 2px 0 0; font-size: 28px; line-height: 1.2; letter-spacing: -.01em; }
+  h2 { margin: 0; font-size: 18px; line-height: 1.3; }
+  h2:focus { outline: none; }
+  p { margin: 0; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  .card > .sub { margin-bottom: 16px; }
+
+  label.field, .field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  input[type="text"], input[type="email"], select {
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    min-height: 44px;
+    padding: 8px 12px;
+    width: 100%;
+  }
+  select { padding-right: 8px; cursor: pointer; }
+  input[aria-invalid="true"] { border-color: var(--danger); }
+  input:disabled, select:disabled { opacity: .6; cursor: not-allowed; }
+  input[readonly] { opacity: .7; }
+
+  button {
+    font: inherit;
+    font-weight: 600;
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover:not(:disabled) { border-color: var(--ink); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.primary:hover:not(:disabled) { filter: brightness(1.1); border-color: var(--accent); }
+  button.danger { background: var(--danger); border-color: var(--danger); color: var(--surface); }
+  button.quiet-danger { border-color: transparent; background: transparent; color: var(--danger); padding: 8px 12px; }
+  button.quiet-danger:hover:not(:disabled) { background: var(--danger-soft); border-color: transparent; }
+  button.link { min-height: 0; padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .row-form { display: flex; gap: 12px; align-items: flex-end; }
+  .row-form .grow { flex: 1 1 auto; min-width: 0; }
+  .row-form .role-col { flex: 0 0 140px; }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 0; }
+  .msg:empty { display: none; }
+  .msg.error { color: var(--danger); }
+  .msg.ok { color: var(--ok); }
+  .msg.info { color: var(--muted); }
+  .hint { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  .invite { border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 20px; background: var(--bg); }
+  .invite h3 { margin: 0 0 12px; font-size: 16px; }
+
+  ul.members { list-style: none; margin: 0; padding: 0; }
+  .member {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 150px 124px 92px;
+    grid-template-areas: "av who act role rm" ". err err err err";
+    align-items: center;
+    column-gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+  }
+  .member.fresh { animation: fresh 2.4s ease-out; }
+  @keyframes fresh { from { background: var(--accent-soft); } to { background: transparent; } }
+  .avatar {
+    grid-area: av; width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; font-size: 14px; font-weight: 700;
+  }
+  .who { grid-area: who; min-width: 0; }
+  .who .name { font-weight: 600; overflow-wrap: anywhere; line-height: 1.3; }
+  .who .email { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; line-height: 1.35; }
+  .act { grid-area: act; color: var(--muted); font-size: 14px; }
+  .role { grid-area: role; font-size: 14px; }
+  .role .saving { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 14px; }
+  .rm { grid-area: rm; justify-self: end; }
+  .rowerr { grid-area: err; }
+  .rowerr .msg { margin-top: 6px; }
+  .empty { border-top: 1px solid var(--line); padding: 28px 0 8px; text-align: center; color: var(--muted); }
+  .empty strong { display: block; color: var(--ink); margin-bottom: 4px; }
+
+  ul.notifs { list-style: none; margin: 0; padding: 0; }
+  ul.notifs li { border-top: 1px solid var(--line); padding: 4px 0; }
+  .notif { display: flex; align-items: center; gap: 16px; padding: 10px 0; cursor: pointer; min-height: 44px; }
+  .notif .text { flex: 1 1 auto; min-width: 0; }
+  .notif .title { font-weight: 600; display: block; }
+  .notif .desc { color: var(--muted); font-size: 14px; display: block; }
+  .notif .state { font-size: 13px; color: var(--muted); min-width: 52px; text-align: right; }
+  input.switch {
+    appearance: none; -webkit-appearance: none;
+    flex: 0 0 auto; width: 46px; height: 28px; margin: 0;
+    border-radius: 999px; border: 1px solid var(--line-strong);
+    background: var(--skeleton); position: relative; cursor: pointer;
+    transition: background .15s;
+  }
+  input.switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--surface); border: 1px solid var(--line-strong);
+    transition: transform .15s;
+  }
+  input.switch:checked { background: var(--accent); border-color: var(--accent); }
+  input.switch:checked::after { transform: translateX(18px); border-color: transparent; background: var(--accent-ink); }
+  ul.notifs .msg { margin: 0 0 10px; }
+
+  .loadfail { text-align: center; padding: 40px 24px; }
+  .loadfail h2 { margin-bottom: 6px; }
+  .loadfail p { color: var(--muted); margin-bottom: 16px; }
+  .sk { background: var(--skeleton); border-radius: 6px; height: 16px; margin: 12px 0; animation: pulse 1.2s ease-in-out infinite alternate; }
+  .sk.big { height: 44px; }
+  .sk.w40 { width: 40%; } .sk.w60 { width: 60%; } .sk.w80 { width: 80%; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: .45; } }
+
+  dialog {
+    border: 1px solid var(--line); border-radius: 12px; padding: 24px;
+    background: var(--surface); color: var(--ink);
+    width: min(440px, calc(100vw - 32px));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, .45); }
+  dialog h2 { overflow-wrap: anywhere; margin-bottom: 8px; }
+  dialog p { color: var(--muted); overflow-wrap: anywhere; }
+  dialog .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 12px 16px; border-radius: 10px; font-size: 15px;
+    max-width: calc(100vw - 32px); width: max-content; overflow-wrap: anywhere;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .toast.show { opacity: 1; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 700px) {
+    .page { padding: 20px 16px 96px; }
+    h1 { font-size: 24px; }
+    .card { padding: 18px 16px; }
+    .row-form { flex-direction: column; align-items: stretch; }
+    .row-form .role-col { flex: 0 0 auto; }
+    .member {
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      grid-template-areas: "av who who" ". act act" ". role rm" ". err err";
+      row-gap: 6px;
+      align-items: start;
+      padding: 14px 0;
+    }
+    .role { max-width: 160px; }
+    .role, .rm { align-self: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <p class="eyebrow" id="teamEyebrow">&nbsp;</p>
+    <h1>Team settings</h1>
+  </header>
+
+  <main id="main" aria-busy="true">
+    <div id="loading">
+      <span class="vh" role="status">Loading team settings...</span>
+      <div class="card" aria-hidden="true"><div class="sk w40"></div><div class="sk big"></div></div>
+      <div class="card" aria-hidden="true"><div class="sk w40"></div><div class="sk big"></div><div class="sk w80"></div><div class="sk w60"></div><div class="sk w80"></div><div class="sk w60"></div></div>
+      <div class="card" aria-hidden="true"><div class="sk w40"></div><div class="sk w80"></div><div class="sk w60"></div></div>
+    </div>
+
+    <div id="loadfail" class="card loadfail" hidden>
+      <h2 id="loadfailTitle" tabindex="-1">We couldn't load your team settings</h2>
+      <p>The connection dropped before the page finished loading. Nothing has been changed.</p>
+      <button type="button" class="primary" id="reloadBtn">Try again</button>
+    </div>
+
+    <div id="content" hidden>
+      <section class="card" aria-labelledby="nameH">
+        <div class="card-head"><h2 id="nameH">Team name</h2></div>
+        <p class="sub">Shown to everyone on the team and in the emails we send.</p>
+        <form id="nameForm" novalidate>
+          <div class="row-form">
+            <div class="grow">
+              <label class="field" for="nameInput">Name</label>
+              <input type="text" id="nameInput" autocomplete="off" maxlength="60" aria-describedby="nameMsg">
+            </div>
+            <button type="submit" class="primary" id="nameSave" disabled>Save name</button>
+          </div>
+          <p class="msg" id="nameMsg" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="peopleH">
+        <div class="card-head">
+          <h2 id="peopleH" tabindex="-1">People</h2>
+          <p class="sub" id="seatInfo"></p>
+        </div>
+        <p class="sub">Members work on projects. Admins can also manage the team's people and settings.</p>
+
+        <form id="inviteForm" class="invite" novalidate aria-labelledby="inviteH">
+          <h3 id="inviteH">Invite someone</h3>
+          <div class="row-form">
+            <div class="grow">
+              <label class="field" for="inviteEmail">Email address</label>
+              <input type="email" id="inviteEmail" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email" placeholder="name@company.com" aria-describedby="inviteMsg">
+            </div>
+            <div class="role-col">
+              <label class="field" for="inviteRole">Role</label>
+              <select id="inviteRole">
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" class="primary" id="inviteBtn">Send invite</button>
+          </div>
+          <p class="msg" id="inviteMsg" role="status"></p>
+        </form>
+
+        <ul class="members" id="members" aria-label="People on this team"></ul>
+        <div class="empty" id="membersEmpty" hidden>
+          <strong>No one is on this team yet</strong>
+          Invite the first person with the form above.
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="notifH">
+        <div class="card-head"><h2 id="notifH">Email notifications</h2></div>
+        <p class="sub">Choose which emails the team gets. Changes save as soon as you make them.</p>
+        <ul class="notifs" id="notifs"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<dialog id="removeDlg" aria-labelledby="removeTitle" aria-describedby="removeBody">
+  <h2 id="removeTitle"></h2>
+  <p id="removeBody"></p>
+  <p class="msg error" id="removeMsg" role="alert"></p>
+  <div class="actions">
+    <button type="button" id="removeCancel">Keep on team</button>
+    <button type="button" class="danger" id="removeConfirm">Remove from team</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props, ...kids) => {
+    const node = document.createElement(tag);
+    if (props) for (const [k, v] of Object.entries(props)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+      else if (k in node && k !== 'list' && k !== 'form') node[k] = v;
+      else node.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids) if (kid != null && kid !== false) node.append(kid);
+    return node;
+  };
+
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const ROLE_LABEL = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+  const roleLabel = (r) => ROLE_LABEL[r] || (r.charAt(0).toUpperCase() + r.slice(1));
+  const roleNoun = (r) => (r === 'admin' ? 'an admin' : r === 'owner' ? 'the owner' : 'a member');
+  const NOTIF_META = {
+    weekly_digest: ['Weekly digest', 'A summary of the past week across the team\'s projects.'],
+    new_member: ['New people', 'When someone joins the team.'],
+    billing: ['Billing', 'Receipts, payment problems and changes to the plan.'],
+    mentions: ['Mentions', 'When the team is mentioned in a comment.'],
+  };
+
+  const state = { team: null, rows: new Map(), freshId: null };
+
+  // Plain-language reasons for a failed call. Never shows raw server text.
+  function why(err) {
+    if (err && err.code === 'ECONNRESET') return 'The connection dropped.';
+    return 'Something went wrong on our side.';
+  }
+
+  /* ---------- toast ---------- */
+  let toastTimer;
+  function toast(text) {
+    const t = $('toast');
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 6000);
+  }
+
+  /* ---------- load ---------- */
+  async function load() {
+    $('main').setAttribute('aria-busy', 'true');
+    $('loading').hidden = false;
+    $('loadfail').hidden = true;
+    $('content').hidden = true;
+    try {
+      state.team = await api.getTeam();
+    } catch (err) {
+      $('loading').hidden = true;
+      $('loadfail').hidden = false;
+      $('main').setAttribute('aria-busy', 'false');
+      $('loadfailTitle').focus();
+      return;
+    }
+    $('loading').hidden = true;
+    $('content').hidden = false;
+    $('main').setAttribute('aria-busy', 'false');
+    showTeamName();
+    $('nameInput').value = state.team.name;
+    syncNameForm();
+    renderMembers();
+    renderNotifs();
+  }
+  $('reloadBtn').addEventListener('click', load);
+
+  function showTeamName() {
+    $('teamEyebrow').textContent = state.team.name;
+    document.title = 'Team settings - ' + state.team.name;
+  }
+
+  /* ---------- rename ---------- */
+  const nameInput = $('nameInput'), nameSave = $('nameSave'), nameMsg = $('nameMsg');
+  let nameSaving = false;
+  function setMsg(node, kind, text, field) {
+    node.className = 'msg' + (kind ? ' ' + kind : '');
+    node.textContent = text || '';
+    if (field) {
+      if (kind === 'error') field.setAttribute('aria-invalid', 'true');
+      else field.removeAttribute('aria-invalid');
+    }
+  }
+  function syncNameForm() {
+    const changed = nameInput.value.trim() !== state.team.name;
+    nameSave.disabled = nameSaving || !changed;
+    nameSave.textContent = nameSaving ? 'Saving...' : 'Save name';
+    nameInput.readOnly = nameSaving;
+  }
+  nameInput.addEventListener('input', () => { setMsg(nameMsg, '', '', nameInput); syncNameForm(); });
+  $('nameForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (nameSaving) return;
+    const name = nameInput.value.trim();
+    if (!name) {
+      setMsg(nameMsg, 'error', 'Enter a name for the team.', nameInput);
+      nameInput.focus();
+      return;
+    }
+    if (name === state.team.name) { nameInput.value = name; syncNameForm(); return; }
+    nameSaving = true;
+    setMsg(nameMsg, '', '', nameInput);
+    syncNameForm();
+    try {
+      const res = await api.renameTeam(name);
+      state.team.name = res.name;
+      nameInput.value = res.name;
+      showTeamName();
+      setMsg(nameMsg, 'ok', 'Saved. The team is now called ' + res.name + '.', nameInput);
+    } catch (err) {
+      if (err.code === 'VALIDATION') setMsg(nameMsg, 'error', 'Enter a name for the team.', nameInput);
+      else setMsg(nameMsg, 'error', 'The name was not saved. ' + why(err) + ' Your text is still here, so you can save again.', nameInput);
+    } finally {
+      nameSaving = false;
+      syncNameForm();
+    }
+  });
+
+  /* ---------- people ---------- */
+  function initials(name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    const a = parts[0][0], b = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (a + b).toUpperCase();
+  }
+  function activity(iso) {
+    if (!iso) return { text: 'Hasn\'t signed in yet' };
+    const d = new Date(iso), now = new Date();
+    if (isNaN(d)) return { text: '' };
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const days = Math.round((day(now) - day(d)) / 86400000);
+    const full = new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(d);
+    let text;
+    if (days <= 0) text = 'Active today';
+    else if (days === 1) text = 'Active yesterday';
+    else if (days < 7) text = 'Active ' + days + ' days ago';
+    else {
+      const opts = { month: 'short', day: 'numeric' };
+      if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+      text = 'Last active ' + new Intl.DateTimeFormat(undefined, opts).format(d);
+    }
+    return { text, full, iso };
+  }
+  const rowState = (id) => {
+    if (!state.rows.has(id)) state.rows.set(id, { saving: false, pendingRole: null, error: null });
+    return state.rows.get(id);
+  };
+
+  function memberRow(m) {
+    const rs = rowState(m.id);
+    const a = activity(m.lastActive);
+    const isOwner = m.role === 'owner';
+    const shownRole = rs.saving ? rs.pendingRole : m.role;
+
+    let roleCell;
+    if (isOwner) {
+      roleCell = el('div', { class: 'role' }, el('span', { class: 'badge', text: 'Owner' }));
+    } else {
+      const select = el('select', {
+        'aria-label': 'Role for ' + m.name,
+        'data-fk': 'role-' + m.id,
+        disabled: rs.saving,
+        onchange: (e) => changeRole(m.id, e.target.value),
+      },
+        el('option', { value: 'member', text: 'Member' }),
+        el('option', { value: 'admin', text: 'Admin' }));
+      if (!['member', 'admin'].includes(shownRole)) select.append(el('option', { value: shownRole, text: roleLabel(shownRole) }));
+      select.value = shownRole;
+      roleCell = el('div', { class: 'role' }, select, rs.saving && el('div', { class: 'saving', text: 'Saving...' }));
+    }
+
+    const li = el('li', { class: 'member' + (state.freshId === m.id ? ' fresh' : ''), 'data-id': m.id },
+      el('div', { class: 'avatar', 'aria-hidden': 'true', text: initials(m.name) }),
+      el('div', { class: 'who' },
+        el('div', { class: 'name', text: m.name }),
+        el('div', { class: 'email', text: m.email })),
+      el('div', { class: 'act' }, a.iso ? el('time', { dateTime: a.iso, title: a.full, text: a.text }) : a.text),
+      roleCell,
+      !isOwner && el('div', { class: 'rm' },
+        el('button', {
+          type: 'button', class: 'quiet-danger', text: 'Remove',
+          'aria-label': 'Remove ' + m.name + ' from the team',
+          'data-fk': 'rm-' + m.id,
+          disabled: rs.saving,
+          onclick: () => openRemove(m.id),
+        })),
+      rs.error && el('div', { class: 'rowerr' },
+        el('p', { class: 'msg error', role: 'alert' },
+          rs.error.text + ' ',
+          el('button', { type: 'button', class: 'link', text: 'Try again', 'data-fk': 'retry-' + m.id, onclick: () => changeRole(m.id, rs.error.role) }))));
+    return li;
+  }
+
+  function renderMembers() {
+    const list = $('members');
+    const active = document.activeElement;
+    const fk = active && list.contains(active) ? active.dataset.fk : null;
+    list.replaceChildren(...state.team.members.map(memberRow));
+    state.freshId = null;
+    if (fk) {
+      const again = list.querySelector('[data-fk="' + fk + '"]');
+      if (again && !again.disabled) again.focus();
+    }
+    const count = state.team.members.length, seats = state.team.seats;
+    $('membersEmpty').hidden = count > 0;
+    list.hidden = count === 0;
+    $('seatInfo').textContent = count + ' of ' + seats + ' seats used';
+    syncInviteForm();
+  }
+
+  async function changeRole(id, role) {
+    const m = state.team.members.find((x) => x.id === id);
+    const rs = rowState(id);
+    if (!m || rs.saving) return;
+    rs.error = null;
+    if (m.role === role) { renderMembers(); return; }
+    rs.saving = true; rs.pendingRole = role;
+    renderMembers();
+    let ok = false;
+    try {
+      const res = await api.changeRole(id, role);
+      m.role = res.role;
+      ok = true;
+    } catch (err) {
+      rs.error = { role, text: m.name + ' is still ' + roleNoun(m.role) + '. The change to ' + roleLabel(role).toLowerCase() + ' was not saved. ' + why(err) };
+    }
+    rs.saving = false; rs.pendingRole = null;
+    const lostFocus = !document.activeElement || document.activeElement === document.body;
+    renderMembers();
+    if (lostFocus) {
+      const target = $('members').querySelector('[data-fk="' + (ok ? 'role-' : 'retry-') + id + '"]');
+      if (target) target.focus();
+    }
+    if (ok) toast(m.name + ' is now ' + roleNoun(m.role) + '.');
+  }
+
+  /* ---------- invite ---------- */
+  const inviteEmail = $('inviteEmail'), inviteRole = $('inviteRole'), inviteBtn = $('inviteBtn'), inviteMsg = $('inviteMsg');
+  let inviting = false;
+  function seatsFull() { return state.team.members.length >= state.team.seats; }
+  function syncInviteForm() {
+    const full = seatsFull();
+    inviteEmail.disabled = full;
+    inviteRole.disabled = full || inviting;
+    inviteEmail.readOnly = inviting;
+    inviteBtn.disabled = full || inviting;
+    inviteBtn.textContent = inviting ? 'Sending...' : 'Send invite';
+    if (full) setMsg(inviteMsg, 'info', 'All ' + state.team.seats + ' seats are in use. Remove someone to free a seat, then invite again.', inviteEmail);
+    else if (inviteMsg.classList.contains('info')) setMsg(inviteMsg, '', '', inviteEmail);
+  }
+  inviteEmail.addEventListener('input', () => { if (!seatsFull()) setMsg(inviteMsg, '', '', inviteEmail); });
+  $('inviteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (inviting || seatsFull()) return;
+    const email = inviteEmail.value.trim();
+    const role = inviteRole.value;
+    const fail = (text) => { setMsg(inviteMsg, 'error', text, inviteEmail); inviteEmail.focus(); };
+    if (!email) return fail('Enter the email address of the person you want to invite.');
+    if (!EMAIL_RE.test(email)) return fail('That doesn\'t look like a full email address. It should look like name@company.com.');
+    const existing = state.team.members.find((m) => m.email.toLowerCase() === email.toLowerCase());
+    if (existing) return fail(existing.email + ' is already on this team as ' + roleNoun(existing.role) + '.');
+
+    inviting = true;
+    setMsg(inviteMsg, '', '', inviteEmail);
+    syncInviteForm();
+    try {
+      const m = await api.inviteMember(email, role);
+      state.team.members.push(m);
+      state.freshId = m.id;
+      inviteEmail.value = '';
+      inviteRole.value = 'member';
+      inviting = false;
+      renderMembers();
+      if (!seatsFull()) setMsg(inviteMsg, 'ok', 'Invite sent to ' + m.email + '. They were added as ' + roleNoun(m.role) + '.', inviteEmail);
+      toast('Invite sent to ' + m.email + '.');
+      if (!seatsFull()) inviteEmail.focus();
+    } catch (err) {
+      inviting = false;
+      syncInviteForm();
+      if (err.code === 'VALIDATION') fail('That doesn\'t look like a full email address. It should look like name@company.com.');
+      else if (err.code === 'EXISTS') fail(email + ' is already on this team.');
+      else if (err.code === 'SEATS') fail('All ' + state.team.seats + ' seats are in use. Remove someone to free a seat, then invite again.');
+      else fail('The invite was not sent. ' + why(err) + ' The address is still here, so you can send it again.');
+    }
+  });
+
+  /* ---------- remove ---------- */
+  const dlg = $('removeDlg'), removeConfirm = $('removeConfirm'), removeCancel = $('removeCancel'), removeMsg = $('removeMsg');
+  let removing = false, removeId = null;
+  function openRemove(id) {
+    const m = state.team.members.find((x) => x.id === id);
+    if (!m) return;
+    removeId = id;
+    $('removeTitle').textContent = 'Remove ' + m.name + ' from ' + state.team.name + '?';
+    $('removeBody').textContent = m.name + ' (' + m.email + ') will lose access to the team right away. You can invite them again later.';
+    removeMsg.textContent = '';
+    removeConfirm.textContent = 'Remove from team';
+    removeConfirm.disabled = false; removeCancel.disabled = false;
+    dlg.showModal();
+    removeCancel.focus();
+  }
+  function closeRemove() { if (!removing) dlg.close(); }
+  removeCancel.addEventListener('click', closeRemove);
+  dlg.addEventListener('cancel', (e) => { if (removing) e.preventDefault(); });
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) closeRemove(); });
+  removeConfirm.addEventListener('click', async () => {
+    if (removing) return;
+    const id = removeId;
+    const m = state.team.members.find((x) => x.id === id);
+    if (!m) { dlg.close(); return; }
+    removing = true;
+    removeMsg.textContent = '';
+    removeConfirm.textContent = 'Removing...';
+    removeConfirm.disabled = true; removeCancel.disabled = true;
+    try {
+      await api.removeMember(id);
+      removing = false;
+      state.team.members = state.team.members.filter((x) => x.id !== id);
+      state.rows.delete(id);
+      dlg.close();
+      renderMembers();
+      $('peopleH').focus();
+      toast(m.name + ' was removed and no longer has access.');
+    } catch (err) {
+      removing = false;
+      removeMsg.textContent = m.name + ' was not removed and still has access. ' + why(err);
+      removeConfirm.textContent = 'Try again';
+      removeConfirm.disabled = false; removeCancel.disabled = false;
+      removeConfirm.focus();
+    }
+  });
+
+  /* ---------- notifications ---------- */
+  function renderNotifs() {
+    const list = $('notifs');
+    const entries = Object.entries(state.team.notifications || {});
+    list.replaceChildren(...entries.map(([key, on]) => notifRow(key, !!on)));
+  }
+  function notifRow(key, on) {
+    const meta = NOTIF_META[key] || [key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()), ''];
+    const s = { saved: on, want: on, busy: false, okTimer: null };
+    const descId = 'nd-' + key;
+    const box = el('input', { type: 'checkbox', class: 'switch', role: 'switch', checked: on, 'aria-describedby': descId });
+    const stateText = el('span', { class: 'state', 'aria-hidden': 'true' });
+    const msg = el('p', { class: 'msg error', role: 'alert' });
+    const live = el('span', { class: 'vh', role: 'status' });
+
+    async function pump() {
+      if (s.busy || s.want === s.saved) return;
+      const want = s.want;
+      s.busy = true;
+      clearTimeout(s.okTimer);
+      stateText.textContent = 'Saving...';
+      try {
+        await api.setNotification(key, want);
+        s.saved = want;
+        s.busy = false;
+        if (s.want === s.saved) {
+          stateText.textContent = 'Saved';
+          live.textContent = meta[0] + ' emails turned ' + (want ? 'on' : 'off') + '.';
+          s.okTimer = setTimeout(() => { stateText.textContent = ''; }, 2500);
+        }
+        pump();
+      } catch (err) {
+        s.busy = false;
+        s.want = s.saved;
+        box.checked = s.saved;
+        stateText.textContent = '';
+        msg.replaceChildren(
+          meta[0] + ' emails are still ' + (s.saved ? 'on' : 'off') + '. The change was not saved. ' + why(err) + ' ',
+          el('button', { type: 'button', class: 'link', text: 'Try again', onclick: () => { box.checked = want; set(want); box.focus(); } }));
+      }
+    }
+    function set(v) { s.want = v; msg.replaceChildren(); live.textContent = ''; pump(); }
+    box.addEventListener('change', () => set(box.checked));
+
+    return el('li', null,
+      el('label', { class: 'notif' },
+        el('span', { class: 'text' },
+          el('span', { class: 'title', text: meta[0] }),
+          meta[1] && el('span', { class: 'desc', id: descId, text: meta[1] })),
+        stateText, box),
+      msg, live);
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

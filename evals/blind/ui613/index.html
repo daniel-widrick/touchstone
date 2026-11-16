@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs - Harbour Heating</title>
+<style>
+  :root {
+    --ink: #17202a;
+    --muted: #46525e;
+    --line: #c3cbd3;
+    --edge: #6b7783;
+    --page: #f2f4f6;
+    --card: #ffffff;
+    --brand: #0b4f94;
+    --brand-dark: #083c72;
+    --error: #a3231b;
+    --error-bg: #fdf0ee;
+    --done: #1a6238;
+    --focus: #b84a00;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 1rem/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-wrap: anywhere;
+  }
+  [hidden] { display: none !important; }
+  .vh {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  a { color: var(--brand); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  h1:focus-visible, p:focus-visible { outline-offset: 4px; }
+
+  .bar { background: var(--brand-dark); }
+  .bar-in, main { max-width: 44rem; margin: 0 auto; padding: 0 1rem; }
+  .bar a {
+    display: inline-flex; align-items: center; min-height: 3rem;
+    color: #fff; font-weight: 700; text-decoration: none;
+  }
+  .bar a:focus-visible { outline-color: #fff; }
+  main { padding-top: 1rem; padding-bottom: 3rem; }
+
+  h1 { font-size: 1.4rem; line-height: 1.25; margin: 0 0 0.75rem; }
+  h2 { font-size: 1.15rem; margin: 1.75rem 0 0.5rem; }
+  p { margin: 0; }
+
+  /* Buttons */
+  button {
+    font: inherit; font-weight: 600; color: var(--brand-dark);
+    min-height: 3rem; padding: 0.5rem 1rem;
+    background: var(--card); border: 2px solid var(--brand); border-radius: 0.5rem;
+    cursor: pointer; touch-action: manipulation;
+  }
+  button:hover { background: #e8f0f9; }
+  button:active { background: #d5e4f5; }
+  button.primary { background: var(--brand); color: #fff; }
+  button.primary:hover { background: var(--brand-dark); }
+  button[aria-disabled="true"] { cursor: progress; border-style: dashed; }
+
+  /* Messages */
+  .notice { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+  .notice.on {
+    margin: 0.75rem 0; padding: 0.75rem 1rem;
+    background: var(--card); border: 1px solid var(--line); border-left: 0.3rem solid var(--edge);
+    border-radius: 0.25rem;
+  }
+  .notice.on.error { background: var(--error-bg); border-color: var(--error); color: var(--error); }
+  .notice p { flex: 1 1 12rem; }
+  .field-error { color: var(--error); font-weight: 600; }
+  .field-error:not(:empty) { margin-top: 0.4rem; }
+
+  /* Day navigation */
+  .days { display: flex; gap: 0.5rem; margin: 0 0 1rem; }
+  .days a {
+    flex: 1 1 0; display: flex; align-items: center; justify-content: center; text-align: center;
+    min-height: 2.75rem; padding: 0.25rem 0.5rem;
+    background: var(--card); border: 1px solid var(--edge); border-radius: 0.5rem;
+    font-weight: 600; text-decoration: none;
+  }
+  .days a:hover { background: #e8f0f9; }
+  .days a[aria-current="page"] { border: 2px solid var(--ink); color: var(--ink); text-decoration: underline; }
+
+  /* Fields */
+  label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
+  input, textarea {
+    font: inherit; font-size: 1rem; color: var(--ink);
+    width: 100%; min-height: 3rem; padding: 0.6rem 0.75rem;
+    background: var(--card); border: 1px solid var(--edge); border-radius: 0.5rem;
+  }
+  textarea { display: block; resize: vertical; }
+  input[type="date"] { max-width: 14rem; display: block; }
+  [aria-invalid="true"] { border: 2px solid var(--error); }
+
+  .countrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; margin: 0.75rem 0 0.5rem; min-height: 1.5rem; }
+  .countrow p { color: var(--muted); }
+
+  /* Job list */
+  .jobs { list-style: none; margin: 0; padding: 0; }
+  .jobs li { margin: 0 0 0.5rem; }
+  .jobs a, .skel {
+    display: grid; grid-template-columns: 4.75rem 1fr; column-gap: 0.75rem; row-gap: 0.1rem;
+    min-height: 5.5rem; padding: 0.75rem 1rem;
+    background: var(--card); border: 1px solid var(--line); border-radius: 0.5rem;
+    color: var(--ink); text-decoration: none;
+  }
+  .jobs a:hover { border-color: var(--brand); background: #f7fafd; }
+  .jobs .slot { grid-column: 1; grid-row: 1; white-space: nowrap; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .jobs .who { grid-column: 2; grid-row: 1; font-weight: 700; color: var(--brand); text-decoration: underline; }
+  .jobs .what, .jobs .where { grid-column: 2; }
+  .jobs .where { color: var(--muted); font-size: 0.95rem; }
+  .jobs .done { grid-column: 1; grid-row: 2 / span 2; align-self: start; white-space: nowrap; color: var(--done); font-weight: 700; font-size: 0.85rem; }
+  .jobs li.is-done a { background: #f6f8f7; }
+  .skel { background: #e6eaee; border-color: #e6eaee; }
+
+  /* Job detail */
+  .back { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; margin-bottom: 0.25rem; }
+  dl { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.25rem 1rem; }
+  dl div { padding: 0.6rem 0; border-top: 1px solid #e2e6ea; }
+  dl div:first-child { border-top: 0; }
+  dt { font-size: 0.9rem; color: var(--muted); }
+  dd { margin: 0; font-weight: 600; }
+  dd a { display: inline-block; padding: 0.35rem 0; }
+  .status-done { color: var(--done); }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0 0; }
+  .actions button { flex: 1 1 12rem; }
+  .panel { margin-top: 0.75rem; padding: 1rem; background: var(--card); border: 1px solid var(--line); border-radius: 0.5rem; }
+  .panel output { display: block; margin-top: 0.4rem; font-weight: 600; }
+  .panel .hint { margin-top: 0.4rem; color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+
+  .notes { list-style: none; margin: 0 0 1rem; padding: 0; }
+  .notes li { padding: 0.6rem 0; border-top: 1px solid var(--line); }
+  .notes li:first-child { border-top: 0; padding-top: 0; }
+  .notes time { display: block; font-size: 0.9rem; color: var(--muted); }
+  .notes p { white-space: pre-wrap; }
+  .empty { color: var(--muted); margin-bottom: 1rem; }
+
+  dialog {
+    width: calc(100% - 2rem); max-width: 28rem; max-height: calc(100% - 2rem); overflow: auto;
+    padding: 1.25rem; border: 1px solid var(--edge); border-radius: 0.75rem; color: var(--ink); background: var(--card);
+  }
+  dialog::backdrop { background: rgba(10, 20, 30, 0.6); }
+  dialog h2 { margin: 0 0 0.5rem; }
+  dialog .row button { flex: 1 1 100%; }
+
+  @media (min-width: 40rem) {
+    h1 { font-size: 1.6rem; }
+    dl div { display: grid; grid-template-columns: 10rem 1fr; gap: 1rem; align-items: baseline; }
+    dialog .row button { flex: 1 1 auto; }
+    .actions button { flex: 0 1 auto; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in"><a id="home-link" href="#/">Harbour Heating jobs</a></div>
+</header>
+
+<main id="main">
+  <section id="list-view" hidden>
+    <h1 id="list-title" tabindex="-1">Jobs</h1>
+    <nav class="days" aria-label="Choose a day">
+      <a id="prev-day" href="#/">Previous day</a>
+      <a id="today-link" href="#/">Today</a>
+      <a id="next-day" href="#/">Next day</a>
+    </nav>
+    <form id="find-form" role="search" hidden>
+      <label for="find">Find a job</label>
+      <input type="search" id="find" autocomplete="off" enterkeyhint="search" spellcheck="false">
+    </form>
+    <div class="notice" id="list-box">
+      <p id="list-msg" role="status"></p>
+      <button type="button" id="list-retry" hidden>Try again</button>
+      <a id="empty-link" href="#/" hidden>See today's jobs</a>
+    </div>
+    <div class="countrow">
+      <p id="list-count" role="status"></p>
+      <button type="button" id="clear-find" hidden>Clear search</button>
+    </div>
+    <ul class="jobs" id="jobs"></ul>
+  </section>
+
+  <section id="job-view" hidden>
+    <a class="back" id="back-link" href="#/">Back to today's jobs</a>
+    <h1 id="job-title" tabindex="-1">Job</h1>
+    <div class="notice" id="job-box">
+      <p id="job-msg" role="status"></p>
+      <button type="button" id="job-retry" hidden>Try again</button>
+    </div>
+    <div id="job-body" hidden>
+      <dl>
+        <div><dt>When</dt><dd id="d-when"></dd></div>
+        <div><dt>Status</dt><dd id="d-status"></dd></div>
+        <div><dt>What needs doing</dt><dd id="d-work"></dd></div>
+        <div><dt>Address</dt><dd id="d-address"></dd></div>
+        <div><dt>Phone</dt><dd id="d-phone"></dd></div>
+        <div><dt>Job number</dt><dd id="d-ref"></dd></div>
+      </dl>
+
+      <div class="actions" id="actions">
+        <button type="button" class="primary" id="complete-btn">Mark complete</button>
+        <button type="button" id="move-toggle" aria-expanded="false" aria-controls="move-form">Move to another day</button>
+      </div>
+      <form class="panel" id="move-form" novalidate hidden>
+        <label for="move-date">New date</label>
+        <input type="date" id="move-date" aria-describedby="move-day move-hint move-error">
+        <output id="move-day" for="move-date"></output>
+        <p class="hint" id="move-hint" hidden>Once moved, this job cannot be moved back to today.</p>
+        <p class="field-error" id="move-error" role="alert"></p>
+        <div class="row">
+          <button type="submit" id="move-submit">Move job</button>
+          <button type="button" id="move-cancel">Cancel</button>
+        </div>
+      </form>
+      <div class="notice" id="action-box">
+        <p id="action-msg" role="status" tabindex="-1"></p>
+        <button type="button" id="undo-move" hidden>Undo move</button>
+      </div>
+
+      <h2 id="notes-title">Notes</h2>
+      <div class="notice" id="notes-box">
+        <p id="notes-msg" role="status"></p>
+        <button type="button" id="notes-retry" hidden>Try again</button>
+      </div>
+      <p class="empty" id="notes-empty" hidden>No notes yet.</p>
+      <ol class="notes" id="notes" aria-labelledby="notes-title"></ol>
+      <form id="note-form" novalidate>
+        <label for="note-text">Add a note</label>
+        <textarea id="note-text" rows="3" aria-describedby="note-error"></textarea>
+        <p class="field-error" id="note-error" role="alert"></p>
+        <div class="row">
+          <button type="submit" id="note-submit">Save note</button>
+        </div>
+        <p class="vh" id="note-saved" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<dialog id="complete-dialog" aria-labelledby="cd-title" aria-describedby="cd-text">
+  <h2 id="cd-title">Mark this job complete?</h2>
+  <p id="cd-text"></p>
+  <p class="field-error" id="cd-error" role="alert"></p>
+  <div class="row">
+    <button type="button" id="cd-keep">Keep as booked</button>
+    <button type="button" class="primary" id="cd-confirm">Complete and send invoice</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const people = ['Mrs A. Okonkwo', 'Mr D. Castellanos-Whitby', 'Greyfriars Dental Practice', 'Ms R. Lindqvist', 'Mr T. Babatunde', 'The Harbour Lights Hotel (kitchen)', 'Dr S. Mehta', 'Mr and Mrs Pemberton', 'Ivy Lane Books', 'Miss K. Dvorak'];
+  const work = ['Annual boiler service', 'No hot water, boiler showing fault F28', 'Radiator leaking in upstairs bedroom', 'Replace thermostat and rebalance system', 'Gas safety certificate for landlord', 'Noisy pump, intermittent'];
+  let jobs = q.get('empty') === '1' ? [] : Array.from({ length: 14 }, (_, i) => ({
+    id: 'job_' + (700 + i), ref: 'HH-' + (5120 + i), customer: people[i % people.length],
+    address: (12 + i * 7) + ' ' + ['Quay Street', 'Lighthouse Road', 'Breakwater Terrace', 'Tidepool Lane'][i % 4] + ', Harbourton, HB' + (1 + (i % 6)) + ' ' + (2 + (i % 7)) + 'QT',
+    phone: '01632 9601' + String(10 + i), date: day(i < 9 ? 0 : 1), slot: ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30', '17:00'][i % 7],
+    work: work[i % work.length], status: i < 2 ? 'complete' : 'booked',
+    notes: i % 3 === 0 ? [{ at: new Date(Date.now() - 86400000).toISOString(), text: 'Customer asked us to use the side gate. Dog in the garden.' }] : [],
+  }));
+  const find = (id) => { const j = jobs.find((x) => x.id === id); if (!j) { const e = new Error('NOT_FOUND: job'); e.code = 'NOT_FOUND'; throw e; } return j; };
+  const copy = (j) => JSON.parse(JSON.stringify(j));
+  return {
+    // date: 'YYYY-MM-DD'. Resolves to the jobs on that day, without their notes.
+    async listJobs(date) { await wait(); maybeFail('list jobs'); return jobs.filter((j) => j.date === date).map((j) => { const c = copy(j); delete c.notes; return c; }); },
+    async getJob(id) { await wait(); maybeFail('load job'); return copy(find(id)); },
+    async addNote(id, text) {
+      await wait(); maybeFail('add note');
+      if (!text || !text.trim()) { const e = new Error('VALIDATION: note_empty'); e.code = 'VALIDATION'; throw e; }
+      const j = find(id); j.notes.push({ at: new Date().toISOString(), text: text.trim() }); return copy(j);
+    },
+    async moveJob(id, date) {
+      await wait(); maybeFail('move job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      if (date <= day(0)) { const e = new Error('VALIDATION: date_not_future'); e.code = 'PAST'; throw e; }
+      j.date = date; return copy(j);
+    },
+    async completeJob(id) {
+      await wait(); maybeFail('complete job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      j.status = 'complete'; return copy(j);
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const PRODUCT = 'Harbour Heating';
+  const SIGNAL = ' Check your signal and try again.';
+
+  // ---------- dates ----------
+  // The office system counts days in UTC, so "today" is worked out the same way here.
+  const todayStr = () => new Date().toISOString().slice(0, 10);
+  const asDate = (s) => new Date(s + 'T00:00:00Z');
+  const validDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '') && !isNaN(asDate(s));
+  const addDays = (s, n) => { const d = asDate(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const fmtDay = (s) => {
+    const opts = { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' };
+    if (s.slice(0, 4) !== todayStr().slice(0, 4)) opts.year = 'numeric';
+    return new Intl.DateTimeFormat('en-GB', opts).format(asDate(s));
+  };
+  const dayPhrase = (s) => (s === todayStr() ? 'today' : s === addDays(todayStr(), 1) ? 'tomorrow, ' + fmtDay(s) : 'on ' + fmtDay(s));
+  const fmtClock = (d) => new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(d);
+  const fmtNoteTime = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    const key = (x) => x.getFullYear() + '-' + x.getMonth() + '-' + x.getDate();
+    const now = new Date();
+    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+    const dayPart = key(d) === key(now) ? 'Today'
+      : key(d) === key(yest) ? 'Yesterday'
+      : new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' }).format(d);
+    return dayPart + ', ' + fmtClock(d);
+  };
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+
+  // ---------- state ----------
+  const lists = new Map();     // date -> { jobs, at }
+  const jobsById = new Map();  // id -> job, notes present once loaded
+  const scrolls = new Map();   // route key -> scrollY
+  let current = null;          // { view: 'day', date, find } or { view: 'job', id }
+  let currentKey = '';
+  let lastList = null;         // { date, hash } of the list last looked at
+  let lastOpened = null;       // id of the job last opened from a list
+  let listToken = 0;
+  let jobToken = 0;
+  let noteBusy = null, moveBusy = null, completeBusy = null, undoBusy = null;
+  let undo = null;             // { id, date }
+
+  const onJob = (id) => current && current.view === 'job' && current.id === id;
+
+  function setMsg(boxId, msgId, text, isError) {
+    $(boxId).classList.toggle('on', !!text);
+    $(boxId).classList.toggle('error', !!text && !!isError);
+    $(msgId).textContent = text || '';
+  }
+  function setBusy(btn, busy, label) {
+    if (busy) btn.setAttribute('aria-disabled', 'true'); else btn.removeAttribute('aria-disabled');
+    btn.textContent = label;
+  }
+  function fieldError(input, errEl, text, notTheField) {
+    errEl.textContent = text || '';
+    if (text && !notTheField) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+  }
+
+  // Keep every cached copy of a job in step with what the server last returned.
+  function applyJob(j) {
+    const old = jobsById.get(j.id);
+    if (!j.notes && old && old.notes) j.notes = old.notes;
+    jobsById.set(j.id, j);
+    const slim = Object.assign({}, j); delete slim.notes;
+    lists.forEach((entry, date) => {
+      const i = entry.jobs.findIndex((x) => x.id === j.id);
+      if (date === j.date) {
+        if (i >= 0) entry.jobs[i] = slim; else lists.delete(date);
+      } else if (i >= 0) {
+        entry.jobs.splice(i, 1);
+      }
+    });
+  }
+
+  // ---------- routing ----------
+  const dayHash = (date, find) => '#/day/' + date + (find ? '?find=' + encodeURIComponent(find) : '');
+  const jobHash = (id) => '#/job/' + encodeURIComponent(id);
+
+  function parse() {
+    const h = location.hash.replace(/^#\/?/, '');
+    const cut = h.indexOf('?');
+    const path = cut < 0 ? h : h.slice(0, cut);
+    const qs = cut < 0 ? '' : h.slice(cut + 1);
+    const parts = path.split('/');
+    if (parts[0] === 'job' && parts[1]) {
+      let id = parts[1];
+      try { id = decodeURIComponent(id); } catch (e) { /* keep as typed */ }
+      return { view: 'job', id };
+    }
+    const date = parts[0] === 'day' && validDate(parts[1]) ? parts[1] : todayStr();
+    return { view: 'day', date, find: new URLSearchParams(qs).get('find') || '' };
+  }
+
+  function navigate(initial) {
+    if (currentKey) scrolls.set(currentKey, window.scrollY);
+    const prev = current;
+    current = parse();
+    currentKey = current.view === 'day' ? 'day/' + current.date : 'job/' + current.id;
+    const dlg = $('complete-dialog');
+    if (dlg.open) dlg.close();
+    $('home-link').href = dayHash(todayStr());
+    $('list-view').hidden = current.view !== 'day';
+    $('job-view').hidden = current.view !== 'job';
+    if (current.view === 'day') showDay(prev, initial); else showJob(initial);
+  }
+
+  // ---------- list ----------
+  function showDay(prev, initial) {
+    const date = current.date;
+    const today = todayStr();
+    lastList = { date, hash: dayHash(date, current.find) };
+    const title = 'Jobs ' + dayPhrase(date) + (date === today ? ', ' + fmtDay(date) : '');
+    $('list-title').textContent = title;
+    document.title = title + ' - ' + PRODUCT;
+    $('prev-day').href = dayHash(addDays(date, -1));
+    $('next-day').href = dayHash(addDays(date, 1));
+    $('today-link').href = dayHash(today);
+    if (date === today) $('today-link').setAttribute('aria-current', 'page'); else $('today-link').removeAttribute('aria-current');
+    $('find').value = current.find;
+
+    const cached = lists.get(date);
+    if (cached) {
+      renderList();
+    } else {
+      $('find-form').hidden = true;
+      $('list-count').textContent = '';
+      $('clear-find').hidden = true;
+      renderSkeleton();
+    }
+    loadDay(date);
+
+    const cameFromJob = prev && prev.view === 'job';
+    const link = cameFromJob && lastOpened ? document.querySelector('#jobs a[data-id="' + CSS.escape(lastOpened) + '"]') : null;
+    if (link) link.focus({ preventScroll: true });
+    else if (!initial && cameFromJob) $('list-title').focus({ preventScroll: true });
+    window.scrollTo(0, cameFromJob ? (scrolls.get(currentKey) || 0) : 0);
+  }
+
+  function renderSkeleton() {
+    const ul = $('jobs');
+    ul.textContent = '';
+    for (let i = 0; i < 4; i++) {
+      const li = document.createElement('li');
+      li.setAttribute('aria-hidden', 'true');
+      const d = document.createElement('div'); d.className = 'skel';
+      li.appendChild(d); ul.appendChild(li);
+    }
+  }
+
+  async function loadDay(date) {
+    const token = ++listToken;
+    const live = () => token === listToken && current.view === 'day' && current.date === date;
+    $('list-retry').hidden = true;
+    $('empty-link').hidden = true;
+    setMsg('list-box', 'list-msg', lists.has(date) ? '' : 'Loading jobs');
+    let jobs;
+    try {
+      jobs = await api.listJobs(date);
+    } catch (e) {
+      if (!live()) return;
+      const cached = lists.get(date);
+      if (cached) {
+        setMsg('list-box', 'list-msg', 'Could not update this list. It shows the jobs as they were at ' + fmtClock(cached.at) + '.', true);
+      } else {
+        $('jobs').textContent = '';
+        setMsg('list-box', 'list-msg', 'Could not load the jobs.' + SIGNAL, true);
+      }
+      $('list-retry').hidden = false;
+      return;
+    }
+    jobs.sort((a, b) => String(a.slot).localeCompare(String(b.slot)) || String(a.ref).localeCompare(String(b.ref)));
+    lists.set(date, { jobs, at: new Date() });
+    jobs.forEach((j) => { const old = jobsById.get(j.id); jobsById.set(j.id, old && old.notes ? Object.assign({}, j, { notes: old.notes }) : j); });
+    if (!live()) return;
+    setMsg('list-box', 'list-msg', '');
+    const hadFocus = document.activeElement && document.activeElement.closest && document.activeElement.closest('#jobs a');
+    const focusId = hadFocus ? hadFocus.dataset.id : null;
+    renderList();
+    if (focusId) {
+      const again = document.querySelector('#jobs a[data-id="' + CSS.escape(focusId) + '"]');
+      if (again) again.focus({ preventScroll: true });
+    }
+  }
+
+  function renderList() {
+    const entry = lists.get(current.date);
+    if (!entry) return;
+    const all = entry.jobs;
+    const q = $('find').value.trim().toLowerCase();
+    const shown = q ? all.filter((j) => [j.slot, j.customer, j.work, j.address, j.ref, j.phone].join(' ').toLowerCase().includes(q)) : all;
+    const ul = $('jobs');
+    ul.textContent = '';
+    $('find-form').hidden = all.length === 0;
+    $('clear-find').hidden = !q || all.length === 0;
+
+    if (all.length === 0) {
+      const today = todayStr();
+      $('list-count').textContent = '';
+      setMsg('list-box', 'list-msg', 'No jobs are booked ' + (current.date === today ? 'for today' : dayPhrase(current.date)) + '.');
+      const link = $('empty-link');
+      if (current.date === today) { link.textContent = "See tomorrow's jobs"; link.href = dayHash(addDays(today, 1)); }
+      else { link.textContent = "See today's jobs"; link.href = dayHash(today); }
+      link.hidden = false;
+      return;
+    }
+    if (shown.length === 0) {
+      $('list-count').textContent = 'No jobs ' + dayPhrase(current.date).replace(/,.*/, '') + ' match "' + $('find').value.trim() + '".';
+      return;
+    }
+    const done = all.filter((j) => j.status === 'complete').length;
+    $('list-count').textContent = q
+      ? 'Showing ' + shown.length + ' of ' + plural(all.length, 'job')
+      : plural(all.length, 'job') + (done ? ', ' + done + ' complete' : '');
+
+    shown.forEach((j) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = jobHash(j.id);
+      a.dataset.id = j.id;
+      const span = (cls, text) => { const s = document.createElement('span'); s.className = cls; s.textContent = text; a.appendChild(s); a.appendChild(document.createTextNode(' ')); };
+      span('slot', j.slot || 'No time');
+      span('who', j.customer || 'No customer name');
+      span('what', j.work || 'No description');
+      span('where', j.address || 'No address');
+      if (j.status === 'complete') { li.className = 'is-done'; span('done', 'Complete'); }
+      li.appendChild(a); ul.appendChild(li);
+    });
+  }
+
+  $('find').addEventListener('input', () => {
+    current.find = $('find').value.trim();
+    const hash = dayHash(current.date, current.find);
+    history.replaceState(null, '', hash);
+    lastList = { date: current.date, hash };
+    renderList();
+  });
+  $('find-form').addEventListener('submit', (e) => e.preventDefault());
+  $('clear-find').addEventListener('click', () => {
+    $('find').value = '';
+    $('find').dispatchEvent(new Event('input'));
+    $('find').focus();
+  });
+  $('list-retry').addEventListener('click', () => {
+    if (!lists.has(current.date)) renderSkeleton();
+    loadDay(current.date);
+    $('list-title').focus({ preventScroll: true });
+  });
+  $('jobs').addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[data-id]');
+    if (a) lastOpened = a.dataset.id;
+  });
+
+  // ---------- job ----------
+  function draftKey(id) { return 'hh-note-draft-' + id; }
+  function readDraft(id) { try { return sessionStorage.getItem(draftKey(id)) || ''; } catch (e) { return ''; } }
+  function writeDraft(id, text) { try { if (text) sessionStorage.setItem(draftKey(id), text); else sessionStorage.removeItem(draftKey(id)); } catch (e) { /* storage is optional */ } }
+
+  function showJob(initial) {
+    const id = current.id;
+    lastOpened = id;
+    const job = jobsById.get(id);
+
+    // Reset everything that belonged to the job shown before.
+    closeMove();
+    undo = null;
+    $('undo-move').hidden = true;
+    setBusy($('undo-move'), undoBusy === id, 'Undo move');
+    setMsg('action-box', 'action-msg', '');
+    setMsg('job-box', 'job-msg', '');
+    setMsg('notes-box', 'notes-msg', '');
+    $('job-retry').hidden = true;
+    $('notes-retry').hidden = true;
+    fieldError($('note-text'), $('note-error'), '');
+    $('note-saved').textContent = '';
+    $('note-text').value = readDraft(id);
+    setBusy($('note-submit'), noteBusy === id, noteBusy === id ? 'Saving note' : 'Save note');
+    setBusy($('move-submit'), moveBusy === id, moveBusy === id ? 'Moving job' : 'Move job');
+    $('notes').textContent = '';
+    $('notes-empty').hidden = true;
+
+    if (job) {
+      renderJob(job);
+      if (!job.notes) setMsg('notes-box', 'notes-msg', 'Loading notes');
+    } else {
+      $('job-body').hidden = true;
+      $('job-title').textContent = 'Job';
+      document.title = 'Job - ' + PRODUCT;
+      renderBack(null);
+      setMsg('job-box', 'job-msg', 'Loading job');
+    }
+    loadJob(id);
+    window.scrollTo(0, 0);
+    if (!initial) $('job-title').focus({ preventScroll: true });
+  }
+
+  function renderBack(job) {
+    const target = lastList || (job ? { date: job.date, hash: dayHash(job.date) } : { date: todayStr(), hash: dayHash(todayStr()) });
+    const a = $('back-link');
+    a.href = target.hash;
+    a.textContent = target.date === todayStr() ? "Back to today's jobs" : 'Back to jobs ' + dayPhrase(target.date);
+  }
+
+  function renderJob(j) {
+    const today = todayStr();
+    const complete = j.status === 'complete';
+    $('job-body').hidden = false;
+    $('job-title').textContent = j.customer || 'Job ' + (j.ref || '');
+    document.title = (j.customer || 'Job') + (j.ref ? ', ' + j.ref : '') + ' - ' + PRODUCT;
+    renderBack(j);
+    const dayText = j.date === today ? 'Today, ' + fmtDay(j.date) : j.date === addDays(today, 1) ? 'Tomorrow, ' + fmtDay(j.date) : fmtDay(j.date);
+    $('d-when').textContent = dayText + (j.slot ? ' at ' + j.slot : '');
+    $('d-status').textContent = complete ? 'Complete' : 'Booked';
+    $('d-status').className = complete ? 'status-done' : '';
+    $('d-work').textContent = j.work || 'Not given';
+    $('d-address').textContent = j.address || 'Not given';
+    $('d-ref').textContent = j.ref || 'Not given';
+    const phone = $('d-phone');
+    phone.textContent = '';
+    if (j.phone) {
+      const a = document.createElement('a');
+      a.href = 'tel:' + String(j.phone).replace(/[^\d+]/g, '');
+      a.textContent = 'Call ' + j.phone;
+      phone.appendChild(a);
+    } else {
+      phone.textContent = 'Not given';
+    }
+    $('actions').hidden = complete;
+    if (complete) closeMove();
+    $('move-hint').hidden = j.date !== today;
+    if (j.notes) renderNotes(j.notes);
+  }
+
+  function renderNotes(notes) {
+    const ol = $('notes');
+    ol.textContent = '';
+    $('notes-empty').hidden = notes.length > 0;
+    notes.forEach((n) => {
+      const li = document.createElement('li');
+      const t = document.createElement('time');
+      t.dateTime = n.at || '';
+      t.textContent = fmtNoteTime(n.at);
+      const p = document.createElement('p');
+      p.textContent = n.text;
+      li.appendChild(t); li.appendChild(p); ol.appendChild(li);
+    });
+  }
+
+  async function loadJob(id) {
+    const token = ++jobToken;
+    const live = () => token === jobToken && onJob(id);
+    $('job-retry').hidden = true;
+    $('notes-retry').hidden = true;
+    let j;
+    try {
+      j = await api.getJob(id);
+    } catch (e) {
+      if (!live()) return;
+      const known = jobsById.get(id);
+      if (e && e.code === 'NOT_FOUND') {
+        $('job-body').hidden = true;
+        $('job-title').textContent = 'Job not found';
+        document.title = 'Job not found - ' + PRODUCT;
+        setMsg('job-box', 'job-msg', 'This job is no longer in the system. Ask the office if you were expecting it.', true);
+      } else if (known) {
+        setMsg('notes-box', 'notes-msg', (known.notes ? 'Could not check for newer notes.' : 'Could not load the notes.') + SIGNAL, true);
+        $('notes-retry').hidden = false;
+      } else {
+        setMsg('job-box', 'job-msg', 'Could not load this job.' + SIGNAL, true);
+        $('job-retry').hidden = false;
+      }
+      return;
+    }
+    applyJob(j);
+    if (!live()) return;
+    setMsg('job-box', 'job-msg', '');
+    setMsg('notes-box', 'notes-msg', '');
+    renderJob(j);
+  }
+
+  $('job-retry').addEventListener('click', () => {
+    setMsg('job-box', 'job-msg', 'Loading job');
+    loadJob(current.id);
+    $('job-title').focus({ preventScroll: true });
+  });
+  $('notes-retry').addEventListener('click', () => {
+    const known = jobsById.get(current.id);
+    setMsg('notes-box', 'notes-msg', known && known.notes ? 'Checking for newer notes' : 'Loading notes');
+    loadJob(current.id);
+    $('notes-title').setAttribute('tabindex', '-1');
+    $('notes-title').focus({ preventScroll: true });
+  });
+
+  // ----- add a note -----
+  $('note-text').addEventListener('input', () => {
+    writeDraft(current.id, $('note-text').value);
+    if ($('note-error').textContent) fieldError($('note-text'), $('note-error'), '');
+  });
+
+  $('note-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = current.id;
+    if (noteBusy === id) return;
+    const input = $('note-text');
+    const text = input.value.trim();
+    $('note-saved').textContent = '';
+    if (!text) {
+      fieldError(input, $('note-error'), 'Write the note before saving it.');
+      input.focus();
+      return;
+    }
+    fieldError(input, $('note-error'), '');
+    noteBusy = id;
+    setBusy($('note-submit'), true, 'Saving note');
+    let j = null, err = null;
+    try { j = await api.addNote(id, text); } catch (x) { err = x; }
+    noteBusy = null;
+    if (j) {
+      applyJob(j);
+      if (readDraft(id).trim() === text) writeDraft(id, '');
+    }
+    if (!onJob(id)) return;
+    setBusy($('note-submit'), false, 'Save note');
+    if (j) {
+      if (input.value.trim() === text) input.value = '';
+      setMsg('notes-box', 'notes-msg', '');
+      $('notes-retry').hidden = true;
+      renderJob(j);
+      $('note-saved').textContent = 'Note saved.';
+    } else if (err && err.code === 'NOT_FOUND') {
+      fieldError(input, $('note-error'), 'The note was not saved because this job is no longer in the system.', true);
+    } else if (err && err.code === 'VALIDATION') {
+      fieldError(input, $('note-error'), 'Write the note before saving it.');
+      input.focus();
+    } else {
+      fieldError(input, $('note-error'), 'The note was not saved.' + SIGNAL, true);
+    }
+  });
+
+  // ----- move to another day -----
+  function closeMove() {
+    $('move-form').hidden = true;
+    $('move-toggle').setAttribute('aria-expanded', 'false');
+    fieldError($('move-date'), $('move-error'), '');
+  }
+  function showMoveDay() {
+    const v = $('move-date').value;
+    $('move-day').textContent = validDate(v) ? fmtDay(v) : '';
+  }
+  $('move-toggle').addEventListener('click', () => {
+    if (!$('move-form').hidden) { closeMove(); return; }
+    const tomorrow = addDays(todayStr(), 1);
+    const job = jobsById.get(current.id);
+    const input = $('move-date');
+    input.min = tomorrow;
+    let suggest = tomorrow;
+    if (job && job.date >= tomorrow) suggest = addDays(job.date, 1);
+    if (!validDate(input.value) || input.value < tomorrow || (job && input.value === job.date)) input.value = suggest;
+    showMoveDay();
+    $('move-form').hidden = false;
+    $('move-toggle').setAttribute('aria-expanded', 'true');
+    input.focus();
+  });
+  $('move-date').addEventListener('input', showMoveDay);
+  $('move-date').addEventListener('change', showMoveDay);
+  $('move-cancel').addEventListener('click', () => { closeMove(); $('move-toggle').focus(); });
+
+  $('move-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = current.id;
+    if (moveBusy === id) return;
+    const input = $('move-date');
+    const date = input.value;
+    const job = jobsById.get(id);
+    const from = job ? job.date : null;
+    let problem = '';
+    if (!validDate(date)) problem = 'Choose the new date.';
+    else if (date <= todayStr()) problem = 'Choose a date after today.';
+    else if (date === from) problem = 'This job is already booked for that day. Choose a different date.';
+    if (problem) { fieldError(input, $('move-error'), problem); input.focus(); return; }
+    fieldError(input, $('move-error'), '');
+    moveBusy = id;
+    setBusy($('move-submit'), true, 'Moving job');
+    let j = null, err = null;
+    try { j = await api.moveJob(id, date); } catch (x) { err = x; }
+    moveBusy = null;
+    if (j) applyJob(j);
+    if (!onJob(id)) return;
+    setBusy($('move-submit'), false, 'Move job');
+    if (j) {
+      closeMove();
+      renderJob(j);
+      undo = from && from > todayStr() ? { id, date: from } : null;
+      $('undo-move').hidden = !undo;
+      setMsg('action-box', 'action-msg', 'Moved to ' + fmtDay(j.date) + (j.slot ? ' at ' + j.slot : '') + '.');
+      $('move-toggle').focus();
+    } else if (err && err.code === 'PAST') {
+      fieldError(input, $('move-error'), 'Choose a date after today.');
+      input.focus();
+    } else if (err && err.code === 'COMPLETE') {
+      markAlreadyComplete(id, 'This job has already been marked complete, so it cannot be moved.');
+    } else if (err && err.code === 'NOT_FOUND') {
+      fieldError(input, $('move-error'), 'The job was not moved because it is no longer in the system.', true);
+    } else {
+      fieldError(input, $('move-error'), 'The job was not moved.' + SIGNAL, true);
+    }
+  });
+
+  $('undo-move').addEventListener('click', async () => {
+    if (!undo || undoBusy) return;
+    const { id, date } = undo;
+    undoBusy = id;
+    setBusy($('undo-move'), true, 'Undoing move');
+    let j = null, err = null;
+    try { j = await api.moveJob(id, date); } catch (x) { err = x; }
+    undoBusy = null;
+    if (j) applyJob(j);
+    if (!onJob(id)) return;
+    setBusy($('undo-move'), false, 'Undo move');
+    if (j) {
+      undo = null;
+      renderJob(j);
+      setMsg('action-box', 'action-msg', 'Moved back to ' + fmtDay(j.date) + (j.slot ? ' at ' + j.slot : '') + '.');
+      $('action-msg').focus();
+      $('undo-move').hidden = true;
+    } else if (err && err.code === 'COMPLETE') {
+      markAlreadyComplete(id, 'This job has already been marked complete, so it cannot be moved back.');
+    } else if (err && err.code === 'PAST') {
+      undo = null;
+      setMsg('action-box', 'action-msg', 'The move cannot be undone because the earlier date has now passed.', true);
+      $('action-msg').focus();
+      $('undo-move').hidden = true;
+    } else {
+      setMsg('action-box', 'action-msg', 'The move was not undone.' + SIGNAL, true);
+    }
+  });
+
+  function markAlreadyComplete(id, message) {
+    const known = jobsById.get(id);
+    if (known) applyJob(Object.assign({}, known, { status: 'complete' }));
+    if (!onJob(id)) return;
+    const dlg = $('complete-dialog');
+    if (dlg.open) dlg.close();
+    undo = null;
+    $('undo-move').hidden = true;
+    if (known) renderJob(jobsById.get(id));
+    setMsg('action-box', 'action-msg', message);
+    $('action-msg').focus();
+  }
+
+  // ----- mark complete -----
+  const dlg = $('complete-dialog');
+  $('complete-btn').addEventListener('click', () => {
+    const job = jobsById.get(current.id);
+    if (!job) return;
+    const who = job.customer || 'the customer';
+    $('cd-title').textContent = 'Mark ' + (job.ref ? job.ref + ' for ' : 'the job for ') + who + ' as complete?';
+    $('cd-text').textContent = 'An invoice will be emailed to ' + who + ' at once. This cannot be undone.';
+    $('cd-error').textContent = '';
+    setBusy($('cd-confirm'), completeBusy === job.id, completeBusy === job.id ? 'Completing job' : 'Complete and send invoice');
+    dlg.showModal();
+    $('cd-keep').focus();
+  });
+  $('cd-keep').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+
+  $('cd-confirm').addEventListener('click', async () => {
+    const id = current.id;
+    if (completeBusy === id) return;
+    completeBusy = id;
+    $('cd-error').textContent = '';
+    setBusy($('cd-confirm'), true, 'Completing job');
+    let j = null, err = null;
+    try { j = await api.completeJob(id); } catch (x) { err = x; }
+    completeBusy = null;
+    if (j) applyJob(j);
+    if (!onJob(id)) return;
+    setBusy($('cd-confirm'), false, 'Complete and send invoice');
+    if (j) {
+      if (dlg.open) dlg.close();
+      closeMove();
+      undo = null;
+      $('undo-move').hidden = true;
+      renderJob(j);
+      setMsg('action-box', 'action-msg', 'Job complete. The invoice has been emailed to ' + (j.customer || 'the customer') + '.');
+      $('action-msg').focus();
+    } else if (err && err.code === 'COMPLETE') {
+      markAlreadyComplete(id, 'This job had already been marked complete. The invoice was sent then.');
+    } else {
+      const text = err && err.code === 'NOT_FOUND'
+        ? 'The job was not marked complete because it is no longer in the system.'
+        : 'The job was not marked complete and no invoice was sent.' + SIGNAL;
+      if (dlg.open) {
+        $('cd-error').textContent = text;
+      } else {
+        setMsg('action-box', 'action-msg', text, true);
+        $('action-msg').focus();
+      }
+    }
+  });
+
+  // ---------- start ----------
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('hashchange', () => navigate(false));
+  navigate(true);
+})();
+</script>
+</body>
+</html>

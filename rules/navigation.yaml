@@ -1,0 +1,219 @@
+domain: navigation
+prefix: NAV
+title: Navigation and structure
+load_when: "Any product with more than one screen, and any screen that uses dialogs, drawers, tabs or steps."
+rules:
+  - id: NAV-001
+    rule: "Each screen has its own descriptive title, in the browser title and as the top heading."
+    why: "Titles are how people tell tabs, history entries and screens apart."
+    applies_when: "Always."
+    pass_when: "document.title names this screen and the product, differs between screens, and matches the visible top heading."
+    evidence: dom
+    check: page-title
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:2.4.2", "hhs:9:2", "sm86:2.5/10"]
+    counters: [B3.6]
+    examples:
+      pass: "'Invoices - Northwind' with an h1 of 'Invoices'."
+      fail: "'Vite App' on every screen."
+      na: "Never; this rule always applies."
+
+  - id: NAV-002
+    rule: "Navigation shows where the user currently is."
+    why: "Without a you-are-here cue people lose track of which section they are acting in."
+    applies_when: "The product has persistent navigation."
+    pass_when: "The current section is marked in the navigation by more than colour and carries aria-current."
+    evidence: dom
+    severity: major
+    support: practice-consensus
+    sources: ["hhs:7:4", "sm86:3.1.3/30", "wcag22:1.4.1"]
+    counters: [B9.3]
+    examples:
+      pass: "The 'Invoices' item is bold with a side bar and aria-current=\"page\"."
+      fail: "All navigation items look the same on every screen."
+      na: "A single-screen product."
+
+  - id: NAV-003
+    rule: "Top-level navigation is visible on screens wide enough to hold it."
+    why: "Navigation hidden behind a menu button is used about half as often and makes tasks slower."
+    applies_when: "The viewport is 1024px or wider and the product has top-level sections."
+    pass_when: "The top-level items are visible as text without opening a menu."
+    evidence: measured
+    severity: major
+    support: some-support
+    sources: ["nng:hamburger-menus", "nng:find-navigation-desktop-not-hamburger", "hhs:7:2"]
+    counters: [B1.1, B1.5]
+    examples:
+      pass: "A sidebar listing the five sections."
+      fail: "A hamburger button on a 1440px desktop layout."
+      na: "A product with a single section."
+
+  - id: NAV-004
+    rule: "Navigation labels name the user's things and tasks in the user's words."
+    why: "People choose a path by the words on it; generic labels give no scent."
+    applies_when: "The product has navigation."
+    pass_when: "Each label names an object or task of this product; generic catch-alls are not the main items."
+    evidence: judgement
+    severity: major
+    support: well-replicated
+    sources: ["hhs:9:1", "pirolli1999", "sm86:2.0/12", "msux:top-violations#Property Sheets", "hhs:7:6"]
+    counters: [B9.2]
+    examples:
+      pass: "'Invoices', 'Customers', 'Payments'."
+      fail: "'Dashboard', 'Overview', 'Manage', 'General', 'Advanced'."
+      na: "No navigation."
+
+  - id: NAV-005
+    rule: "What the user is looking at is in the URL: the screen, the selected item, the tab, filters, sort and page."
+    why: "Reload, Back, bookmarks and shared links should return the same view."
+    applies_when: "A screen has selectable views, filters, tabs, pagination or a selected record."
+    pass_when: "Changing each updates the URL, and loading that URL restores the view."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["vercel:guidelines", "govuk:patterns/question-pages"]
+    counters: [B11.1]
+    examples:
+      pass: "/invoices?status=overdue&page=2 reloads to the same filtered page."
+      fail: "Reloading returns to the unfiltered first page; the detail panel has no URL."
+      na: "A screen with one view and no state."
+
+  - id: NAV-006
+    rule: "The browser's Back button returns to the previous view with its state."
+    why: "Back is the most used navigation control and people expect it to undo their last move."
+    applies_when: "The product has more than one view."
+    pass_when: "Back returns to the prior view with its filters, entered values and scroll position, and never exits the product unexpectedly or reopens a closed dialog."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["govuk:patterns/question-pages", "vercel:guidelines", "sm86:3.3/4", "hhs:7:1"]
+    counters: [B11.1]
+    examples:
+      pass: "From an invoice, Back returns to the list at the same scroll position and filter."
+      fail: "Back from step 3 of a flow leaves the application."
+      na: "A single-view product."
+
+  - id: NAV-007
+    rule: "Every screen offers a way onward and a way back."
+    why: "A dead end forces people to edit the URL or start again."
+    applies_when: "Always, including error, empty, success and not-found screens."
+    pass_when: "Each screen, including end states, has navigation or a link to a sensible next place."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["hhs:7:1", "hhs:5:1", "sm86:4.4/5", "sm86:3.1.3/26", "carbon:patterns/empty-states-pattern"]
+    counters: [B5.6]
+    examples:
+      pass: "The 'Invite sent' screen links to 'Invite another' and 'Back to members'."
+      fail: "A 404 or success screen with no links."
+      na: "Never; this rule always applies."
+
+  - id: NAV-008
+    rule: "A modal dialog is used only for a short decision that must be made before continuing; longer work gets a page or a side panel."
+    why: "Modals hide the context people need and trap long tasks in a small box."
+    applies_when: "The screen opens a modal dialog."
+    pass_when: "Each modal holds a single decision or a form of a few fields; multi-step flows, long forms and anything needing the page behind it are not modal. No modal opens without the user asking."
+    evidence: judgement
+    severity: major
+    support: practice-consensus
+    sources: ["uswds:components/modal", "nng:modal-nonmodal-dialog", "carbon:patterns/dialog-pattern", "msux:top-violations#Dialog boxes", "hhs:2:1", "nng:data-tables"]
+    counters: [B7.6, B2.7]
+    examples:
+      pass: "A two-field 'Rename project' dialog; editing a record opens a side panel beside the table."
+      fail: "A four-step onboarding wizard inside a modal; a promotional modal on page load."
+      na: "No modal dialogs."
+
+  - id: NAV-009
+    rule: "One dialog is open at a time."
+    why: "Stacked dialogs lose focus, context and the way out."
+    applies_when: "The screen uses dialogs."
+    pass_when: "No dialog opens another dialog on top of itself; a further step replaces the content or returns to the page."
+    evidence: dom
+    check: nested-dialog
+    severity: major
+    support: practice-consensus
+    sources: ["carbon:patterns/dialog-pattern", "atlassian:components/modal-dialog/usage", "fluent:components/web/react/core/dialog/usage", "apple:modality", "msux:mess-warn#Presentation"]
+    counters: [B2.1]
+    examples:
+      pass: "Delete inside an edit panel shows its confirmation in place of the panel content."
+      fail: "An edit dialog whose Delete button opens a second dialog over it."
+      na: "No dialogs."
+
+  - id: NAV-010
+    rule: "A dialog is marked up as a dialog and has a name."
+    why: "Without the role and name, assistive technology does not announce that a dialog opened or what it is."
+    applies_when: "The screen shows a dialog or a full-screen overlay containing controls."
+    pass_when: "It is a dialog element or has role dialog or alertdialog, with aria-modal for modals and a name from aria-labelledby or aria-label."
+    evidence: dom
+    check: dialog-semantics
+    severity: major
+    support: practice-consensus
+    sources: ["apg:dialog-modal", "wcag22:4.1.2"]
+    counters: [B2.1]
+    examples:
+      pass: "<dialog aria-labelledby=\"rename-title\">"
+      fail: "<div class=\"modal-backdrop\"><div class=\"modal\">...</div></div>"
+      na: "No dialogs or overlays."
+
+  - id: NAV-011
+    rule: "A dialog takes focus when it opens, keeps it while open, closes on Escape and returns focus to what opened it."
+    why: "Otherwise keyboard users are left behind the dialog or stranded after it closes."
+    applies_when: "The screen opens a modal dialog."
+    pass_when: "On open, focus is inside; Tab cycles within; Escape closes; on close, focus is back on the trigger; a visible close or cancel control exists."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["apg:dialog-modal", "wcag22:2.1.2", "wcag22:2.4.3"]
+    counters: [B2.1]
+    examples:
+      pass: "A native dialog opened with showModal()."
+      fail: "Tab moves through the page behind the open dialog; Escape does nothing."
+      na: "No modal dialogs."
+
+  - id: NAV-012
+    rule: "A step-by-step flow is used only when the steps must happen in order; otherwise the fields are on one page."
+    why: "Splitting a simple form into steps adds clicks and hides what is coming."
+    applies_when: "A task is presented as a sequence of steps."
+    pass_when: "Later steps depend on earlier answers or the task is long and unfamiliar; the flow starts on a working step, not a welcome screen, and its last button names the final action."
+    evidence: judgement
+    severity: minor
+    support: practice-consensus
+    sources: ["nng:wizards", "msux:top-violations#Wizard pages", "msux:top-violations#Wizards", "hhs:7:9"]
+    counters: [B2.7]
+    examples:
+      pass: "A four-field 'New customer' form on one page."
+      fail: "The same four fields over four steps, after a 'Welcome' step, ending with 'Finish'."
+      na: "No stepped flows."
+
+  - id: NAV-013
+    rule: "The structure is broad and shallow: few levels, with each level's items grouped and labelled."
+    why: "Deep hierarchies hide things and cost navigation time."
+    applies_when: "The product has nested navigation."
+    pass_when: "Any screen is reachable in at most three levels, and groups of items have headings."
+    evidence: measured
+    severity: minor
+    support: well-replicated
+    sources: ["larson1998", "sm86:3.1.3/22", "sm86:3.1.3/24"]
+    counters: [B9.3]
+    examples:
+      pass: "Settings has six grouped sections on one page."
+      fail: "Settings > Advanced > Preferences > Display > Density."
+      na: "Flat navigation."
+
+  - id: NAV-014
+    rule: "When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labelled More button."
+    why: "Navigation hidden entirely behind a menu is used less and makes tasks slower; navigation shown in full on a phone takes the first view away from the content."
+    applies_when: "At any width, the product's top-level sections do not fit in a single row at full size."
+    pass_when: "The header is one row at every width from 320px up, and it never scrolls sideways or wraps. As many sections as fit are visible as text links, in order of how often they are used, and the count follows the width; where the product has no usage figures, order by the tasks the brief names and say that the order is a default. The others are in a list of links shown and hidden by a button with a text label (a disclosure with aria-expanded, not an application menu with arrow-key handling). Every item, and the button, is at least 44px tall. The current section is marked with aria-current and by more than colour, including when it is inside the list. Where the row has no room for the product's full name, its mark alone is shown and the name stays in the link's accessible name. With four sections or fewer, all are visible and there is no button."
+    evidence: measured
+    severity: major
+    support: some-support
+    sources: ["nng:hamburger-menus", "nng:find-navigation-desktop-not-hamburger", "apg:disclosure", "wcag22:2.5.5", "house:2026-11-16 show what fits plus More, no side scrolling"]
+    counters: [B10.1, B1.5]
+    exceptions: ["A product whose sections all fit one row at every width it supports."]
+    dissent: "The study behind the combination is from 2016 and covers phones and desktops, not the widths between. No source we hold supports a tab row that scrolls sideways, and none tests it against this pattern; ruling it out rests on a house decision. A menu alone is a defensible choice on a phone."
+    examples:
+      pass: "At 390px: Today, Weather, News, Events, then 'More' with eight sections. At 820px: eight sections, then 'More' with four. At 1280px: all twelve and no button."
+      fail: "Twelve tabs wrapped over four rows; a tab row that scrolls sideways with tabs cut off at the edge; a lone hamburger icon hiding every section."
+      na: "A desktop-only tool, or a product with one section."

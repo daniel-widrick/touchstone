@@ -1,0 +1,157 @@
+domain: states
+prefix: STATE
+title: States a screen can be in
+load_when: "Any screen that loads, saves or lists data."
+rules:
+  - id: STATE-001
+    rule: "A view with nothing to show says why it is empty and offers the next step."
+    why: "A blank area or a bare 'No data' reads as broken and gives new users nowhere to go."
+    applies_when: "A list, table, chart, feed or search can have zero items."
+    pass_when: "With zero items, the view shows one line saying what would appear there and one action that leads to it."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["carbon:patterns/empty-states-pattern", "nng:empty-state-interface-design", "primer:ui-patterns/empty-states", "sm86:4.2/1"]
+    counters: [B5.2, B5.1]
+    examples:
+      pass: "'No invoices yet.' with a 'Create invoice' button."
+      fail: "An empty table with headers and nothing below, or the text 'No data found'."
+      na: "A view that always has content, such as a settings form."
+
+  - id: STATE-002
+    rule: "Empty because nothing exists, empty because a filter matched nothing, and failed to load look different and offer different next steps."
+    why: "The right recovery differs: create something, change the filter, or try again."
+    applies_when: "A view can be empty for more than one reason."
+    pass_when: "Each cause has its own message and action: create, clear the filter or search, or retry."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["carbon:patterns/empty-states-pattern", "primer:ui-patterns/empty-states", "atlassian:foundations/content/designing-messages/empty-state", "msux:mess-error#Design concepts > Avoiding unnecessary error messages"]
+    counters: [B5.2, B5.4]
+    examples:
+      pass: "A search with no match shows 'No invoices match \"acme\".' and 'Clear search'."
+      fail: "First use, an unmatched filter and a server error all show 'Nothing here'."
+      na: "A view with no filters or search that cannot fail to load."
+
+  - id: STATE-003
+    rule: "A failed load or save says it failed, keeps what the user had, and offers a way to try again."
+    why: "Silent failure looks like success or like an empty account."
+    applies_when: "A screen reads from or writes to a server."
+    pass_when: "With the request forced to fail, the screen states the failure where the content or control is, offers retry, and loses no input."
+    evidence: walk
+    severity: blocker
+    support: practice-consensus
+    sources: ["sm86:5.4/7", "sm86:5.4/2", "sm86:6.0/3", "primer:ui-patterns/empty-states", "nng:error-message-guidelines"]
+    counters: [B5.1, B5.4]
+    examples:
+      pass: "'Could not load invoices. Try again.' with a retry button in place of the table."
+      fail: "The table stays empty for ever, or the spinner never stops."
+      na: "A fully static page."
+
+  - id: STATE-004
+    rule: "A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled."
+    why: "With no signal people assume the action failed and repeat it or leave."
+    applies_when: "An action or load can take longer than one second."
+    pass_when: "With the response delayed, an indicator appears by one second; for operations that can exceed ten seconds there is progress or an estimate and a cancel control."
+    evidence: walk
+    severity: major
+    support: some-support
+    sources: ["nielsen1993", "nng:progress-indicators", "hhs:2:10", "sm86:4.2/3", "sm86:3.0/21", "myers1985", "msux:progress-bars#Modal progress bars"]
+    counters: [B5.3, B8.1]
+    examples:
+      pass: "The table area shows a loading indicator; an import shows '340 of 1,200 rows' and 'Cancel import'."
+      fail: "Clicking 'Generate report' changes nothing for six seconds."
+      na: "Every response arrives in well under a second."
+
+  - id: STATE-005
+    rule: "While data is loading the view shows a loading state, never the empty state."
+    why: "A flash of 'No results' before results arrive tells people there is nothing there."
+    applies_when: "A view has both a loading state and an empty state."
+    pass_when: "With the response delayed, no empty-state text or zero counts are visible until the response has arrived."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["nng:empty-state-interface-design", "sm86:4.1/1"]
+    counters: [B5.3, B5.1]
+    examples:
+      pass: "Rows of placeholders until the response arrives."
+      fail: "'0 invoices' and 'No invoices yet' for a second, then 40 rows."
+      na: "A view with no asynchronous data."
+
+  - id: STATE-006
+    rule: "Content that arrives later takes the place reserved for it without moving what is already on screen."
+    why: "Layout that jumps makes people lose their place and click the wrong thing."
+    applies_when: "Parts of a screen load after first paint."
+    pass_when: "Placeholders match the size of what replaces them; cumulative layout shift stays at 0.1 or less."
+    evidence: measured
+    severity: minor
+    support: practice-consensus
+    sources: ["webdev:cls", "primer:ui-patterns/loading", "vercel:guidelines"]
+    counters: [B5.3]
+    examples:
+      pass: "A table placeholder with the same row height as real rows."
+      fail: "A banner loads late and pushes the form down as the user reaches for a button."
+      na: "Nothing loads after first paint."
+
+  - id: STATE-007
+    rule: "The layout holds with real-world content: long names, large numbers, many items and missing values."
+    why: "Screens built around tidy sample data break on the first real record."
+    applies_when: "A screen displays values that vary in length or count."
+    pass_when: "With a 60-character name, a nine-digit number, 200 items and a missing optional value, nothing overlaps, overflows its container or shows 'undefined', 'null' or 'NaN'."
+    evidence: walk
+    check: leftover-text
+    severity: major
+    support: practice-consensus
+    sources: ["catalogue:B5.5", "primer:ui-patterns/degraded-experiences", "wcag22:1.4.10", "hhs:13:8"]
+    counters: [B5.5]
+    examples:
+      pass: "Long names wrap or truncate with the full value available; a missing phone number shows as a dash with a label."
+      fail: "'undefined undefined' in the name column; a long project name pushes the action buttons off the card."
+      na: "A screen with only fixed text."
+
+  - id: STATE-008
+    rule: "When one part of a screen fails, the rest still works and the failed part says so."
+    why: "One failed widget should not take the page, or the navigation, down with it."
+    applies_when: "A screen is assembled from more than one data request."
+    pass_when: "With one request failing, the other parts render, navigation remains, and the failed part shows its own message."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["primer:ui-patterns/degraded-experiences", "sm86:6.0/3"]
+    counters: [B5.1]
+    examples:
+      pass: "The activity panel shows 'Activity is unavailable right now' while the rest of the page loads."
+      fail: "One failing request leaves a blank white page."
+      na: "A screen with a single data request."
+
+  - id: STATE-009
+    rule: "A list or table that continues beyond what is shown says so, and says when the end is reached."
+    why: "People cannot tell whether they are seeing everything."
+    applies_when: "A list or table shows a subset of its items."
+    pass_when: "The total or a 'showing x of y' is visible, with a control to see more, and the end is marked."
+    evidence: dom
+    severity: minor
+    support: practice-consensus
+    sources: ["sm86:2.7.2/5", "hhs:6:9", "nng:infinite-scrolling-tips"]
+    counters: [B5.1]
+    exceptions: ["Short lists whose end is obvious."]
+    examples:
+      pass: "'Showing 1 to 50 of 312' with page controls."
+      fail: "A table that silently shows the first 20 rows."
+      na: "Lists that always show every item."
+
+  - id: STATE-010
+    rule: "Leaving a screen with unsaved changes either keeps them or asks first."
+    why: "Work lost to a stray click is not recoverable."
+    applies_when: "A screen holds edits that are saved by an explicit action."
+    pass_when: "Navigating away or closing with unsaved edits triggers a prompt naming what would be lost, or the edits are restored on return."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:3.5/11", "sm86:6.0/5", "primer:ui-patterns/saving", "vercel:guidelines", "msux:mess-confirm#Guidelines > General"]
+    counters: [B11.1]
+    exceptions: ["No prompt when nothing significant was changed."]
+    examples:
+      pass: "Closing the tab mid-edit asks 'Leave without saving your changes to Invoice 42?'"
+      fail: "Clicking a navigation link discards a half-written description."
+      na: "Screens that save each change immediately."

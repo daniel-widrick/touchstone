@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1d21;
+    --muted: #56606c;
+    --line: #d5d9df;
+    --control: #76808c;
+    --accent: #1d5bc9;
+    --on-accent: #ffffff;
+    --danger: #b3261e;
+    --danger-bg: #fdf1f0;
+    --ok: #1a6b3a;
+    --new: #fff4cf;
+    --hover: #f2f4f7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181c;
+      --text: #e8eaed;
+      --muted: #a7b0bc;
+      --line: #363c45;
+      --control: #808a97;
+      --accent: #8ab4ff;
+      --on-accent: #0b1220;
+      --danger: #ff9486;
+      --danger-bg: #2c1917;
+      --ok: #74d6a0;
+      --new: #3a3212;
+      --hover: #20252b;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { color-scheme: light dark; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 54rem; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; }
+  h1 { font-size: 1.5rem; line-height: 1.2; margin: 0; }
+  h2 { font-size: 1.125rem; line-height: 1.3; margin: 0; }
+  p { margin: 0; }
+  .context { color: var(--muted); font-size: 0.9375rem; min-height: 1.45em; overflow-wrap: anywhere; }
+  header { padding-bottom: 1.25rem; }
+  section { border-top: 1px solid var(--line); padding: 1.25rem 0 1.75rem; }
+  .sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 1rem; margin-bottom: 0.875rem; }
+  .muted { color: var(--muted); font-size: 0.9375rem; }
+  h2:focus { outline: none; }
+  h2:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  :is(button, input, select, a):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  label, .cell-label { font-size: 0.9375rem; font-weight: 600; }
+  input[type="text"], input[type="email"], select {
+    font: inherit; font-size: 1rem; color: var(--text); background: var(--bg);
+    border: 1px solid var(--control); border-radius: 6px;
+    height: 2.5rem; padding: 0 0.625rem; width: 100%; min-width: 0;
+  }
+  input[aria-invalid="true"] { border: 2px solid var(--danger); }
+
+  .btn {
+    font: inherit; font-size: 0.9375rem; font-weight: 600; line-height: 1.2;
+    min-height: 2.5rem; padding: 0.375rem 0.875rem;
+    border: 1px solid var(--control); border-radius: 6px;
+    background: var(--bg); color: var(--text); cursor: pointer;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { filter: brightness(0.92); }
+  .btn.danger { color: var(--danger); }
+  .btn.small { min-height: 2rem; padding: 0.25rem 0.625rem; }
+  .btn[aria-disabled="true"] { cursor: progress; opacity: 0.75; }
+  .btn[aria-disabled="true"]::before {
+    content: ""; display: inline-block; width: 0.75em; height: 0.75em; margin-right: 0.5em;
+    border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+    vertical-align: -0.05em; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Forms */
+  .invite { display: grid; grid-template-columns: minmax(0, 1fr) 9rem auto; column-gap: 0.75rem; row-gap: 0.25rem;
+    grid-template-areas: "el rl ." "ei rs b" "er er er"; }
+  .invite [for="invite-email"] { grid-area: el; }
+  .invite [for="invite-role"] { grid-area: rl; }
+  #invite-email { grid-area: ei; }
+  #invite-role { grid-area: rs; }
+  #invite-btn { grid-area: b; }
+  #invite-email-err { grid-area: er; }
+  .rename { display: grid; grid-template-columns: minmax(0, 24rem) auto; justify-content: start; column-gap: 0.75rem; row-gap: 0.25rem;
+    grid-template-areas: "l ." "i b" "er er"; }
+  .rename label { grid-area: l; }
+  #team-name { grid-area: i; }
+  #name-btn { grid-area: b; }
+  #name-err { grid-area: er; }
+
+  .err, .note-ok { font-size: 0.9375rem; overflow-wrap: anywhere; }
+  .err:empty, .note-ok:empty { display: none; }
+  .err { color: var(--danger); font-weight: 600; }
+  .err::before {
+    content: "!"; display: inline-block; width: 1.125rem; height: 1.125rem; margin-right: 0.375rem;
+    border: 1.5px solid currentColor; border-radius: 50%; text-align: center; font-size: 0.75rem; line-height: 0.95rem;
+  }
+  .note-ok { color: var(--ok); font-weight: 600; }
+  .form-msg { margin-top: 0.5rem; }
+
+  .notice {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem;
+    margin-top: 1rem; padding: 0.5rem 0.75rem; border: 1px solid var(--control); border-radius: 6px;
+  }
+  .notice p { flex: 1 1 14rem; overflow-wrap: anywhere; }
+
+  /* Members table */
+  table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; table-layout: auto; }
+  thead th { text-align: left; font-size: 0.8125rem; font-weight: 600; color: var(--muted); padding: 0 0.75rem 0.375rem 0; border-bottom: 1px solid var(--control); white-space: nowrap; }
+  tbody th, tbody td { text-align: left; vertical-align: top; padding: 0.625rem 0.75rem 0.625rem 0; border-bottom: 1px solid var(--line); font-weight: 400; }
+  tbody tr > :last-child, thead tr > :last-child { padding-right: 0; text-align: right; }
+  .m-name { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .m-email { display: block; color: var(--muted); font-size: 0.9375rem; overflow-wrap: anywhere; }
+  .c-role { width: 13.5rem; }
+  .c-role select { width: 8rem; }
+  .c-active { width: 8.5rem; white-space: nowrap; }
+  .c-act { width: 6rem; }
+  .role-text, .c-active { line-height: 2.5rem; }
+  .cell-label { display: none; }
+  tr.is-new > * { animation: flash 2.5s ease-out; }
+  @keyframes flash { from { background: var(--new); } to { background: transparent; } }
+
+  .status { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; font-size: 0.875rem; color: var(--muted); }
+  .status:empty { display: none; }
+  .status.saved { color: var(--ok); font-weight: 600; }
+  .status.failed { color: var(--danger); font-weight: 600; }
+  .c-role .status { margin-left: 0.5rem; }
+  .c-role .status.failed { display: flex; margin: 0.375rem 0 0; }
+
+  .empty { margin-top: 1.25rem; padding: 1rem 0; border-top: 1px solid var(--control); border-bottom: 1px solid var(--line); }
+
+  /* Notifications */
+  .notif { list-style: none; margin: 0; padding: 0; max-width: 30rem; }
+  .notif li:first-child { border-top: 1px solid var(--line); }
+  .notif li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 1rem; border-bottom: 1px solid var(--line); }
+  .notif label { display: flex; align-items: center; gap: 0.625rem; min-height: 2.75rem; flex: 1 1 auto; font-weight: 400; font-size: 1rem; cursor: pointer; }
+  .notif input { width: 1.5rem; height: 1.5rem; margin: 0; accent-color: var(--accent); flex: none; }
+  .notif .status.failed { flex-basis: 100%; padding-bottom: 0.5rem; }
+
+  /* Loading and load failure */
+  .load { border-top: 1px solid var(--line); padding: 2rem 0; }
+  .load .spin { display: inline-block; width: 1em; height: 1em; margin-right: 0.5rem; vertical-align: -0.15em;
+    border: 2px solid var(--control); border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .load .btn { margin-top: 0.75rem; }
+
+  /* Dialog */
+  dialog { border: 1px solid var(--control); border-radius: 10px; padding: 1.25rem; width: min(28rem, calc(100vw - 2rem)); background: var(--bg); color: var(--text); }
+  dialog::backdrop { background: rgba(10, 14, 20, 0.55); }
+  dialog h2 { overflow-wrap: anywhere; margin-bottom: 0.5rem; }
+  dialog .err { margin-top: 0.75rem; }
+  .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.625rem; margin-top: 1.25rem; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+  @media (max-width: 640px) {
+    .page { padding: 1rem 1rem 3rem; }
+    .btn, input[type="text"], input[type="email"], select { min-height: 2.75rem; height: auto; }
+    input[type="text"], input[type="email"], select { height: 2.75rem; }
+    .btn.small { min-height: 2.75rem; }
+    .invite { grid-template-columns: minmax(0, 1fr); grid-template-areas: "el" "ei" "er" "rl" "rs" "b"; }
+    .invite [for="invite-role"] { margin-top: 0.5rem; }
+    #invite-btn { margin-top: 0.75rem; }
+    .rename { grid-template-columns: minmax(0, 1fr); grid-template-areas: "l" "i" "er" "b"; }
+    #name-btn { margin-top: 0.5rem; justify-self: start; }
+    .dialog-actions .btn { flex: 1 1 100%; }
+
+    table, tbody { display: block; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); }
+    table { border-top: 1px solid var(--control); }
+    tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "role role" "active act"; gap: 0.5rem 0.75rem; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+    tbody th, tbody td, tbody td.c-role, tbody td.c-active, tbody td.c-act { display: block; padding: 0; border: 0; width: auto; }
+    tbody th { grid-area: name; }
+    .c-role { grid-area: role; }
+    .c-active { grid-area: active; white-space: normal; line-height: 1.45; }
+    .c-act { grid-area: act; }
+    .role-text { line-height: 1.45; }
+    .cell-label { display: inline; margin-right: 0.5rem; }
+    .c-role select { width: 9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn[aria-disabled="true"]::before, .load .spin { animation: none; border-right-color: currentColor; border-style: dotted; }
+    tr.is-new > * { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <p class="context" id="team-context"></p>
+    <h1>Team settings</h1>
+  </header>
+
+  <main id="main">
+    <div class="load" id="load-panel">
+      <p id="load-text"><span class="spin" aria-hidden="true"></span>Loading team...</p>
+      <div id="load-failed" hidden>
+        <p class="err">Could not load the team. Check your connection and try again.</p>
+        <button type="button" class="btn" id="load-retry">Try again</button>
+      </div>
+    </div>
+
+    <div id="content" hidden>
+      <section aria-labelledby="members-h">
+        <div class="sec-head">
+          <h2 id="members-h" tabindex="-1">Members</h2>
+          <p class="muted" id="seats"></p>
+        </div>
+
+        <form class="invite" id="invite-form" novalidate>
+          <label for="invite-email">Invite by email address</label>
+          <label for="invite-role">Role</label>
+          <input id="invite-email" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="invite-email-err">
+          <select id="invite-role" name="role">
+            <option value="member" selected>Member</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="btn primary" id="invite-btn">Send invite</button>
+          <p class="err" id="invite-email-err"></p>
+        </form>
+        <p class="err form-msg" id="invite-err"></p>
+        <p class="note-ok form-msg" id="invite-ok"></p>
+
+        <div class="notice" id="removed-notice" hidden>
+          <p id="removed-text"></p>
+          <button type="button" class="btn small" id="removed-reinvite">Invite again</button>
+          <button type="button" class="btn small" id="removed-dismiss">Dismiss</button>
+        </div>
+
+        <table id="members-table" role="table" aria-labelledby="members-h">
+          <thead role="rowgroup">
+            <tr role="row">
+              <th scope="col" role="columnheader">Name</th>
+              <th scope="col" role="columnheader" id="col-role">Role</th>
+              <th scope="col" role="columnheader">Last active</th>
+              <th scope="col" role="columnheader"><span class="sr-only">Remove</span></th>
+            </tr>
+          </thead>
+          <tbody id="members-body" role="rowgroup"></tbody>
+        </table>
+        <p class="empty" id="members-empty" hidden>No one is on this team yet. Invite the first person by email.</p>
+      </section>
+
+      <section aria-labelledby="name-h">
+        <div class="sec-head"><h2 id="name-h">Team name</h2></div>
+        <form class="rename" id="name-form" novalidate>
+          <label for="team-name">Name</label>
+          <input id="team-name" name="team-name" type="text" autocomplete="off" aria-describedby="name-err">
+          <button type="submit" class="btn" id="name-btn">Save name</button>
+          <p class="err" id="name-err"></p>
+        </form>
+        <p class="note-ok form-msg" id="name-ok"></p>
+      </section>
+
+      <section aria-labelledby="notif-h">
+        <div class="sec-head"><h2 id="notif-h">Email notifications</h2></div>
+        <ul class="notif" id="notif-list" role="group" aria-labelledby="notif-h"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="sr-only" id="live" role="status" aria-live="polite"></div>
+
+<dialog id="remove-dialog" aria-labelledby="remove-title" aria-describedby="remove-desc">
+  <h2 id="remove-title"></h2>
+  <p id="remove-desc">They lose access at once. You can invite them again later.</p>
+  <p class="err" id="remove-err"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn" id="remove-keep">Keep on team</button>
+    <button type="button" class="btn danger" id="remove-confirm">Remove from team</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props, kids) => {
+    const node = Object.assign(document.createElement(tag), props || {});
+    (kids || []).forEach((k) => node.append(k));
+    return node;
+  };
+
+  const ROLE = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+  const NOTIF = { weekly_digest: 'Weekly digest', new_member: 'New member joins', billing: 'Billing', mentions: 'Mentions' };
+  const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const RETRY = ' Check your connection and try again.';
+  const dateFmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+  let team = null;
+
+  /* Announcements for assistive technology */
+  let liveTimer;
+  function announce(text) {
+    const live = $('live');
+    live.textContent = '';
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => { live.textContent = text; }, 60);
+  }
+
+  /* Buttons stay focusable while their request runs */
+  const isBusy = (btn) => btn.getAttribute('aria-disabled') === 'true';
+  function setBusy(btn, busyLabel) {
+    if (busyLabel) {
+      btn.dataset.label = btn.textContent;
+      btn.textContent = busyLabel;
+      btn.setAttribute('aria-disabled', 'true');
+    } else {
+      btn.textContent = btn.dataset.label;
+      btn.removeAttribute('aria-disabled');
+    }
+  }
+
+  /* Small status beside a control that saves at once */
+  function setStatus(node, kind, text, retry) {
+    clearTimeout(node._timer);
+    node.className = 'status' + (kind ? ' ' + kind : '');
+    node.textContent = '';
+    if (!kind) return;
+    node.append(el('span', { textContent: text }));
+    if (retry) {
+      const b = el('button', { type: 'button', className: 'btn small', textContent: 'Try again' });
+      b.setAttribute('aria-label', 'Try again: ' + retry.label);
+      b.addEventListener('click', retry.run);
+      node.append(b);
+    }
+    if (kind === 'saved') node._timer = setTimeout(() => setStatus(node, null), 4000);
+  }
+
+  /* A control whose changes apply at once. The latest choice wins; a refused change is put back. */
+  function instantSave(o) {
+    const s = { saved: o.value, want: o.value, busy: false };
+    async function run() {
+      if (s.busy) return;
+      s.busy = true;
+      let failed;
+      while (s.want !== s.saved) {
+        const target = s.want;
+        setStatus(o.status, 'saving', 'Saving...');
+        try {
+          await o.send(target);
+          s.saved = target;
+          o.onSaved(target);
+        } catch (e) {
+          if (s.want !== target) continue;
+          s.want = s.saved;
+          o.show(s.saved);
+          failed = { value: target };
+          break;
+        }
+      }
+      s.busy = false;
+      if (failed) {
+        setStatus(o.status, 'failed', o.failShort(failed.value), {
+          label: o.describe(failed.value),
+          run: () => { o.control.focus(); o.show(failed.value); set(failed.value); },
+        });
+        announce('Not saved. Could not ' + o.describe(failed.value) + '.' + RETRY);
+      } else {
+        setStatus(o.status, 'saved', 'Saved');
+        announce('Saved. ' + o.savedText(s.saved));
+      }
+    }
+    function set(v) {
+      s.want = v;
+      if (v === s.saved && !s.busy) { setStatus(o.status, null); return; }
+      run();
+    }
+    return { set };
+  }
+
+  /* Loading */
+  async function load() {
+    $('load-text').hidden = false;
+    $('load-failed').hidden = true;
+    announce('Loading team');
+    const hadFocus = document.activeElement === $('load-retry');
+    try {
+      team = await api.getTeam();
+    } catch (e) {
+      $('load-text').hidden = true;
+      $('load-failed').hidden = false;
+      if (hadFocus) $('load-retry').focus();
+      announce('Could not load the team.' + RETRY);
+      return;
+    }
+    $('load-panel').hidden = true;
+    $('content').hidden = false;
+    showTeamName();
+    $('team-name').value = team.name;
+    renderMembers();
+    renderNotifications();
+    if (hadFocus) $('members-h').focus();
+    announce('Team loaded');
+  }
+  $('load-retry').addEventListener('click', load);
+
+  function showTeamName() {
+    $('team-context').textContent = team.name;
+    document.title = 'Team settings - ' + team.name;
+  }
+
+  /* Members */
+  function updateCounts() {
+    const used = team.members.length;
+    const full = used >= team.seats;
+    $('seats').textContent = used + ' of ' + team.seats + ' seats used' + (full ? '. Remove someone to invite another person.' : '');
+    $('members-table').hidden = used === 0;
+    $('members-empty').hidden = used !== 0;
+  }
+
+  function renderMembers() {
+    const body = $('members-body');
+    body.textContent = '';
+    team.members.forEach((m) => body.append(memberRow(m)));
+    updateCounts();
+  }
+
+  function memberRow(m) {
+    const nameId = 'name-' + m.id;
+    const tr = el('tr', { id: 'row-' + m.id });
+    tr.setAttribute('role', 'row');
+
+    const th = el('th', { scope: 'row' }, [
+      el('span', { className: 'm-name', id: nameId, textContent: m.name }),
+      el('span', { className: 'm-email', textContent: m.email }),
+    ]);
+    th.setAttribute('role', 'rowheader');
+
+    const roleCell = el('td', { className: 'c-role' });
+    roleCell.setAttribute('role', 'cell');
+    const roleLabel = el('span', { className: 'cell-label', textContent: 'Role' });
+    roleLabel.setAttribute('aria-hidden', 'true');
+    roleCell.append(roleLabel);
+    if (m.role === 'owner') {
+      roleCell.append(el('span', { className: 'role-text', textContent: ROLE.owner }));
+    } else {
+      const select = el('select', { id: 'role-' + m.id }, [
+        el('option', { value: 'member', textContent: ROLE.member }),
+        el('option', { value: 'admin', textContent: ROLE.admin }),
+      ]);
+      select.value = m.role;
+      select.setAttribute('aria-labelledby', 'col-role ' + nameId);
+      const status = el('span', { className: 'status' });
+      const saver = instantSave({
+        value: m.role, control: select, status,
+        send: (role) => api.changeRole(m.id, role),
+        show: (role) => { select.value = role; },
+        onSaved: (role) => { m.role = role; },
+        failShort: () => 'Role not changed.',
+        describe: (role) => 'change ' + m.name + ' to ' + ROLE[role],
+        savedText: (role) => m.name + ' is now ' + ROLE[role] + '.',
+      });
+      select.addEventListener('change', () => saver.set(select.value));
+      roleCell.append(select, status);
+    }
+
+    const activeCell = el('td', { className: 'c-active' });
+    activeCell.setAttribute('role', 'cell');
+    const activeLabel = el('span', { className: 'cell-label', textContent: 'Last active' });
+    activeLabel.setAttribute('aria-hidden', 'true');
+    activeCell.append(activeLabel);
+    if (m.lastActive) {
+      activeCell.append(el('time', { dateTime: m.lastActive, textContent: dateFmt.format(new Date(m.lastActive)) }));
+    } else {
+      activeCell.append('Never');
+    }
+
+    const actCell = el('td', { className: 'c-act' });
+    actCell.setAttribute('role', 'cell');
+    if (m.role !== 'owner') {
+      const remove = el('button', { type: 'button', className: 'btn danger', textContent: 'Remove' });
+      remove.setAttribute('aria-label', 'Remove ' + m.name);
+      remove.addEventListener('click', () => openRemove(m));
+      actCell.append(remove);
+    }
+
+    tr.append(th, roleCell, activeCell, actCell);
+    return tr;
+  }
+
+  /* Invite */
+  const inviteEmail = $('invite-email');
+  const inviteBtn = $('invite-btn');
+
+  function inviteFieldError(text) {
+    $('invite-email-err').textContent = text;
+    inviteEmail.setAttribute('aria-invalid', 'true');
+    inviteEmail.focus();
+    announce(text);
+  }
+  function clearInviteMessages() {
+    $('invite-email-err').textContent = '';
+    $('invite-err').textContent = '';
+    $('invite-ok').textContent = '';
+    inviteEmail.removeAttribute('aria-invalid');
+  }
+  inviteEmail.addEventListener('input', clearInviteMessages);
+
+  async function submitInvite() {
+    if (isBusy(inviteBtn)) return;
+    clearInviteMessages();
+    const email = inviteEmail.value.trim().toLowerCase();
+    const role = $('invite-role').value;
+    const seatsFull = 'All ' + team.seats + ' seats are in use. Remove someone to invite another person.';
+    const exists = email + ' is already on this team.';
+
+    if (!email) return inviteFieldError('Enter an email address.');
+    if (!EMAIL_RE.test(email)) return inviteFieldError('Enter a full email address, like name@example.org.');
+    if (team.members.some((m) => m.email.toLowerCase() === email)) return inviteFieldError(exists);
+    if (team.members.length >= team.seats) return inviteFieldError(seatsFull);
+
+    setBusy(inviteBtn, 'Sending...');
+    announce('Sending invite');
+    try {
+      const m = await api.inviteMember(email, role);
+      team.members.push(m);
+      const row = memberRow(m);
+      row.classList.add('is-new');
+      $('members-body').append(row);
+      updateCounts();
+      inviteEmail.value = '';
+      $('invite-role').value = 'member';
+      const done = 'Invite sent to ' + m.email + ' as ' + ROLE[m.role].toLowerCase() + '.';
+      $('invite-ok').textContent = done;
+      announce(done);
+    } catch (e) {
+      if (e.code === 'EXISTS') inviteFieldError(exists);
+      else if (e.code === 'SEATS') inviteFieldError(seatsFull);
+      else if (e.code === 'VALIDATION') inviteFieldError('Enter a full email address, like name@example.org.');
+      else {
+        const text = 'Could not send the invite to ' + email + '.' + RETRY;
+        $('invite-err').textContent = text;
+        announce(text);
+      }
+    } finally {
+      setBusy(inviteBtn, null);
+    }
+  }
+  $('invite-form').addEventListener('submit', (e) => { e.preventDefault(); submitInvite(); });
+
+  /* Remove */
+  const dialog = $('remove-dialog');
+  const removeConfirm = $('remove-confirm');
+  let removing = null;
+  let lastRemoved = null;
+
+  function openRemove(m) {
+    removing = m;
+    $('remove-title').textContent = 'Remove ' + m.name + ' from ' + team.name + '?';
+    $('remove-err').textContent = '';
+    dialog.showModal();
+    $('remove-keep').focus();
+  }
+  $('remove-keep').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (e) => { if (e.target === dialog && !isBusy(removeConfirm)) dialog.close(); });
+  dialog.addEventListener('cancel', (e) => { if (isBusy(removeConfirm)) e.preventDefault(); });
+
+  removeConfirm.addEventListener('click', async () => {
+    if (isBusy(removeConfirm) || !removing) return;
+    const m = removing;
+    $('remove-err').textContent = '';
+    setBusy(removeConfirm, 'Removing...');
+    announce('Removing ' + m.name);
+    try {
+      await api.removeMember(m.id);
+    } catch (e) {
+      setBusy(removeConfirm, null);
+      const text = 'Could not remove ' + m.name + '. They still have access.' + RETRY;
+      if (dialog.open) {
+        $('remove-err').textContent = text;
+      } else {
+        showRemovedNotice(text, null);
+      }
+      announce(text);
+      return;
+    }
+    setBusy(removeConfirm, null);
+    team.members = team.members.filter((x) => x.id !== m.id);
+    const row = $('row-' + m.id);
+    if (row) row.remove();
+    updateCounts();
+    if (dialog.open) dialog.close();
+    const text = m.name + ' was removed from the team.';
+    showRemovedNotice(text, m);
+    $('members-h').focus();
+    announce(text);
+  });
+
+  function showRemovedNotice(text, member) {
+    lastRemoved = member;
+    $('removed-text').textContent = text;
+    $('removed-reinvite').hidden = !member;
+    $('removed-notice').hidden = false;
+  }
+  $('removed-dismiss').addEventListener('click', () => {
+    $('removed-notice').hidden = true;
+    $('members-h').focus();
+  });
+  $('removed-reinvite').addEventListener('click', () => {
+    if (!lastRemoved) return;
+    inviteEmail.value = lastRemoved.email;
+    $('invite-role').value = lastRemoved.role;
+    $('removed-notice').hidden = true;
+    inviteBtn.focus();
+    submitInvite();
+  });
+
+  /* Rename */
+  const nameInput = $('team-name');
+  const nameBtn = $('name-btn');
+  function clearNameMessages() {
+    $('name-err').textContent = '';
+    $('name-ok').textContent = '';
+    nameInput.removeAttribute('aria-invalid');
+  }
+  nameInput.addEventListener('input', clearNameMessages);
+
+  $('name-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (isBusy(nameBtn)) return;
+    clearNameMessages();
+    const name = nameInput.value.trim();
+    const required = 'Enter a team name.';
+    const invalid = (text) => {
+      $('name-err').textContent = text;
+      nameInput.setAttribute('aria-invalid', 'true');
+      nameInput.focus();
+      announce(text);
+    };
+    if (!name) return invalid(required);
+    if (name === team.name) {
+      nameInput.value = name;
+      $('name-ok').textContent = 'No changes to save.';
+      announce('No changes to save.');
+      return;
+    }
+    setBusy(nameBtn, 'Saving...');
+    announce('Saving team name');
+    try {
+      const res = await api.renameTeam(name);
+      team.name = res.name;
+      if (nameInput.value.trim() === name) nameInput.value = res.name;
+      showTeamName();
+      const done = 'Team renamed to ' + res.name + '.';
+      $('name-ok').textContent = done;
+      announce(done);
+    } catch (err) {
+      if (err.code === 'VALIDATION') invalid(required);
+      else {
+        const text = 'Could not rename the team. It is still called ' + team.name + '.' + RETRY;
+        $('name-err').textContent = text;
+        announce(text);
+      }
+    } finally {
+      setBusy(nameBtn, null);
+    }
+  });
+
+  /* Notifications */
+  function renderNotifications() {
+    const list = $('notif-list');
+    list.textContent = '';
+    Object.keys(team.notifications).forEach((key) => {
+      const text = NOTIF[key] || (key.charAt(0).toUpperCase() + key.slice(1)).replace(/_/g, ' ');
+      const box = el('input', { type: 'checkbox', id: 'notif-' + key, checked: !!team.notifications[key] });
+      const status = el('span', { className: 'status' });
+      const saver = instantSave({
+        value: box.checked, control: box, status,
+        send: (on) => api.setNotification(key, on),
+        show: (on) => { box.checked = on; },
+        onSaved: (on) => { team.notifications[key] = on; },
+        failShort: (on) => 'Still ' + (on ? 'off' : 'on') + '. Not saved.',
+        describe: (on) => 'turn ' + (on ? 'on' : 'off') + ' ' + text + ' emails',
+        savedText: (on) => text + ' emails are ' + (on ? 'on' : 'off') + '.',
+      });
+      box.addEventListener('change', () => saver.set(box.checked));
+      list.append(el('li', {}, [el('label', {}, [box, text]), status]));
+    });
+  }
+
+  /* Typed but unsent text is not lost to a stray reload */
+  window.addEventListener('beforeunload', (e) => {
+    if (!team) return;
+    if (nameInput.value.trim() !== team.name || inviteEmail.value.trim()) e.preventDefault();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+domain: feedback
+prefix: FB
+title: Feedback, messages and confirmations
+load_when: "Any screen where an action changes something: saving, deleting, sending, toggling, importing."
+rules:
+  - id: FB-001
+    rule: "Every action produces a visible response at once."
+    why: "With no response people click again, creating duplicates, or assume the product is broken."
+    applies_when: "The screen has controls that trigger an action."
+    pass_when: "Within about a tenth of a second of using a control, something visible changes: a pressed or busy state, the result, or a message."
+    evidence: walk
+    severity: blocker
+    support: some-support
+    sources: ["sm86:3.0/14", "sm86:1.0/3", "nielsen1993", "card1991", "sm86:3.1.3/9"]
+    counters: [B8.1, B5.8]
+    examples:
+      pass: "A clicked button shows a pressed state and then a busy label until the response."
+      fail: "Clicking 'Save' changes nothing on screen for two seconds."
+      na: "A screen with no actions."
+
+  - id: FB-002
+    rule: "The outcome of an action is evident on screen: the result is visible, or a message states it."
+    why: "People need to know whether the thing they asked for happened."
+    applies_when: "An action completes, succeeds or fails."
+    pass_when: "After the action, either the changed item is visibly changed in place, or a message says what happened. Failures are always stated."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:1.0/12", "sm86:4.2/4", "sm86:3.0/15", "sm86:5.4/2", "bargas2010:19"]
+    counters: [B8.2]
+    examples:
+      pass: "The new row appears at the top of the table, highlighted briefly."
+      fail: "A form clears after submit with no sign whether it was saved."
+      na: "A screen with no actions."
+
+  - id: FB-003
+    rule: "A success message is shown only when the result is not already visible."
+    why: "Confirming what the user can see adds noise and trains them to ignore messages."
+    applies_when: "A screen shows a success toast, banner or dialog."
+    pass_when: "Each success message reports something the user could not otherwise see, such as a background send or an off-screen change."
+    evidence: judgement
+    severity: minor
+    support: practice-consensus
+    sources: ["msux:mess-notif#What to notify", "msux:mess-notif#Is this the right user interface?", "apple:feedback", "primer:ui-patterns/notification-messaging"]
+    counters: [B3.4]
+    examples:
+      pass: "'Invite sent to sam@example.org', because nothing else on screen shows it."
+      fail: "A 'Row added successfully!' toast while the row appears in the table."
+      na: "No success messages."
+
+  - id: FB-004
+    rule: "An error or a message with an action in it stays until the user dismisses it or the problem is resolved."
+    why: "A message that disappears on a timer is missed, and its action with it."
+    applies_when: "The screen reports errors, or shows transient messages that contain a button or link."
+    pass_when: "Errors appear in place or in a persistent banner; nothing carrying an error or an action auto-dismisses."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["atlassian:components/flag/usage", "shopify:user-experience/alerts", "carbon:patterns/notification-pattern", "nng:indicators-validations-notifications", "msux:mess-notif#When to notify", "wcag22:2.2.1"]
+    counters: [B5.4, B8.2]
+    dissent: "GitHub Primer avoids toasts altogether on accessibility grounds."
+    examples:
+      pass: "A failed save shows an inline message with 'Try again' that stays until it succeeds."
+      fail: "'Failed to save' in a toast that fades after three seconds."
+      na: "No transient messages and no error states."
+
+  - id: FB-005
+    rule: "The kind of message matches its scope: beside the field, on the section or page, or a dialog only when a decision is required now."
+    why: "A modal for something that needs no decision interrupts; a toast for a field error is too far from the fix."
+    applies_when: "The screen shows any message."
+    pass_when: "Field problems are inline; page-level status is a banner in the page; a dialog is used only when the user must choose before continuing."
+    evidence: judgement
+    severity: major
+    support: practice-consensus
+    sources: ["carbon:patterns/notification-pattern", "primer:ui-patterns/notification-messaging", "msux:mess-error#Design concepts > Error message presentation", "msux:mess-warn#Presentation", "msux:top-violations#Dialog boxes"]
+    counters: [B7.6]
+    examples:
+      pass: "A failed upload shows its message on the upload row."
+      fail: "A modal dialog announcing 'Settings saved' with an OK button."
+      na: "No messages."
+
+  - id: FB-006
+    rule: "An action that can be reversed is carried out at once and offers undo."
+    why: "Confirmations for routine actions are answered by reflex, so they protect nothing and slow everything."
+    applies_when: "An action removes, archives, moves or changes something that the system could restore."
+    pass_when: "The action runs without a confirmation dialog and an undo control or a recoverable location is offered."
+    evidence: walk
+    severity: major
+    support: some-support
+    sources: ["msux:mess-confirm#Consider the design alternatives", "msux:mess-confirm#Is this the right user interface?", "nng:confirmation-dialog", "apple:alerts", "mswin:design/basics/commanding-basics", "sm86:3.5/10", "sm86:6.0/21", "anderson2015"]
+    counters: [B7.5]
+    dissent: "Smith and Mosier also ask for confirmation of destructive entries; no experiment compares undo with confirmation directly."
+    examples:
+      pass: "Archiving a project removes it and shows 'Project archived. Undo'."
+      fail: "'Are you sure you want to archive this project?' for an action reversible from the archive."
+      na: "No reversible removing or changing actions."
+
+  - id: FB-007
+    rule: "An action that cannot be undone asks first, naming the thing and the consequence, with buttons that name the outcomes."
+    why: "This is the one place a confirmation earns its interruption, and only if it can be answered without guessing."
+    applies_when: "An action permanently deletes or overwrites data, sends something that cannot be recalled, or spends money."
+    pass_when: "A confirmation names the specific object and what will be lost, says 'permanently' where true, labels its buttons with the outcomes, and the safe choice is the default."
+    evidence: walk
+    severity: blocker
+    support: practice-consensus
+    sources: ["sm86:6.0/18", "sm86:6.0/20", "sm86:3.5/8", "msux:mess-confirm#Provide all the information", "msux:mess-confirm#Text > Main instructions", "msux:mess-confirm#Default values", "nng:confirmation-dialog"]
+    counters: [B7.5]
+    examples:
+      pass: "'Permanently delete Acme Ltd and its 14 invoices?' with 'Delete customer' and 'Keep customer'; focus on 'Keep customer'."
+      fail: "'Are you sure?' with 'OK' and 'Cancel', or deletion on a single click with no way back."
+      na: "No irreversible actions."
+
+  - id: FB-008
+    rule: "Confirmation is kept for rare, consequential actions."
+    why: "A confirmation nearly everyone answers the same way is noise, and it wears down attention for the ones that matter."
+    applies_when: "The screen uses a confirmation dialog."
+    pass_when: "Each confirmation guards an action that is both uncommon and costly to get wrong; none guards cancel, close, save or a frequent action."
+    evidence: judgement
+    severity: major
+    support: well-replicated
+    sources: ["msux:mess-confirm#Unnecessary confirmations are annoying", "msux:mess-confirm#How to determine if a confirmation is necessary", "msux:win-dialog-box#Commit buttons", "anderson2015", "akhawe2013", "nng:confirmation-dialog"]
+    counters: [B7.5, B3.5]
+    examples:
+      pass: "The only confirmation in the product is on permanently deleting a workspace."
+      fail: "Confirmations on 'Save', 'Cancel', 'Log out' and 'Remove filter'."
+      na: "No confirmation dialogs."
+
+  - id: FB-009
+    rule: "A change made on screen before the server answers is put back, with a message, if the server refuses it."
+    why: "An optimistic change that silently fails leaves the screen showing something untrue."
+    applies_when: "The interface updates immediately and sends the request in the background."
+    pass_when: "With the request forced to fail, the item returns to its previous state and a message says the change was not saved."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["vercel:guidelines", "sm86:5.4/7", "sm86:4.2/11"]
+    counters: [B8.3]
+    examples:
+      pass: "A toggle flips back and shows 'Could not turn on notifications. Try again.'"
+      fail: "The toggle stays on although the request failed; a reload shows it off."
+      na: "No optimistic updates."
+
+  - id: FB-010
+    rule: "A message is written to be acted on: one message per event, and none when there is nothing the user would do differently."
+    why: "Messages that change nothing for the user are interruptions."
+    applies_when: "The screen shows notifications, toasts or status messages."
+    pass_when: "Each message corresponds to one event and to something the user may now do or avoid; routine internal events produce none."
+    evidence: judgement
+    severity: minor
+    support: practice-consensus
+    sources: ["msux:mess-notif#Is this the right user interface?", "msux:mess-notif#What to notify", "msux:mess-error#Is this the right user interface?", "msux:progress-bars#Guidelines > General", "mswin:design/basics/commanding-basics"]
+    counters: [B3.4]
+    examples:
+      pass: "One message when an export is ready to download."
+      fail: "Toasts for 'Loading data', 'Data loaded', 'Cache refreshed' and 'Connected'."
+      na: "No notifications or toasts."
+
+  - id: FB-011
+    rule: "A time limit is announced before it expires and can be extended."
+    why: "Silent timeouts destroy work in progress."
+    applies_when: "A session or step has a time limit."
+    pass_when: "A warning appears before expiry with a way to continue, and input survives re-authentication."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["hhs:2:7", "wcag22:2.2.1", "sm86:1.0/8"]
+    counters: [B11.1]
+    examples:
+      pass: "'You will be signed out in 2 minutes. Stay signed in.'"
+      fail: "Submitting a long form returns the login page and the answers are gone."
+      na: "No time limits."

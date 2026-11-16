@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; margin: 0; color: #1f2937; background: #fff; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 24px; margin: 0 0 16px; }
+  h2 { font-size: 18px; margin: 28px 0 8px; }
+  button { font: inherit; min-height: 36px; padding: 6px 14px; border-radius: 6px; border: 1px solid #6b7280; background: #fff; color: #1f2937; cursor: pointer; }
+  button.primary { background: #3730a3; border-color: #3730a3; color: #fff; }
+  button[aria-busy=true] { opacity: .7; }
+  :focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+  input[type=text], input[type=email], select { font: inherit; min-height: 36px; padding: 4px 8px; border: 1px solid #6b7280; border-radius: 6px; max-width: 100%; }
+  label { display: block; margin: 12px 0 4px; }
+  .hint { color: #4b5563; margin: 0 0 4px; }
+  .error { color: #b91c1c; margin: 4px 0; }
+  .error::before { content: "Problem: "; font-weight: 600; }
+  .status { color: #166534; margin: 4px 0; min-height: 1.5em; }
+  .panel { border: 1px solid #b91c1c; border-radius: 6px; padding: 12px; margin: 8px 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid #d1d5db; vertical-align: top; overflow-wrap: anywhere; }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .undo { border: 1px solid #6b7280; border-radius: 6px; padding: 8px 12px; margin: 8px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  .check { display: flex; gap: 8px; align-items: center; min-height: 36px; margin: 0; }
+  dialog { border: 1px solid #6b7280; border-radius: 8px; max-width: 420px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Team settings</h1>
+  <div id="page-status" role="status"></div>
+  <div id="load-error" hidden class="panel">
+    <p class="error">Team settings could not be loaded. Check your connection and try again.</p>
+    <button type="button" id="retry-load">Try again</button>
+  </div>
+
+  <div id="content" hidden>
+    <section aria-labelledby="h-name">
+      <h2 id="h-name">Team name</h2>
+      <form id="rename-form" novalidate>
+        <label for="team-name">Team name</label>
+        <input id="team-name" type="text" autocomplete="organization" aria-describedby="rename-msg">
+        <p id="rename-msg" role="alert"></p>
+        <button class="primary" type="submit" id="rename">Save team name</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="h-members">
+      <h2 id="h-members">Members</h2>
+      <div id="members-msg" role="alert"></div>
+      <div id="undo-area"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Last active</th><th scope="col">Actions</th></tr></thead>
+          <tbody id="members"></tbody>
+        </table>
+      </div>
+      <p id="members-empty" hidden>No one is on this team yet. Invite the first member below.</p>
+    </section>
+
+    <section aria-labelledby="h-invite">
+      <h2 id="h-invite">Invite a member</h2>
+      <form id="invite-form" novalidate>
+        <label for="invite-email">Email address</label>
+        <input id="invite-email" type="email" autocomplete="email" aria-describedby="invite-msg">
+        <p id="invite-msg" role="alert"></p>
+        <label for="invite-role">Role</label>
+        <p class="hint" id="role-hint">Admins can invite and remove people.</p>
+        <select id="invite-role" aria-describedby="role-hint"><option value="member" selected>Member</option><option value="admin">Admin</option></select>
+        <p><button type="submit" id="invite">Send invite</button></p>
+      </form>
+    </section>
+
+    <section aria-labelledby="h-notif">
+      <h2 id="h-notif">Email notifications</h2>
+      <fieldset id="notifications"><legend class="hint">Each change is saved as you make it.</legend></fieldset>
+      <div id="notif-msg" role="alert"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+
+const $ = (id) => document.getElementById(id);
+const ROLE = { owner: 'Owner', admin: 'Admin', member: 'Member' };
+const NOTIF = { weekly_digest: 'Weekly summary', new_member: 'Someone joins the team', billing: 'Billing and invoices', mentions: 'Someone mentions the team' };
+let team = null;
+
+const say = (msg) => { $('page-status').textContent = msg; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const when = (iso) => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not yet signed in';
+
+// Turn a server error into a sentence a person can act on.
+function explain(e, doing) {
+  if (e.code === 'EXISTS') return 'That person is already on the team.';
+  if (e.code === 'SEATS') return 'All ' + team.seats + ' seats are in use. Remove someone or add seats before inviting.';
+  if (e.code === 'VALIDATION') return doing === 'rename' ? 'Enter a team name.' : 'Enter a full email address, like name@example.org.';
+  return 'The connection dropped, so this was not saved. Try again.';
+}
+
+async function busy(btn, label, fn) {
+  if (btn.getAttribute('aria-busy') === 'true') return;
+  const old = btn.textContent;
+  btn.setAttribute('aria-busy', 'true'); btn.textContent = label;
+  try { await fn(); } finally { btn.removeAttribute('aria-busy'); btn.textContent = old; }
+}
+
+function renderMembers() {
+  $('members-empty').hidden = team.members.length > 0;
+  $('members').innerHTML = team.members.map((m) => `
+    <tr>
+      <th scope="row">${esc(m.name)}</th><td>${esc(m.email)}</td>
+      <td>${m.role === 'owner' ? 'Owner' : `<select data-role="${m.id}" aria-label="Role for ${esc(m.name)}">
+        <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin</option>
+        <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member</option></select>`}</td>
+      <td>${when(m.lastActive)}</td>
+      <td class="row-actions">${m.role === 'owner' ? 'The owner cannot be removed' : `<button type="button" data-remove="${m.id}">Remove ${esc(m.name)}</button>`}</td>
+    </tr>`).join('');
+}
+
+function render() {
+  document.title = 'Team settings - ' + team.name;
+  $('team-name').value = team.name;
+  renderMembers();
+  $('notifications').querySelectorAll('.check').forEach((n) => n.remove());
+  for (const k of Object.keys(team.notifications)) {
+    const p = document.createElement('p'); p.className = 'check';
+    p.innerHTML = `<input type="checkbox" id="n-${k}" data-notif="${k}" ${team.notifications[k] ? 'checked' : ''}><label for="n-${k}" style="margin:0">${NOTIF[k] || k}</label>`;
+    $('notifications').appendChild(p);
+  }
+}
+
+async function load() {
+  $('load-error').hidden = true; $('content').hidden = true;
+  say('Loading team settings...');
+  try {
+    team = await api.getTeam();
+    render();
+    $('content').hidden = false; say('');
+  } catch (e) {
+    say(''); $('load-error').hidden = false; $('retry-load').focus();
+  }
+}
+$('retry-load').addEventListener('click', load);
+
+$('rename-form').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const name = $('team-name').value;
+  if (!name.trim()) { $('rename-msg').className = 'error'; $('rename-msg').textContent = 'Enter a team name.'; $('team-name').setAttribute('aria-invalid', 'true'); $('team-name').focus(); return; }
+  busy($('rename'), 'Saving...', async () => {
+    try {
+      team.name = (await api.renameTeam(name)).name;
+      document.title = 'Team settings - ' + team.name;
+      $('team-name').removeAttribute('aria-invalid');
+      $('rename-msg').className = 'status'; $('rename-msg').textContent = 'Team name saved.';
+    } catch (e) {
+      $('rename-msg').className = 'error'; $('rename-msg').textContent = explain(e, 'rename');
+    }
+  });
+});
+
+$('invite-form').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const email = $('invite-email').value.trim(), role = $('invite-role').value;
+  const fail = (msg) => { $('invite-msg').className = 'error'; $('invite-msg').textContent = msg; $('invite-email').setAttribute('aria-invalid', 'true'); $('invite-email').focus(); };
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail('Enter a full email address, like name@example.org.');
+  busy($('invite'), 'Sending invite...', async () => {
+    try {
+      team.members.push(await api.inviteMember(email, role));
+      renderMembers();
+      $('invite-email').value = ''; $('invite-email').removeAttribute('aria-invalid');
+      $('invite-msg').className = 'status'; $('invite-msg').textContent = 'Invite sent to ' + email + '.';
+    } catch (e) { fail(explain(e, 'invite')); }   // the typed email stays in the field
+  });
+});
+
+// Removing is reversible (the person can be invited again), so it happens at once and offers undo.
+document.addEventListener('click', (ev) => {
+  const id = ev.target.dataset && ev.target.dataset.remove;
+  if (!id) return;
+  const m = team.members.find((x) => x.id === id);
+  busy(ev.target, 'Removing...', async () => {
+    try {
+      await api.removeMember(id);
+      team.members = team.members.filter((x) => x.id !== id);
+      renderMembers(); $('members-msg').textContent = '';
+      $('undo-area').innerHTML = `<div class="undo" role="status"><span>${esc(m.name)} was removed and has lost access.</span><button type="button" id="undo">Invite ${esc(m.name)} back</button></div>`;
+      $('undo').addEventListener('click', () => busy($('undo'), 'Inviting...', async () => {
+        try { team.members.push(await api.inviteMember(m.email, m.role)); renderMembers(); $('undo-area').innerHTML = ''; say(m.name + ' was invited back.'); }
+        catch (e) { $('members-msg').className = 'error'; $('members-msg').textContent = explain(e, 'invite'); }
+      }));
+      $('undo').focus();
+    } catch (e) {
+      $('members-msg').className = 'error'; $('members-msg').textContent = m.name + ' was not removed. ' + explain(e);
+    }
+  });
+});
+
+document.addEventListener('change', async (ev) => {
+  const t = ev.target;
+  if (t.dataset.role) {
+    const m = team.members.find((x) => x.id === t.dataset.role), before = m.role;
+    t.disabled = true; say('Saving role for ' + m.name + '...');
+    try { m.role = (await api.changeRole(m.id, t.value)).role; $('members-msg').textContent = ''; say(m.name + ' is now ' + ROLE[m.role].toLowerCase() + '.'); }
+    catch (e) { t.value = before; say(''); $('members-msg').className = 'error'; $('members-msg').textContent = 'The role for ' + m.name + ' was not changed. ' + explain(e); }
+    t.disabled = false; t.focus();
+  }
+  if (t.dataset.notif) {
+    const want = t.checked;
+    t.disabled = true; say('Saving...');
+    try { await api.setNotification(t.dataset.notif, want); $('notif-msg').textContent = ''; say('Saved.'); }
+    catch (e) { t.checked = !want; say(''); $('notif-msg').className = 'error'; $('notif-msg').textContent = '"' + NOTIF[t.dataset.notif] + '" was not changed. ' + explain(e); }
+    t.disabled = false; t.focus();
+  }
+});
+
+// Leaving with an unsaved team name asks first.
+window.addEventListener('beforeunload', (ev) => {
+  if (team && $('team-name').value.trim() !== team.name) { ev.preventDefault(); ev.returnValue = ''; }
+});
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a meeting room</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #1b1f24;
+    --muted: #4d5661;
+    --line: #8a939e;
+    --soft: #d5dae0;
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --accent: #1a56c4;
+    --accent-dark: #123f93;
+    --accent-soft: #eaf1fd;
+    --error: #b3261e;
+    --error-soft: #fdf1f0;
+    --ok: #17663a;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 20px; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  h1:focus, h2:focus { outline: none; }
+  section, .panel {
+    background: var(--panel);
+    border: 1px solid var(--soft);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  [hidden] { display: none !important; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .when { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 16px; }
+  .field { margin-bottom: 16px; min-width: 0; }
+  label, legend { font-weight: 600; }
+  .field > label { display: block; margin-bottom: 6px; }
+  .optional { font-weight: 400; color: var(--muted); }
+  input[type=date], input[type=time], input[type=number], input[type=text], select, textarea {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  textarea { min-height: 88px; resize: vertical; }
+  #people { max-width: 7rem; }
+  [aria-invalid=true] { border: 2px solid var(--error); }
+  .under { margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+  .field-error { margin: 6px 0 0; color: var(--error); font-weight: 600; }
+  .field-error::before { content: "Error: "; }
+
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  button {
+    font: inherit;
+    font-weight: 600;
+    min-height: 44px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .primary { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+  .primary:hover { background: var(--accent-dark); }
+  .secondary { background: #fff; color: var(--accent-dark); border: 1px solid var(--accent-dark); }
+  .secondary:hover { background: var(--accent-soft); }
+  button[aria-disabled=true] { cursor: progress; opacity: 0.75; }
+
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { padding: 0; margin-bottom: 12px; font-weight: 400; }
+  .room {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 2px 12px;
+    align-items: start;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 400;
+  }
+  .room input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); grid-row: 1 / span 2; }
+  .room-name { font-weight: 600; overflow-wrap: anywhere; }
+  .room-meta { grid-column: 2; color: var(--muted); }
+  .room.chosen { border: 2px solid var(--accent); padding: 11px 13px; background: var(--accent-soft); }
+  .room.chosen .room-meta { color: var(--text); }
+
+  .state { min-height: 72px; }
+  .state p { margin: 0 0 12px; }
+  .problem {
+    border-left: 4px solid var(--error);
+    background: var(--error-soft);
+    padding: 12px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 16px;
+  }
+  .problem p { margin: 0 0 10px; }
+  .problem p:last-child { margin-bottom: 0; }
+  .problem strong { color: var(--error); }
+
+  .field > label.check { display: grid; margin-bottom: 0; grid-template-columns: 24px 1fr; gap: 12px; align-items: center; min-height: 44px; cursor: pointer; }
+  .check input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+  #catering-msg { margin: 6px 0 0 36px; }
+  #catering-msg p { margin: 0 0 8px; color: var(--error); font-weight: 600; }
+
+  .booking-for { margin: 0 0 12px; overflow-wrap: anywhere; }
+
+  .done-mark { color: var(--ok); }
+  dl { margin: 0 0 20px; display: grid; grid-template-columns: 9.5rem 1fr; gap: 10px 16px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+
+  @media (max-width: 560px) {
+    main { padding: 16px 12px 48px; }
+    section, .panel { padding: 16px; }
+    .when { grid-template-columns: 1fr; gap: 0; }
+    dl { grid-template-columns: 1fr; gap: 2px; }
+    dd { margin-bottom: 10px; }
+    #find, #book, #another { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div id="form-view">
+    <h1 id="form-title" tabindex="-1">Book a meeting room</h1>
+
+    <section aria-label="When and how many people">
+      <form id="search" novalidate>
+        <div class="when">
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+            <p class="field-error" id="date-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="start">Start time</label>
+            <input type="time" id="start" name="start" step="300" required>
+            <p class="field-error" id="start-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="minutes">Length</label>
+            <select id="minutes" name="minutes" aria-describedby="ends">
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1 hour 30 minutes</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+              <option value="240">4 hours</option>
+            </select>
+            <p class="under" id="ends"></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="people">Number of people</label>
+          <input type="number" id="people" name="people" min="1" step="1" inputmode="numeric" required>
+          <p class="field-error" id="people-error" hidden></p>
+        </div>
+        <button type="submit" class="primary" id="find">Find free rooms</button>
+      </form>
+    </section>
+
+    <form id="booking" novalidate>
+      <section id="rooms-section" aria-labelledby="rooms-heading" hidden>
+        <h2 id="rooms-heading">Free rooms</h2>
+        <div id="results" class="state"></div>
+      </section>
+
+      <section id="details-section" aria-labelledby="details-heading" hidden>
+        <h2 id="details-heading">Meeting details</h2>
+        <div class="field">
+          <label for="title">Meeting title</label>
+          <input type="text" id="title" name="title" maxlength="120" autocomplete="off" required>
+          <p class="field-error" id="title-error" hidden></p>
+        </div>
+        <div class="field">
+          <label class="check" for="catering">
+            <input type="checkbox" id="catering" name="catering" aria-describedby="catering-msg">
+            <span>Ask for catering</span>
+          </label>
+          <div id="catering-msg"></div>
+        </div>
+        <div class="field">
+          <label for="note">Note for reception <span class="optional">(optional)</span></label>
+          <textarea id="note" name="note" rows="3" maxlength="500"></textarea>
+        </div>
+        <div id="book-problem"></div>
+        <p class="booking-for" id="booking-for"></p>
+        <button type="submit" class="primary" id="book">Book room</button>
+      </section>
+    </form>
+  </div>
+
+  <div id="done-view" class="panel" hidden>
+    <h1 id="done-title" tabindex="-1"><span class="done-mark" aria-hidden="true">&#10003;</span> Room booked</h1>
+    <dl id="done-list"></dl>
+    <button type="button" class="secondary" id="another">Book another room</button>
+  </div>
+
+  <div id="announce" class="sr-only" role="status" aria-live="polite"></div>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const rooms = [
+    { id: 'r1', name: 'Harbour', floor: 1, capacity: 4, features: ['screen'] },
+    { id: 'r2', name: 'Lighthouse', floor: 1, capacity: 8, features: ['screen', 'video'] },
+    { id: 'r3', name: 'Quay', floor: 2, capacity: 12, features: ['screen', 'video', 'whiteboard'] },
+    { id: 'r4', name: 'Breakwater Boardroom and Client Suite', floor: 3, capacity: 20, features: ['screen', 'video', 'whiteboard', 'catering'] },
+    { id: 'r5', name: 'Tidepool', floor: 2, capacity: 2, features: [] },
+  ];
+  return {
+    // criteria: { date: 'YYYY-MM-DD', start: 'HH:MM', minutes: number, people: number }
+    async findRooms(c) {
+      await wait(); maybeFail('find rooms');
+      if (q.get('empty') === '1') return [];
+      if (new Date(c.date + 'T' + c.start) < new Date()) { const e = new Error('VALIDATION: start_in_past'); e.code = 'PAST'; throw e; }
+      return rooms.filter((r) => r.capacity >= c.people && !(r.id === 'r2' && c.start < '12:00')).map((r) => ({ ...r }));
+    },
+    // booking: { roomId, date, start, minutes, people, title, catering: boolean, note }
+    async createBooking(b) {
+      await wait(); maybeFail('create booking');
+      if (!b.title || !b.title.trim()) { const e = new Error('VALIDATION: title_required'); e.code = 'VALIDATION'; throw e; }
+      if (b.catering && !rooms.find((r) => r.id === b.roomId).features.includes('catering')) { const e = new Error('CONFLICT: room_has_no_catering'); e.code = 'NO_CATERING'; throw e; }
+      return { id: 'bk_' + Math.floor(Math.random() * 90000 + 10000), ...b };
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    formView: $('form-view'), doneView: $('done-view'),
+    search: $('search'), booking: $('booking'),
+    date: $('date'), start: $('start'), minutes: $('minutes'), people: $('people'), ends: $('ends'),
+    find: $('find'), roomsSection: $('rooms-section'), results: $('results'),
+    detailsSection: $('details-section'), title: $('title'), catering: $('catering'),
+    cateringMsg: $('catering-msg'), note: $('note'), bookProblem: $('book-problem'),
+    bookingFor: $('booking-for'), book: $('book'),
+    doneTitle: $('done-title'), doneList: $('done-list'), another: $('another'),
+    announce: $('announce'), formTitle: $('form-title'),
+  };
+
+  const state = {
+    status: 'idle',        // idle | loading | error | empty | ready | stale
+    rooms: [],
+    searched: null,        // the criteria the listed rooms are free for
+    selectedId: null,
+    wantedRoomId: null,    // room to reselect after a reload
+    detailsShown: false,
+    cateringRefusedFor: null,
+    searchToken: 0,
+    booking: false,
+  };
+
+  /* ---------- small helpers ---------- */
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const hm = (d) => pad(d.getHours()) + ':' + pad(d.getMinutes());
+  const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  const fmtDay = (d, long) => d.toLocaleDateString(undefined, long
+    ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
+    : { weekday: 'short', day: 'numeric', month: 'short' });
+  const peopleText = (n) => n + (n === 1 ? ' person' : ' people');
+  const startOf = (c) => new Date(c.date + 'T' + c.start);
+  const endOf = (c) => new Date(startOf(c).getTime() + c.minutes * 60000);
+  function whenText(c, long) {
+    const s = startOf(c), e = endOf(c);
+    const sameDay = ymd(s) === ymd(e);
+    return fmtDay(s, long) + ', ' + fmtTime(s) + ' to ' + fmtTime(e) + (sameDay ? '' : ' (' + fmtDay(e, false) + ')');
+  }
+  const FEATURES = { screen: 'screen', video: 'video calls', whiteboard: 'whiteboard', catering: 'catering' };
+  function featureText(room) {
+    if (!room.features || !room.features.length) return 'No equipment';
+    const t = room.features.map((f) => FEATURES[f] || f).join(', ');
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  const hasCatering = (room) => !!room && (room.features || []).includes('catering') && state.cateringRefusedFor !== room.id;
+  const selectedRoom = () => state.rooms.find((r) => r.id === state.selectedId) || null;
+  function announce(msg) {
+    el.announce.textContent = '';
+    setTimeout(() => { el.announce.textContent = msg; }, 50);
+  }
+  const store = {
+    get(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } },
+    set(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } },
+    del(k) { try { sessionStorage.removeItem(k); } catch (e) { /* storage unavailable */ } },
+  };
+
+  /* ---------- field errors ---------- */
+  function setError(input, msg) {
+    const p = $(input.id + '-error');
+    p.textContent = msg; p.hidden = false;
+    input.setAttribute('aria-invalid', 'true');
+    const d = (input.getAttribute('aria-describedby') || '').split(' ').filter((x) => x && x !== p.id);
+    input.setAttribute('aria-describedby', d.concat(p.id).join(' '));
+  }
+  function clearError(input) {
+    const p = $(input.id + '-error');
+    if (!p || p.hidden) return;
+    p.hidden = true; p.textContent = '';
+    input.removeAttribute('aria-invalid');
+    const d = (input.getAttribute('aria-describedby') || '').split(' ').filter((x) => x && x !== p.id);
+    if (d.length) input.setAttribute('aria-describedby', d.join(' ')); else input.removeAttribute('aria-describedby');
+  }
+
+  /* ---------- criteria ---------- */
+  function defaultStart() {
+    const d = new Date();
+    d.setSeconds(0, 0);
+    d.setMinutes(Math.ceil((d.getMinutes() + 1) / 15) * 15);
+    if (d.getHours() >= 18) { d.setDate(d.getDate() + 1); d.setHours(9, 0); }
+    else if (d.getHours() < 8) d.setHours(9, 0);
+    while (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() + 1); d.setHours(9, 0); }
+    return d;
+  }
+  function setDefaultCriteria() {
+    const d = defaultStart();
+    el.date.value = ymd(d);
+    el.start.value = hm(d);
+    el.minutes.value = '60';
+    el.people.value = '4';
+  }
+  function readCriteria() {
+    return { date: el.date.value, start: el.start.value, minutes: Number(el.minutes.value), people: Number(el.people.value) };
+  }
+  const sameCriteria = (a, b) => !!a && !!b && a.date === b.date && a.start === b.start && a.minutes === b.minutes && a.people === b.people;
+  function updateEnds() {
+    const c = readCriteria();
+    el.ends.textContent = c.date && c.start ? 'Ends ' + fmtTime(endOf(c)) : '';
+  }
+  function validateCriteria() {
+    const bad = [];
+    [el.date, el.start, el.people].forEach(clearError);
+    if (!el.date.value) { setError(el.date, 'Choose a date.'); bad.push(el.date); }
+    else if (el.date.value < ymd(new Date())) { setError(el.date, 'This date has passed. Choose today or later.'); bad.push(el.date); }
+    if (!el.start.value) { setError(el.start, 'Choose a start time.'); bad.push(el.start); }
+    else if (!bad.length && startOf(readCriteria()) < new Date()) { setError(el.start, 'This time has passed. Choose a later time.'); bad.push(el.start); }
+    const n = Number(el.people.value);
+    if (el.people.value.trim() === '' || !Number.isInteger(n) || n < 1) { setError(el.people, 'Enter how many people, as a whole number of 1 or more.'); bad.push(el.people); }
+    return bad;
+  }
+
+  /* ---------- draft: survives reload ---------- */
+  function saveDraft() {
+    store.set('roomDraft', {
+      c: readCriteria(), title: el.title.value, catering: el.catering.checked, note: el.note.value,
+      roomId: state.selectedId, searched: state.status === 'ready' || state.status === 'empty',
+    });
+  }
+
+  /* ---------- rendering ---------- */
+  function setBusy(button, busy, label) {
+    if (busy) button.setAttribute('aria-disabled', 'true'); else button.removeAttribute('aria-disabled');
+    button.textContent = label;
+  }
+
+  function renderResults() {
+    const s = state.status;
+    el.roomsSection.hidden = s === 'idle';
+    el.detailsSection.hidden = !state.detailsShown;
+    let html = '';
+    if (s === 'loading') {
+      html = '<p>Finding free rooms...</p>';
+    } else if (s === 'error') {
+      html = '<div class="problem" role="alert"><p><strong>Could not check which rooms are free.</strong> The connection to the booking system dropped.</p>' +
+        '<p><button type="button" class="secondary" id="retry">Try again</button></p></div>';
+    } else if (s === 'empty') {
+      html = '<p><strong>No rooms are free</strong> on ' + esc(whenText(state.searched)) + ' for ' + peopleText(state.searched.people) + '.</p>' +
+        '<p><button type="button" class="secondary" id="change-time">Choose another time</button></p>';
+    } else if (s === 'stale') {
+      html = '<p>The date, time or number of people has changed.</p>' +
+        '<p><button type="button" class="secondary" id="retry">Find free rooms again</button></p>';
+    } else if (s === 'ready') {
+      const n = state.rooms.length;
+      html = '<fieldset><legend>' + n + (n === 1 ? ' room' : ' rooms') + ' free on ' + esc(whenText(state.searched)) +
+        ' for ' + peopleText(state.searched.people) + '</legend>' +
+        state.rooms.map((r) =>
+          '<label class="room' + (r.id === state.selectedId ? ' chosen' : '') + '">' +
+          '<input type="radio" name="room" value="' + esc(r.id) + '"' + (r.id === state.selectedId ? ' checked' : '') + '>' +
+          '<span class="room-name">' + esc(r.name) + '</span>' +
+          '<span class="room-meta">Floor ' + esc(r.floor) + ', seats ' + esc(r.capacity) + '. ' + esc(featureText(r)) + '.</span>' +
+          '</label>').join('') + '</fieldset>';
+    }
+    el.results.innerHTML = html;
+    renderChoice();
+  }
+
+  // Everything that depends on which room is chosen.
+  function renderChoice() {
+    const room = selectedRoom();
+    el.results.querySelectorAll('.room').forEach((l) => l.classList.toggle('chosen', l.querySelector('input').checked));
+    el.bookingFor.textContent = room && state.searched
+      ? room.name + ', ' + whenText(state.searched) + ', ' + peopleText(state.searched.people)
+      : '';
+    renderCatering();
+  }
+
+  function cateringProblem() {
+    const room = selectedRoom();
+    return el.catering.checked && room && !hasCatering(room);
+  }
+  function renderCatering() {
+    if (!cateringProblem()) { el.cateringMsg.innerHTML = ''; return; }
+    const room = selectedRoom();
+    const others = state.rooms.filter((r) => hasCatering(r));
+    let html = '<p>' + esc(room.name) + ' cannot have catering. ' +
+      (others.length ? 'Choose a room that can, or untick this.' : 'No free room at this time can. Untick this to book ' + esc(room.name) + '.') + '</p>';
+    html += others.map((r) => '<p><button type="button" class="secondary" data-switch="' + esc(r.id) + '">Switch to ' + esc(r.name) + '</button></p>').join('');
+    el.cateringMsg.innerHTML = html;
+  }
+
+  function showBookProblem(html) {
+    el.bookProblem.innerHTML = html ? '<div class="problem" role="alert">' + html + '</div>' : '';
+  }
+
+  /* ---------- find rooms ---------- */
+  async function findRooms() {
+    if (state.status === 'loading' || state.booking) return;
+    const bad = validateCriteria();
+    if (bad.length) { bad[0].focus(); return; }
+    const c = readCriteria();
+    const token = ++state.searchToken;
+    state.status = 'loading'; state.rooms = []; state.selectedId = null; state.searched = c;
+    showBookProblem('');
+    setBusy(el.find, true, 'Finding free rooms...');
+    renderResults();
+    let rooms, failure = null;
+    try { rooms = await api.findRooms(c); } catch (e) { failure = e; }
+    if (token !== state.searchToken) return;   // the criteria changed while waiting
+    setBusy(el.find, false, 'Find free rooms');
+    if (failure) {
+      if (failure.code === 'PAST') {
+        state.status = state.detailsShown ? 'stale' : 'idle';
+        renderResults();
+        setError(el.start, 'This time has passed. Choose a later time.');
+        el.start.focus();
+      } else {
+        state.status = 'error';
+        renderResults();
+      }
+      return;
+    }
+    state.rooms = rooms.slice().sort((a, b) => a.capacity - b.capacity);
+    if (!state.rooms.length) {
+      state.status = 'empty';
+      renderResults();
+      announce('No rooms are free at that time.');
+      saveDraft();
+      return;
+    }
+    state.status = 'ready';
+    state.detailsShown = true;
+    state.cateringRefusedFor = null;
+    const wanted = state.rooms.find((r) => r.id === state.wantedRoomId);
+    const withCatering = el.catering.checked && state.rooms.find((r) => hasCatering(r));
+    state.selectedId = (wanted || withCatering || state.rooms[0]).id;
+    state.wantedRoomId = null;
+    renderResults();
+    const n = state.rooms.length;
+    announce(n + (n === 1 ? ' room' : ' rooms') + ' free. ' + selectedRoom().name + ' is selected.');
+    saveDraft();
+  }
+
+  function criteriaChanged() {
+    updateEnds();
+    if (state.status !== 'idle' && !sameCriteria(readCriteria(), state.searched)) {
+      state.searchToken++;
+      setBusy(el.find, false, 'Find free rooms');
+      if (state.selectedId) state.wantedRoomId = state.selectedId;
+      state.status = state.detailsShown ? 'stale' : 'idle';
+      state.rooms = []; state.selectedId = null;
+      renderResults();
+    }
+    saveDraft();
+  }
+
+  /* ---------- book ---------- */
+  async function book() {
+    if (state.booking) return;
+    showBookProblem('');
+    clearError(el.title);
+    const room = selectedRoom();
+    if (!room || state.status !== 'ready') {
+      showBookProblem('<p><strong>No room is chosen.</strong> Find free rooms and choose one, then book.</p>');
+      el.find.focus();
+      return;
+    }
+    if (!el.title.value.trim()) {
+      setError(el.title, 'Enter a title for the meeting.');
+      el.title.focus();
+      return;
+    }
+    if (cateringProblem()) {
+      renderCatering();
+      el.catering.focus();
+      announce(room.name + ' cannot have catering.');
+      return;
+    }
+    const c = state.searched;
+    const request = {
+      roomId: room.id, date: c.date, start: c.start, minutes: c.minutes, people: c.people,
+      title: el.title.value.trim(), catering: el.catering.checked, note: el.note.value.trim(),
+    };
+    state.booking = true;
+    setBusy(el.book, true, 'Booking...');
+    let result, failure = null;
+    try { result = await api.createBooking(request); } catch (e) { failure = e; }
+    state.booking = false;
+    setBusy(el.book, false, 'Book room');
+    if (failure) {
+      if (failure.code === 'VALIDATION') {
+        setError(el.title, 'Enter a title for the meeting.');
+        el.title.focus();
+      } else if (failure.code === 'NO_CATERING') {
+        state.cateringRefusedFor = room.id;
+        renderCatering();
+        el.catering.focus();
+        announce(room.name + ' cannot have catering.');
+      } else {
+        showBookProblem('<p><strong>' + esc(room.name) + ' is not booked.</strong> The connection to the booking system dropped. Try booking again.</p>');
+        el.book.focus();
+      }
+      return;
+    }
+    const done = Object.assign({}, result, { roomName: room.name, floor: room.floor });
+    store.set('roomBooked', done);
+    store.del('roomDraft');
+    resetForm();
+    try { history.pushState({ booked: true }, '', location.pathname + location.search + '#booked'); }
+    catch (e) { location.hash = 'booked'; }
+    showDone(done, true);
+  }
+
+  function resetForm() {
+    el.title.value = ''; el.note.value = ''; el.catering.checked = false;
+    [el.date, el.start, el.people, el.title].forEach(clearError);
+    showBookProblem('');
+    setDefaultCriteria(); updateEnds();
+    state.searchToken++;
+    Object.assign(state, { status: 'idle', rooms: [], searched: null, selectedId: null, wantedRoomId: null, detailsShown: false, cateringRefusedFor: null });
+    setBusy(el.find, false, 'Find free rooms');
+    renderResults();
+  }
+
+  /* ---------- views ---------- */
+  function showDone(b, moveFocus) {
+    const c = { date: b.date, start: b.start, minutes: b.minutes, people: b.people };
+    const rows = [
+      ['Room', b.roomName + ', floor ' + b.floor],
+      ['When', whenText(c, true)],
+      ['People', String(b.people)],
+      ['Meeting title', b.title],
+      ['Catering', b.catering ? 'Requested' : 'Not requested'],
+    ];
+    if (b.note) rows.push(['Note for reception', b.note]);
+    rows.push(['Booking reference', b.id]);
+    el.doneList.innerHTML = rows.map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
+    el.formView.hidden = true; el.doneView.hidden = false;
+    document.title = 'Room booked: ' + b.roomName;
+    if (moveFocus) { el.doneTitle.focus(); window.scrollTo(0, 0); }
+  }
+  function showForm(moveFocus) {
+    el.doneView.hidden = true; el.formView.hidden = false;
+    document.title = 'Book a meeting room';
+    if (moveFocus) { el.formTitle.focus(); window.scrollTo(0, 0); }
+  }
+  function route(moveFocus) {
+    const b = store.get('roomBooked');
+    if (location.hash === '#booked' && b) showDone(b, moveFocus);
+    else showForm(moveFocus);
+  }
+
+  /* ---------- events ---------- */
+  el.search.addEventListener('submit', (e) => { e.preventDefault(); findRooms(); });
+  el.booking.addEventListener('submit', (e) => { e.preventDefault(); book(); });
+  [el.date, el.start, el.minutes, el.people].forEach((f) => {
+    f.addEventListener('input', () => { clearError(f); criteriaChanged(); });
+    f.addEventListener('change', criteriaChanged);
+  });
+  el.results.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'retry') { el.find.focus(); findRooms(); }
+    if (b.id === 'change-time') el.start.focus();
+  });
+  el.results.addEventListener('change', (e) => {
+    if (e.target.name !== 'room') return;
+    state.selectedId = e.target.value;
+    showBookProblem('');
+    renderChoice();
+    saveDraft();
+  });
+  el.title.addEventListener('input', () => { clearError(el.title); saveDraft(); });
+  el.note.addEventListener('input', saveDraft);
+  el.catering.addEventListener('change', () => {
+    renderCatering();
+    if (cateringProblem()) announce(selectedRoom().name + ' cannot have catering.');
+    saveDraft();
+  });
+  el.cateringMsg.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-switch]');
+    if (!b) return;
+    const room = state.rooms.find((r) => r.id === b.dataset.switch);
+    if (!room) return;
+    state.selectedId = room.id;
+    renderResults();
+    el.catering.focus();
+    announce(room.name + ' is selected.');
+    saveDraft();
+  });
+  el.another.addEventListener('click', () => {
+    try { history.pushState(null, '', location.pathname + location.search); }
+    catch (e) { location.hash = ''; }
+    showForm(true);
+  });
+  window.addEventListener('popstate', () => route(true));
+  window.addEventListener('hashchange', () => route(false));
+
+  /* ---------- start ---------- */
+  setDefaultCriteria();
+  el.date.min = ymd(new Date());
+  const draft = store.get('roomDraft');
+  let searchOnLoad = false;
+  if (draft && draft.c && draft.c.date && draft.c.start && startOf(draft.c) > new Date()) {
+    el.date.value = draft.c.date; el.start.value = draft.c.start;
+    el.minutes.value = String(draft.c.minutes); if (!el.minutes.value) el.minutes.value = '60';
+    el.people.value = draft.c.people || '';
+    searchOnLoad = !!draft.searched;
+  }
+  if (draft) {
+    el.title.value = draft.title || ''; el.note.value = draft.note || ''; el.catering.checked = !!draft.catering;
+    state.wantedRoomId = draft.roomId || null;
+  }
+  updateEnds();
+  renderResults();
+  if (location.hash === '#booked' && !store.get('roomBooked')) {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* keep the URL */ }
+  }
+  route(false);
+  if (searchOnLoad && el.doneView.hidden) findRooms();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerline: invoicing for small building and trades firms</title>
+<meta name="description" content="Invoicing software for building and trades firms of 2 to 20 people. Write and send an invoice from your phone on site. 12 GBP per user per month, first 30 days free.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<style>
+:root {
+  color-scheme: light dark;
+
+  /* Colour: one hue (40), light set */
+  --surface: #fcf5f3;
+  --surface-raised: #fffdfb;
+  --text: #211815;
+  --text-muted: #605552;
+  --border: #ded5d3;
+  --border-strong: #837874;
+  --accent: #8a3819;
+  --accent-hover: #6f2a10;
+  --on-accent: #fffdfb;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+
+  /* Space */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.5rem;
+  --s6: 2rem;
+  --s7: 3rem;
+  --s8: 4rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #130e0c;
+    --surface-raised: #1d1714;
+    --text: #ede6e4;
+    --text-muted: #aca29f;
+    --border: #322c2a;
+    --border-strong: #7d726e;
+    --accent: #efa187;
+    --accent-hover: #f7b9a4;
+    --on-accent: #130e0c;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 var(--text-base)/1.5 var(--font-sans);
+}
+
+h1, h2, h3, p, ul, dl, dd { margin: 0; }
+ul { padding: 0; list-style: none; }
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  text-wrap: balance;
+}
+h1 { font-size: var(--text-2xl); line-height: 1.15; }
+h2 { font-size: var(--text-xl); line-height: 1.25; }
+h3 { font-size: var(--text-lg); line-height: 1.3; }
+
+a { color: var(--accent); text-underline-offset: 0.2em; }
+a:hover { color: var(--accent-hover); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.wrap {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0 var(--s4);
+}
+
+.skip {
+  position: absolute;
+  left: var(--s4);
+  top: var(--s2);
+  padding: var(--s2) var(--s4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+/* Header */
+.site-header { border-bottom: 1px solid var(--border); }
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  min-height: 3.5rem;
+}
+.brand {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+.brand:hover { color: var(--text); }
+.site-nav ul {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+}
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+.site-nav a:hover { color: var(--accent); }
+.site-nav .section-link { display: none; }
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: var(--s3) var(--s5);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition: background-color 120ms ease-out;
+}
+.button:hover { background: var(--accent-hover); color: var(--on-accent); }
+.button:focus-visible { outline-offset: 3px; border-radius: 6px; }
+
+/* Opening */
+.intro { padding: var(--s6) 0 var(--s7); }
+.intro h1 { max-width: 24ch; }
+.lead {
+  margin-top: var(--s4);
+  max-width: 44ch;
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+.action {
+  margin-top: var(--s5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3) var(--s4);
+}
+.action p { color: var(--text-muted); }
+
+/* Sections */
+.section {
+  padding: var(--s7) 0;
+  border-top: 1px solid var(--border);
+}
+.section h2 { margin-bottom: var(--s5); }
+
+.features li {
+  display: grid;
+  gap: var(--s2);
+  padding: var(--s5) 0;
+  border-top: 1px solid var(--border);
+}
+.features li:first-child { border-top: 0; padding-top: 0; }
+.features li:last-child { padding-bottom: 0; }
+.features p { max-width: 60ch; }
+
+/* Price */
+.price-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s1) var(--s3);
+}
+.price-amount {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.price-unit { font-size: var(--text-lg); line-height: 1.3; }
+.price-terms {
+  margin-top: var(--s4);
+  display: grid;
+  gap: var(--s2);
+  max-width: 60ch;
+}
+.price .button { margin-top: var(--s5); }
+
+/* Support */
+.support p { max-width: 60ch; }
+.support a { display: inline-block; padding: var(--s3) 0; overflow-wrap: anywhere; }
+
+/* Footer */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: var(--s5) 0 var(--s6);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+@media (min-width: 44rem) {
+  .wrap { padding: 0 var(--s6); }
+  h1 { font-size: var(--text-3xl); line-height: 1.1; }
+  .site-nav .section-link { display: block; }
+  .intro { padding: var(--s8) 0; }
+  .features li {
+    grid-template-columns: 18rem 1fr;
+    gap: var(--s6);
+    align-items: baseline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Ledgerline, top of page">Ledgerline</a>
+    <nav class="site-nav" aria-label="Site">
+      <ul>
+        <li class="section-link"><a href="#features">What it does</a></li>
+        <li class="section-link"><a href="#price">Price</a></li>
+        <li class="section-link"><a href="#support">Support</a></li>
+        <li><a href="/login">Sign in</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="intro" id="top">
+    <div class="wrap">
+      <h1>Invoicing for small building and trades firms</h1>
+      <p class="lead">Write an invoice on your phone on site and send it by email or text before you leave.</p>
+      <div class="action">
+        <a class="button" href="/signup">Start free trial</a>
+        <p>Free for 30 days. No card needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features" aria-labelledby="features-heading">
+    <div class="wrap">
+      <h2 id="features-heading">What Ledgerline does</h2>
+      <ul class="features">
+        <li>
+          <h3>Invoices from your phone</h3>
+          <p>Start from a quote or from scratch. Send the invoice by email or text.</p>
+        </li>
+        <li>
+          <h3>Works without a signal</h3>
+          <p>Write the invoice anyway. It sends when your phone is back online.</p>
+        </li>
+        <li>
+          <h3>Chases late payers</h3>
+          <p>Polite reminders go out 7, 14 and 30 days after the due date. You can switch them off for any customer.</p>
+        </li>
+        <li>
+          <h3>CIS and reverse-charge VAT</h3>
+          <p>The Construction Industry Scheme deduction and reverse-charge VAT are worked out on the invoice.</p>
+        </li>
+        <li>
+          <h3>Exports to your accounts</h3>
+          <p>Invoices export to Xero, QuickBooks and Sage.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section price" id="price" aria-labelledby="price-heading">
+    <div class="wrap">
+      <h2 id="price-heading">Price</h2>
+      <p class="price-figure">
+        <span class="price-amount">&pound;12</span>
+        <span class="price-unit">per user per month</span>
+      </p>
+      <ul class="price-terms">
+        <li>Billed monthly. Cancel any time.</li>
+        <li>The first 30 days are free, and you do not need a card to start.</li>
+        <li>Made for firms of 2 to 20 people.</li>
+      </ul>
+      <a class="button" href="/signup">Start free trial</a>
+    </div>
+  </section>
+
+  <section class="section support" id="support" aria-labelledby="support-heading">
+    <div class="wrap">
+      <h2 id="support-heading">Support</h2>
+      <p>Support is by email, answered on working days.</p>
+      <p><a href="mailto:help@ledgerline.example">help@ledgerline.example</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Ledgerline Ltd. Founded in Leeds in 2021.</p>
+  </div>
+</footer>
+</body>
+</html>

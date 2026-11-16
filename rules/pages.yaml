@@ -1,0 +1,127 @@
+domain: pages
+prefix: PAGE
+title: Pages that present
+load_when: "A screen whose job is to present something to a visitor with few controls: a product or landing page, a pricing page, documentation, an article, an about page. It is still a screen, so every other domain applies; these rules add what such pages get wrong."
+rules:
+  - id: PAGE-001
+    rule: "The first view says what this is and who it is for, in plain words."
+    why: "Visitors decide in seconds whether to stay, and a slogan gives them nothing to decide on."
+    applies_when: "The page introduces a product, service, project or organisation."
+    pass_when: "A person who reads only the top heading and the line under it could say what the thing is and who would use it."
+    evidence: judgement
+    severity: blocker
+    support: some-support
+    sources: ["catalogue:B4.3", "hallmark:macrostructures/03-marquee-hero.md#Avoid", "hallmark:genres/modern-minimal.md#Voice", "pirolli1999", "morkes1997"]
+    counters: [B4.3, A6]
+    examples:
+      pass: "'Invoicing for small building firms. Send an invoice from site in two minutes.'"
+      fail: "'Scale without limits. The future of work, reimagined.'"
+      na: "A page inside a product whose visitor already knows what it is."
+
+  - id: PAGE-002
+    rule: "The first view holds the heading, one supporting line and the main action."
+    why: "What is below the first view is seen by fewer people; the point and the next step must not be down there."
+    applies_when: "The page has a main action for the visitor."
+    pass_when: "At 1280x800 and at 375x667 the top heading, its supporting line and the main action are visible without scrolling."
+    evidence: measured
+    severity: major
+    support: some-support
+    sources: ["hallmark:hero-enrichment.md#Hero space discipline", "hhs:6:3", "hhs:6:2"]
+    counters: [B1.5, B1.6]
+    examples:
+      pass: "Heading, one sentence and 'Start a free trial' within the first 600px."
+      fail: "A full-height image with the heading at the bottom and the button a screen further down."
+      na: "A page with no action to take, such as an article."
+
+  - id: PAGE-003
+    rule: "Imagery is used where it shows something the words cannot."
+    why: "Decorative pictures cost loading time and attention and tell the visitor nothing."
+    applies_when: "The page includes photographs, illustrations, video or generated graphics."
+    pass_when: "Each image shows the product, the result or a fact; removing any one would lose information. No stock or abstract decoration."
+    evidence: judgement
+    severity: minor
+    support: some-support
+    sources: ["hallmark:hero-enrichment.md#Quality bar", "hallmark:hero-enrichment.md#Image-need detection", "hhs:14:4", "owens2011"]
+    counters: [A5, A6]
+    examples:
+      pass: "A screenshot of the invoice the product produces."
+      fail: "An abstract gradient mesh; a stock photo of people at a laptop."
+      na: "A page with no imagery."
+
+  - id: PAGE-004
+    rule: "Every testimonial, customer name, number and price on the page is real."
+    why: "Invented proof is a false statement to the visitor and is found out."
+    applies_when: "The page shows testimonials, customer logos, usage figures, ratings or prices."
+    pass_when: "Each comes from the brief or the product's data; where none was supplied, the section is left out, not filled with plausible examples."
+    evidence: static
+    check: leftover-text
+    severity: blocker
+    support: practice-consensus
+    sources: ["catalogue:B5.7", "catalogue:B3.6", "sm86:2.0/1"]
+    counters: [B5.7, B3.6]
+    exceptions: ["A design mock the user asked to be filled with sample content, marked as sample outside the page."]
+    examples:
+      pass: "No testimonial section, because the brief supplied none."
+      fail: "'Loved by 10,000+ teams' and a quote from 'Sarah K., Head of Ops at Acme', neither supplied."
+      na: "A page with no testimonials, figures or prices."
+
+  - id: PAGE-005
+    rule: "A page about price shows the price."
+    why: "Hiding the number behind 'Contact us' or a toggle sends visitors away to find it elsewhere."
+    applies_when: "The page has a pricing section and the price is known."
+    pass_when: "The actual figure, its unit and its period are visible without interaction."
+    evidence: judgement
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:macrostructures.md#SaaS page sequence"]
+    counters: [B4.3]
+    exceptions: ["Products priced by quotation, which say so plainly."]
+    examples:
+      pass: "'12 GBP per user per month, billed yearly.'"
+      fail: "Three plan cards with 'Get started' and no figures."
+      na: "No pricing section."
+
+  - id: PAGE-006
+    rule: "Media is light, silent and under the visitor's control."
+    why: "Heavy media delays the first view, and sound or motion the visitor did not start drives them off."
+    applies_when: "The page has large images or video."
+    pass_when: "The largest image in the first view is not lazy-loaded; images further down are; video is muted with a poster and controls, and never plays sound unasked."
+    evidence: dom
+    severity: minor
+    support: practice-consensus
+    sources: ["hallmark:slop-test.md#28", "hallmark:hero-enrichment.md#E1", "hallmark:assets.md#Hero video", "wcag22:2.2.2"]
+    counters: [B10.9, B10.8]
+    examples:
+      pass: "<video muted playsinline controls poster=\"still.jpg\">"
+      fail: "A 9MB autoplaying background video with sound and no controls."
+      na: "No large images or video."
+
+  - id: PAGE-007
+    rule: "An announcement strip is one line with one link and can be dismissed."
+    why: "A strip that wraps, stacks or cannot be closed takes the first view away from the page."
+    applies_when: "The page has an announcement or promotional strip."
+    pass_when: "It is a single line at every width, has at most one link, has a labelled dismiss control, and leaves no gap when dismissed."
+    evidence: walk
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:components/n12-banner-retract.md#Anti-pattern"]
+    counters: [B10.2]
+    examples:
+      pass: "'Version 4 is out. Read the notes' with a close button."
+      fail: "Two stacked banners, each two lines tall on a phone, with no way to close them."
+      na: "No announcement strip."
+
+  - id: PAGE-008
+    rule: "Code shown for copying has a copy control."
+    why: "Selecting a multi-line command by hand picks up prompts and line breaks."
+    applies_when: "The page shows commands or code a reader is expected to use."
+    pass_when: "Each such block has a labelled button that copies its text and says that it did."
+    evidence: dom
+    severity: minor
+    support: house-preference
+    sources: ["hallmark:macrostructures/21-component-playground.md#21"]
+    counters: [B1.2]
+    examples:
+      pass: "A 'Copy' button on the install command that changes to 'Copied'."
+      fail: "A styled code block with no control."
+      na: "No code for the reader to use."

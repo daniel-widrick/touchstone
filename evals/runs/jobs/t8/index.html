@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Today's jobs - Harbour Heating</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --surface: #f4f7fb;
+  --surface-raised: #fcfeff;
+  --text: #131c23;
+  --text-muted: #4c5760;
+  --border: #d2d8de;
+  --border-strong: #6e7983;
+  --accent: #00568f;
+  --on-accent: #fcfeff;
+  --accent-soft: #d8ebfb;
+  --danger: #a92227;
+  --success: #0f6a31;
+  --scrim: rgba(11, 16, 20, 0.55);
+
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0b1014;
+    --surface-raised: #141a20;
+    --text: #e4e8ed;
+    --text-muted: #a0a9b1;
+    --border: #292f34;
+    --border-strong: #6e7983;
+    --accent: #7fbef3;
+    --on-accent: #0b1014;
+    --accent-soft: #142b3e;
+    --danger: #f98f87;
+    --success: #6fd087;
+    --scrim: rgba(0, 0, 0, 0.65);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 var(--text-base)/1.5 var(--font);
+}
+[hidden] { display: none !important; }
+h1, h2, p, ul, ol, dl, dd { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+h1:focus { outline: none; }
+
+.vh {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+.muted { color: var(--text-muted); }
+
+.top {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+.top-in, main {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding-left: max(var(--s4), env(safe-area-inset-left));
+  padding-right: max(var(--s4), env(safe-area-inset-right));
+}
+.brand {
+  display: inline-flex; align-items: center;
+  min-height: 48px;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+main { padding-top: var(--s4); padding-bottom: var(--s6); }
+
+h1 { font-size: var(--text-xl); line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+h2 { font-size: var(--text-lg); line-height: 1.3; font-weight: 600; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; min-width: 9rem;
+  padding: 0 var(--s4);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: 600 var(--text-base)/1.2 var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:hover { background: var(--accent-soft); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--accent); }
+.btn[aria-disabled="true"] { opacity: 0.7; cursor: progress; }
+.btn-small { min-height: 44px; min-width: 0; }
+
+/* Fields */
+label { display: block; font-weight: 600; margin-bottom: var(--s1); }
+.hint { color: var(--text-muted); font-size: var(--text-sm); margin-bottom: var(--s1); }
+input, textarea {
+  display: block; width: 100%;
+  min-height: 48px;
+  padding: var(--s3);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: 400 var(--text-base)/1.5 var(--font);
+}
+textarea { resize: vertical; }
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border: 2px solid var(--danger); }
+.error { color: var(--danger); font-weight: 600; }
+.error:empty, .msg:empty, .status:empty { display: none; }
+.field-error { margin-top: var(--s1); }
+
+/* Day list */
+.list-head { margin-bottom: var(--s3); }
+.days { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s3) 0 var(--s4); }
+.days a {
+  display: inline-flex; align-items: center;
+  min-height: 44px; padding: 0 var(--s3);
+  border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--surface-raised);
+  font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.days a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -3px 0 var(--accent); }
+.chev-l::before, .chev-r::after, .job-go {
+  content: ""; display: inline-block; flex: none;
+  width: 0.5em; height: 0.5em;
+  border: solid currentColor; border-width: 0 0 2px 2px;
+}
+.chev-l::before { transform: rotate(45deg); margin-right: 0.5em; }
+.chev-r::after, .job-go { transform: rotate(-135deg); margin-left: 0.5em; }
+
+.search { max-width: 30rem; margin-bottom: var(--s4); }
+.list-status-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4);
+  min-height: 44px; margin-bottom: var(--s2);
+}
+.list-status-row .updating { margin-left: auto; color: var(--text-muted); font-size: var(--text-sm); }
+.alert-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4);
+  margin-bottom: var(--s3);
+}
+.alert-row:has(> p:empty) { display: none; }
+
+.jobs {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.jobs:empty { display: none; }
+.jobs li + li { border-top: 1px solid var(--border); }
+.job {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr) auto;
+  column-gap: var(--s3); row-gap: 2px;
+  align-items: start;
+  padding: var(--s3);
+  color: var(--text);
+  text-decoration: none;
+}
+.job:hover { background: var(--accent-soft); }
+.job span { overflow-wrap: anywhere; }
+.job-time { grid-column: 1; grid-row: 1; font-weight: 600; font-variant-numeric: tabular-nums; }
+.job-ref { grid-column: 1; grid-row: 2 / span 2; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.job-who { grid-column: 2; grid-row: 1; font-weight: 600; color: var(--accent); }
+.job-work { grid-column: 2 / -1; grid-row: 2; }
+.job-addr { grid-column: 2 / -1; grid-row: 3; color: var(--text-muted); }
+.job-state { grid-column: 2 / -1; grid-row: 4; }
+.job .job-go { grid-column: 3; grid-row: 1; margin-top: 0.5em; color: var(--text-muted); }
+.badge {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  font-weight: 600; color: var(--success); white-space: nowrap;
+}
+.badge svg { flex: none; }
+.skel { height: 5.75rem; padding: var(--s3); }
+.skel::before, .skel::after {
+  content: ""; display: block; height: 0.875rem; border-radius: 4px;
+  background: var(--border);
+  animation: pulse 1.2s ease-in-out infinite alternate;
+}
+.skel::before { width: 55%; margin-bottom: var(--s3); }
+.skel::after { width: 80%; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.45; } }
+
+/* Job */
+.back {
+  display: inline-flex; align-items: center;
+  min-height: 44px; margin-bottom: var(--s2);
+  font-weight: 600; text-decoration: none;
+}
+.job-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s4); margin-top: var(--s1); color: var(--text-muted); }
+.job-cols { display: grid; gap: var(--s5); margin-top: var(--s4); }
+.facts dt { font-size: var(--text-sm); color: var(--text-muted); }
+.facts dd { margin-bottom: var(--s3); overflow-wrap: anywhere; }
+.facts dd:last-child { margin-bottom: 0; }
+.facts a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.msg-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); margin-top: var(--s4); }
+.msg-row:has(> p:empty) { display: none; }
+.msg { font-weight: 600; }
+.actions { display: grid; gap: var(--s3); margin-top: var(--s4); }
+.move-form {
+  display: grid; gap: var(--s3);
+  padding: var(--s4);
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface-raised);
+}
+.move-form input { max-width: 14rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.notes h2 { margin-bottom: var(--s2); }
+.notes-list { margin-bottom: var(--s4); }
+.notes-list li { padding: var(--s3) 0; border-bottom: 1px solid var(--border); }
+.notes-list li:first-child { padding-top: 0; }
+.notes-list time { display: block; font-size: var(--text-sm); color: var(--text-muted); }
+.notes-list p { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
+.notes .status { margin-bottom: var(--s4); color: var(--text-muted); }
+.note-form { display: grid; gap: var(--s2); max-width: 36rem; }
+.note-form label, .note-form .field-error { margin: 0; }
+.note-form .btn { justify-self: start; }
+
+/* Dialog */
+dialog {
+  width: calc(100% - 2 * var(--s4)); max-width: 28rem;
+  padding: var(--s5);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-raised); color: var(--text);
+}
+dialog::backdrop { background: var(--scrim); }
+dialog h2 { margin-bottom: var(--s2); overflow-wrap: anywhere; }
+dialog .error { margin-top: var(--s3); }
+.dialog-actions { display: grid; gap: var(--s3); margin-top: var(--s5); }
+
+@media (max-width: 30rem) {
+  .actions .btn, .btn-row .btn, .note-form .btn { width: 100%; }
+}
+@media (min-width: 56rem) {
+  .job {
+    grid-template-columns: 3.5rem 5rem minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.5fr) 6.5rem auto;
+    align-items: baseline;
+  }
+  .job-time, .job-ref, .job-who, .job-work, .job-addr, .job-state { grid-row: 1; }
+  .job-ref { grid-column: 2; }
+  .job-who { grid-column: 3; }
+  .job-work { grid-column: 4; }
+  .job-addr { grid-column: 5; }
+  .job-state { grid-column: 6; }
+  .job .job-go { grid-column: 7; margin-top: 0; align-self: center; }
+  .skel { height: 3.125rem; }
+  .skel::after { display: none; }
+  .job-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6); }
+  .actions { grid-template-columns: repeat(2, max-content); }
+  .move-form { grid-column: 1 / -1; }
+  .dialog-actions { grid-template-columns: repeat(2, max-content); justify-content: end; }
+  .dialog-actions .btn-primary { order: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel::before, .skel::after { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in"><a class="brand" href="#/">Harbour Heating jobs</a></div>
+</header>
+
+<main id="main">
+
+  <section id="view-list" aria-labelledby="list-title">
+    <div class="list-head">
+      <h1 id="list-title" tabindex="-1">Today's jobs</h1>
+      <p id="list-date" class="muted"></p>
+    </div>
+
+    <nav class="days" aria-label="Days">
+      <a id="day-prev" class="chev-l" href="#/">Yesterday</a>
+      <a id="day-today" href="#/">Today</a>
+      <a id="day-next" class="chev-r" href="#/">Tomorrow</a>
+    </nav>
+
+    <form id="search-form" class="search" role="search">
+      <label for="q">Find by customer, address or job number</label>
+      <input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+    </form>
+
+    <div class="list-status-row">
+      <p id="list-status" class="status" role="status"></p>
+      <button id="list-action" class="btn btn-small" type="button" hidden>Clear search</button>
+      <span id="list-updating" class="updating" role="status"></span>
+    </div>
+
+    <div class="alert-row">
+      <p id="list-alert" class="error" role="alert"></p>
+      <button id="list-retry" class="btn btn-small" type="button">Try again</button>
+    </div>
+
+    <ul id="job-list" class="jobs"></ul>
+  </section>
+
+  <section id="view-job" aria-labelledby="job-title" hidden>
+    <a id="job-back" class="back chev-l" href="#/">Today's jobs</a>
+
+    <h1 id="job-title" tabindex="-1">Job</h1>
+    <p id="job-load" class="status muted" role="status"></p>
+    <div class="alert-row">
+      <p id="job-alert" class="error" role="alert"></p>
+      <button id="job-retry" class="btn btn-small" type="button">Try again</button>
+    </div>
+
+    <div id="job-body" hidden>
+      <p class="job-meta"><span id="job-ref"></span><span id="job-state"></span></p>
+
+      <div class="job-cols">
+        <div>
+          <dl class="facts">
+            <dt>When</dt><dd id="job-when"></dd>
+            <dt>Work</dt><dd id="job-work"></dd>
+            <dt>Address</dt><dd id="job-addr"></dd>
+            <dt>Phone</dt><dd><a id="job-phone" href="tel:"></a></dd>
+          </dl>
+
+          <div class="msg-row">
+            <p id="job-msg" class="msg" role="status"></p>
+            <button id="job-undo" class="btn btn-small" type="button" hidden>Undo move</button>
+          </div>
+
+          <div id="job-actions" class="actions">
+            <button id="complete-open" class="btn btn-primary" type="button">Complete job</button>
+            <button id="move-toggle" class="btn" type="button" aria-expanded="false" aria-controls="move-form">Move to another day</button>
+            <form id="move-form" class="move-form" novalidate hidden>
+              <div>
+                <label for="move-date">New date</label>
+                <p id="move-hint" class="hint">Tomorrow or later</p>
+                <input id="move-date" type="date" aria-describedby="move-hint move-day move-error">
+                <p id="move-day" class="hint" style="margin: var(--s1) 0 0"></p>
+                <p id="move-error" class="error field-error" role="alert"></p>
+              </div>
+              <p id="move-warning" hidden>Once moved, this job cannot be put back on today's list.</p>
+              <div class="btn-row">
+                <button id="move-submit" class="btn" type="submit">Move job</button>
+                <button id="move-cancel" class="btn" type="button">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <section class="notes" aria-labelledby="notes-h">
+          <h2 id="notes-h">Notes</h2>
+          <p id="notes-status" class="status" role="status"></p>
+          <div class="alert-row">
+            <p id="notes-alert" class="error" role="alert"></p>
+            <button id="notes-retry" class="btn btn-small" type="button">Try again</button>
+          </div>
+          <ol id="notes-list" class="notes-list"></ol>
+
+          <form id="note-form" class="note-form" novalidate>
+            <label for="note-text">Add a note</label>
+            <textarea id="note-text" rows="3" aria-describedby="note-error"></textarea>
+            <p id="note-error" class="error field-error" role="alert"></p>
+            <button id="note-submit" class="btn" type="submit">Save note</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<dialog id="complete-dialog" aria-labelledby="cd-title" aria-describedby="cd-desc">
+  <h2 id="cd-title">Complete this job?</h2>
+  <p id="cd-desc">The customer will be emailed an invoice straight away. This cannot be undone.</p>
+  <p id="cd-error" class="error" role="alert"></p>
+  <div class="dialog-actions">
+    <button id="cd-confirm" class="btn btn-primary" type="button">Complete and send invoice</button>
+    <button id="cd-cancel" class="btn" type="button" autofocus>Not yet</button>
+  </div>
+</dialog>
+
+<p id="announce" class="vh" role="status"></p>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const people = ['Mrs A. Okonkwo', 'Mr D. Castellanos-Whitby', 'Greyfriars Dental Practice', 'Ms R. Lindqvist', 'Mr T. Babatunde', 'The Harbour Lights Hotel (kitchen)', 'Dr S. Mehta', 'Mr and Mrs Pemberton', 'Ivy Lane Books', 'Miss K. Dvorak'];
+  const work = ['Annual boiler service', 'No hot water, boiler showing fault F28', 'Radiator leaking in upstairs bedroom', 'Replace thermostat and rebalance system', 'Gas safety certificate for landlord', 'Noisy pump, intermittent'];
+  let jobs = q.get('empty') === '1' ? [] : Array.from({ length: 14 }, (_, i) => ({
+    id: 'job_' + (700 + i), ref: 'HH-' + (5120 + i), customer: people[i % people.length],
+    address: (12 + i * 7) + ' ' + ['Quay Street', 'Lighthouse Road', 'Breakwater Terrace', 'Tidepool Lane'][i % 4] + ', Harbourton, HB' + (1 + (i % 6)) + ' ' + (2 + (i % 7)) + 'QT',
+    phone: '01632 9601' + String(10 + i), date: day(i < 9 ? 0 : 1), slot: ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30', '17:00'][i % 7],
+    work: work[i % work.length], status: i < 2 ? 'complete' : 'booked',
+    notes: i % 3 === 0 ? [{ at: new Date(Date.now() - 86400000).toISOString(), text: 'Customer asked us to use the side gate. Dog in the garden.' }] : [],
+  }));
+  const find = (id) => { const j = jobs.find((x) => x.id === id); if (!j) { const e = new Error('NOT_FOUND: job'); e.code = 'NOT_FOUND'; throw e; } return j; };
+  const copy = (j) => JSON.parse(JSON.stringify(j));
+  return {
+    // date: 'YYYY-MM-DD'. Resolves to the jobs on that day, without their notes.
+    async listJobs(date) { await wait(); maybeFail('list jobs'); return jobs.filter((j) => j.date === date).map((j) => { const c = copy(j); delete c.notes; return c; }); },
+    async getJob(id) { await wait(); maybeFail('load job'); return copy(find(id)); },
+    async addNote(id, text) {
+      await wait(); maybeFail('add note');
+      if (!text || !text.trim()) { const e = new Error('VALIDATION: note_empty'); e.code = 'VALIDATION'; throw e; }
+      const j = find(id); j.notes.push({ at: new Date().toISOString(), text: text.trim() }); return copy(j);
+    },
+    async moveJob(id, date) {
+      await wait(); maybeFail('move job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      if (date <= day(0)) { const e = new Error('VALIDATION: date_not_future'); e.code = 'PAST'; throw e; }
+      j.date = date; return copy(j);
+    },
+    async completeJob(id) {
+      await wait(); maybeFail('complete job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      j.status = 'complete'; return copy(j);
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const setText = (node, text) => { if (node.textContent !== text) node.textContent = text; };
+
+  /* Dates. The server's days are ISO dates, so "today" is worked out the same way it does. */
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const isoDay = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const parseIso = (iso) => new Date(iso + 'T00:00:00Z');
+  const isIso = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(parseIso(s)) && parseIso(s).toISOString().slice(0, 10) === s;
+  const shift = (iso, n) => { const d = parseIso(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const rel = (iso) => iso === isoDay(0) ? 'today' : iso === isoDay(1) ? 'tomorrow' : iso === isoDay(-1) ? 'yesterday' : null;
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const yearOf = (d) => d.getUTCFullYear() !== new Date().getFullYear() ? ' ' + d.getUTCFullYear() : '';
+  const longDate = (iso) => { const d = parseIso(iso); return DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + yearOf(d); };
+  const shortDate = (iso) => { const d = parseIso(iso); return DAYS[d.getUTCDay()].slice(0, 3) + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()].slice(0, 3) + yearOf(d); };
+  const dayLabel = (iso) => rel(iso) ? cap(rel(iso)) : shortDate(iso);
+  const listTitle = (iso) => rel(iso) ? cap(rel(iso)) + "'s jobs" : 'Jobs on ' + longDate(iso);
+  const listName = (iso) => rel(iso) ? rel(iso) + "'s jobs" : 'the jobs for ' + shortDate(iso);
+  const dayPhrase = (iso) => rel(iso) || longDate(iso);
+  const clock = (d) => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  const localIso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const noteTime = (at) => {
+    const d = new Date(at), now = new Date(), y = new Date(); y.setDate(y.getDate() - 1);
+    const k = localIso(d);
+    const day = k === localIso(now) ? 'Today' : k === localIso(y) ? 'Yesterday' : shortDate(k);
+    return day + ', ' + clock(d);
+  };
+
+  const SIGNAL = ' Check your signal and try again.';
+  const CHECK = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>';
+
+  /* Reads are safe to repeat, so a dropped connection is retried twice before the user is told. */
+  const read = async (fn) => {
+    for (let i = 0; ; i++) {
+      try { return await fn(); } catch (e) { if (e.code !== 'ECONNRESET' || i >= 2) throw e; }
+    }
+  };
+
+  /* State */
+  const lists = new Map();     // date -> { jobs, at }
+  const listLoad = new Map();  // date -> { loading, failed }
+  const fullJobs = new Map();  // id -> job with notes
+  const jobLoad = new Map();   // id -> { loading, error: 'conn' | 'notfound' | null }
+  const msgs = new Map();      // id -> { text, undoTo, error }
+  const noteErrors = new Map();
+  const busy = { note: new Set(), move: new Set(), undo: new Set(), complete: new Set() };
+  const scrolls = new Map();
+  let route = null;
+  let backHref = null;
+  let moveOpen = false;
+  let rowsSig = '';
+
+  const bySlot = (a, b) => a.slot.localeCompare(b.slot) || a.ref.localeCompare(b.ref);
+  const summary = (id) => {
+    if (fullJobs.has(id)) return fullJobs.get(id);
+    for (const entry of lists.values()) { const j = entry.jobs.find((x) => x.id === id); if (j) return j; }
+    return null;
+  };
+  const applyJob = (job) => {
+    if (job.notes) {
+      fullJobs.set(job.id, job);
+      jobLoad.set(job.id, { loading: !!(jobLoad.get(job.id) || {}).loading, error: null });
+    }
+    else if (fullJobs.has(job.id)) Object.assign(fullJobs.get(job.id), job);
+    const s = Object.assign({}, job); delete s.notes;
+    for (const [date, entry] of lists) {
+      const i = entry.jobs.findIndex((j) => j.id === job.id);
+      if (date === s.date) { if (i >= 0) entry.jobs[i] = s; else entry.jobs.push(s); entry.jobs.sort(bySlot); }
+      else if (i >= 0) entry.jobs.splice(i, 1);
+    }
+  };
+  const draftKey = (id) => 'hh-note-draft:' + id;
+  const getDraft = (id) => { try { return localStorage.getItem(draftKey(id)) || ''; } catch (e) { return ''; } };
+  const setDraft = (id, text) => { try { if (text) localStorage.setItem(draftKey(id), text); else localStorage.removeItem(draftKey(id)); } catch (e) { /* storage unavailable */ } };
+  const announce = (text) => { const a = $('announce'); a.textContent = ''; setTimeout(() => { a.textContent = text; }, 50); };
+
+  /* Routes: #/ is today, #/day/2026-01-31 is another day, #/job/job_700 is one job. ?q= holds the search. */
+  const parseRoute = () => {
+    const raw = location.hash.replace(/^#/, '');
+    const cut = raw.indexOf('?');
+    const path = cut < 0 ? raw : raw.slice(0, cut);
+    const q = cut < 0 ? '' : (new URLSearchParams(raw.slice(cut + 1)).get('q') || '');
+    let m = path.match(/^\/job\/([\w-]+)$/);
+    if (m) return { view: 'job', id: m[1] };
+    m = path.match(/^\/day\/(\d{4}-\d{2}-\d{2})$/);
+    if (m && isIso(m[1])) return { view: 'list', date: m[1], q };
+    return { view: 'list', date: isoDay(0), q };
+  };
+  const listHref = (date, q) => (date === isoDay(0) ? '#/' : '#/day/' + date) + (q ? '?q=' + encodeURIComponent(q) : '');
+  const keyOf = (r) => r.view === 'job' ? 'job:' + r.id : 'list:' + r.date;
+  const isGone = (node) => node && node !== document.body && (!node.isConnected || node.closest('[hidden]'));
+
+  /* ---------- Day list ---------- */
+
+  const matcher = (q) => {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    return (j) => {
+      const hay = [j.customer, j.address, j.ref, j.work, j.slot, j.phone].join(' ').toLowerCase();
+      return terms.every((t) => hay.includes(t));
+    };
+  };
+
+  const jobRow = (j) => {
+    const li = el('li');
+    const a = el('a', 'job');
+    a.href = '#/job/' + j.id;
+    a.append(el('span', 'job-time', j.slot), el('span', 'job-who', j.customer));
+    const go = el('span', 'job-go'); go.setAttribute('aria-hidden', 'true');
+    a.append(go, el('span', 'job-work', j.work), el('span', 'job-addr', j.address), el('span', 'job-ref', j.ref));
+    if (j.status === 'complete') { const b = el('span', 'job-state badge'); b.innerHTML = CHECK; b.append('Complete'); a.append(b); }
+    li.append(a);
+    return li;
+  };
+
+  const renderList = () => {
+    if (!route || route.view !== 'list') return;
+    const active = document.activeElement;
+    const date = route.date, q = route.q.trim();
+    const entry = lists.get(date), st = listLoad.get(date) || {};
+    let text = '', action = '', rows = [], skeleton = false, alert = '';
+
+    if (!entry) {
+      if (st.failed) alert = 'Could not load ' + listName(date) + '.' + SIGNAL;
+      else { text = 'Loading jobs...'; skeleton = true; }
+    } else {
+      const all = entry.jobs;
+      if (!all.length) { text = 'No jobs booked for ' + dayPhrase(date) + '.'; action = 'Check again'; }
+      else if (q) {
+        rows = all.filter(matcher(q));
+        text = rows.length
+          ? rows.length + ' of ' + all.length + (all.length === 1 ? ' job matches "' : ' jobs match "') + q + '"'
+          : 'No jobs for ' + dayPhrase(date) + ' match "' + q + '".';
+        action = 'Clear search';
+      } else {
+        rows = all;
+        const done = all.filter((j) => j.status === 'complete').length;
+        text = all.length + (all.length === 1 ? ' job, ' : ' jobs, ') + done + ' complete';
+      }
+      if (st.failed) alert = 'Could not update ' + listName(date) + '. Showing them as of ' + clock(new Date(entry.at)) + '.';
+    }
+
+    setText($('list-status'), text);
+    setText($('list-updating'), entry && st.loading ? 'Updating...' : '');
+    setText($('list-alert'), alert);
+    $('list-retry').hidden = !alert;
+    const btn = $('list-action');
+    btn.hidden = !action;
+    if (action) setText(btn, action);
+    $('search-form').hidden = (!entry && !!st.failed) || (!!entry && !entry.jobs.length);
+
+    const sig = skeleton ? 'skeleton' : JSON.stringify(rows);
+    if (sig !== rowsSig) {
+      rowsSig = sig;
+      const ul = $('job-list');
+      const focused = active && active.closest && active.closest('#job-list') ? active.getAttribute('href') : null;
+      ul.textContent = '';
+      if (skeleton) for (let i = 0; i < 5; i++) { const s = el('li', 'skel'); s.setAttribute('aria-hidden', 'true'); ul.append(s); }
+      else for (const j of rows) ul.append(jobRow(j));
+      if (focused) { const again = ul.querySelector('a[href="' + focused + '"]'); if (again) again.focus({ preventScroll: true }); }
+    }
+    if (isGone(active)) $('list-title').focus({ preventScroll: true });
+  };
+
+  const loadList = async (date) => {
+    if ((listLoad.get(date) || {}).loading) return;
+    listLoad.set(date, { loading: true, failed: false });
+    renderList();
+    try {
+      const got = await read(() => api.listJobs(date));
+      got.sort(bySlot);
+      lists.set(date, { jobs: got, at: Date.now() });
+      for (const j of got) if (fullJobs.has(j.id)) Object.assign(fullJobs.get(j.id), j);
+      listLoad.set(date, { loading: false, failed: false });
+    } catch (e) {
+      listLoad.set(date, { loading: false, failed: true });
+    }
+    renderList();
+    renderJob();
+  };
+
+  const showList = (prev, initial) => {
+    const date = route.date;
+    document.title = listTitle(date) + ' - Harbour Heating';
+    setText($('list-title'), listTitle(date));
+    const sub = $('list-date');
+    sub.hidden = !rel(date);
+    setText(sub, rel(date) ? longDate(date) : '');
+    const p = $('day-prev'), n = $('day-next'), t = $('day-today');
+    p.href = listHref(shift(date, -1)); setText(p, dayLabel(shift(date, -1)));
+    n.href = listHref(shift(date, 1)); setText(n, dayLabel(shift(date, 1)));
+    if (date === isoDay(0)) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    if ($('q').value !== route.q) $('q').value = route.q;
+    rowsSig = '';
+    renderList();
+    loadList(date);
+    if (initial) return;
+    const from = prev && prev.view === 'job' ? $('job-list').querySelector('a[href="#/job/' + prev.id + '"]') : null;
+    (from || $('list-title')).focus({ preventScroll: true });
+    window.scrollTo(0, prev && prev.view === 'job' ? (scrolls.get(keyOf(route)) || 0) : 0);
+  };
+
+  /* ---------- One job ---------- */
+
+  const syncBusy = (btn, on, busyLabel) => {
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    setText(btn, on ? busyLabel : btn.dataset.label);
+    if (on) btn.setAttribute('aria-disabled', 'true'); else btn.removeAttribute('aria-disabled');
+  };
+
+  const renderJob = () => {
+    if (!route || route.view !== 'job') return;
+    const active = document.activeElement;
+    const id = route.id;
+    const st = jobLoad.get(id) || {};
+    const full = fullJobs.get(id);
+    const job = st.error === 'notfound' ? null : summary(id);
+
+    document.title = (job ? job.customer + ', ' + job.ref : 'Job') + ' - Harbour Heating';
+    setText($('job-title'), job ? job.customer : 'Job');
+
+    const backDate = job && !backHref ? job.date : null;
+    const href = backHref || (backDate ? listHref(backDate) : '#/');
+    const m = href.match(/^#\/day\/(\d{4}-\d{2}-\d{2})/);
+    $('job-back').href = href;
+    setText($('job-back'), listTitle(m ? m[1] : isoDay(0)));
+
+    setText($('job-load'), !job && st.loading ? 'Loading job...' : '');
+    let alert = '';
+    if (st.error === 'notfound') alert = 'This job is no longer in the system. The office may have removed it.';
+    else if (!job && st.error) alert = 'Could not load this job.' + SIGNAL;
+    setText($('job-alert'), alert);
+    $('job-retry').hidden = !(alert && st.error === 'conn');
+    $('job-body').hidden = !job;
+    if (!job) { if (isGone(active)) $('job-title').focus({ preventScroll: true }); return; }
+
+    const done = job.status === 'complete';
+    setText($('job-ref'), job.ref);
+    const state = $('job-state');
+    const stateSig = done ? 'complete' : 'booked';
+    if (state.dataset.sig !== stateSig) {
+      state.dataset.sig = stateSig;
+      state.className = done ? 'badge' : '';
+      if (done) { state.innerHTML = CHECK; state.append('Complete'); } else state.textContent = 'Booked';
+    }
+    setText($('job-when'), dayLabel(job.date) + ', ' + job.slot);
+    setText($('job-work'), job.work);
+    setText($('job-addr'), job.address);
+    const phone = $('job-phone');
+    setText(phone, job.phone);
+    phone.href = 'tel:' + job.phone.replace(/[^\d+]/g, '');
+
+    const msg = msgs.get(id);
+    const msgEl = $('job-msg');
+    setText(msgEl, msg ? msg.text : '');
+    msgEl.classList.toggle('error', !!(msg && msg.error));
+    $('job-undo').hidden = !(msg && msg.undoTo);
+    syncBusy($('job-undo'), busy.undo.has(id), 'Undoing...');
+
+    $('job-actions').hidden = done;
+    const toggle = $('move-toggle');
+    toggle.setAttribute('aria-expanded', moveOpen ? 'true' : 'false');
+    $('move-form').hidden = !moveOpen;
+    $('move-warning').hidden = job.date !== isoDay(0);
+    syncBusy($('move-submit'), busy.move.has(id), 'Moving job...');
+    syncBusy($('complete-open'), busy.complete.has(id), 'Completing...');
+    syncBusy($('cd-confirm'), busy.complete.has(id), 'Completing...');
+    if (busy.complete.has(id)) $('cd-cancel').setAttribute('aria-disabled', 'true'); else $('cd-cancel').removeAttribute('aria-disabled');
+
+    /* Notes */
+    const list = $('notes-list');
+    const notes = full ? full.notes : [];
+    const sig = JSON.stringify(notes);
+    if (list.dataset.sig !== sig) {
+      list.dataset.sig = sig;
+      list.textContent = '';
+      for (const n of notes) {
+        const li = el('li');
+        const t = el('time', '', noteTime(n.at)); t.dateTime = n.at;
+        li.append(t, el('p', '', n.text));
+        list.append(li);
+      }
+    }
+    let ns = '', na = '';
+    if (!full) { if (st.loading) ns = 'Loading notes...'; else if (st.error) na = 'Could not load the notes.' + SIGNAL; }
+    else {
+      if (!notes.length) ns = 'No notes yet.';
+      if (st.error) na = 'Could not check for new notes.' + SIGNAL;
+    }
+    setText($('notes-status'), ns);
+    setText($('notes-alert'), na);
+    $('notes-retry').hidden = !na;
+
+    const ne = noteErrors.get(id) || '';
+    setText($('note-error'), ne);
+    if (ne) $('note-text').setAttribute('aria-invalid', 'true'); else $('note-text').removeAttribute('aria-invalid');
+    syncBusy($('note-submit'), busy.note.has(id), 'Saving note...');
+
+    if (isGone(active)) $('job-title').focus({ preventScroll: true });
+  };
+
+  const loadJob = async (id) => {
+    if ((jobLoad.get(id) || {}).loading) return;
+    jobLoad.set(id, { loading: true, error: null });
+    renderJob();
+    try {
+      applyJob(await read(() => api.getJob(id)));
+      jobLoad.set(id, { loading: false, error: null });
+    } catch (e) {
+      jobLoad.set(id, { loading: false, error: e.code === 'NOT_FOUND' ? 'notfound' : 'conn' });
+    }
+    renderJob();
+  };
+
+  const closeMove = () => {
+    moveOpen = false;
+    setText($('move-error'), '');
+    $('move-date').removeAttribute('aria-invalid');
+  };
+
+  const showJob = (initial) => {
+    const id = route.id;
+    closeMove();
+    $('note-text').value = getDraft(id);
+    $('notes-list').dataset.sig = '';
+    renderJob();
+    loadJob(id);
+    if (initial) return;
+    $('job-title').focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  };
+
+  /* Add a note */
+  $('note-text').addEventListener('input', () => {
+    if (!route || route.view !== 'job') return;
+    setDraft(route.id, $('note-text').value);
+    if (noteErrors.has(route.id)) { noteErrors.delete(route.id); renderJob(); }
+  });
+  $('note-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const id = route.id;
+    if (busy.note.has(id)) return;
+    const text = $('note-text').value;
+    if (!text.trim()) {
+      noteErrors.set(id, 'Write a note before saving.');
+      renderJob();
+      $('note-text').focus();
+      return;
+    }
+    noteErrors.delete(id);
+    busy.note.add(id);
+    renderJob();
+    try {
+      applyJob(await api.addNote(id, text));
+      setDraft(id, '');
+      if (route.view === 'job' && route.id === id) { $('note-text').value = ''; announce('Note saved.'); }
+    } catch (e) {
+      noteErrors.set(id,
+        e.code === 'VALIDATION' ? 'Write a note before saving.'
+        : e.code === 'NOT_FOUND' ? 'Note not saved. This job is no longer in the system.'
+        : 'Note not saved.' + SIGNAL);
+    }
+    busy.note.delete(id);
+    renderJob();
+  });
+
+  /* Move to another day */
+  const showMoveDay = () => { const v = $('move-date').value; setText($('move-day'), isIso(v) ? longDate(v) : ''); };
+  $('move-toggle').addEventListener('click', () => {
+    const job = summary(route.id);
+    if (!job) return;
+    if (moveOpen) { closeMove(); renderJob(); return; }
+    moveOpen = true;
+    const input = $('move-date');
+    input.min = isoDay(1);
+    input.value = shift(job.date > isoDay(0) ? job.date : isoDay(0), 1);
+    showMoveDay();
+    renderJob();
+    input.focus();
+  });
+  $('move-date').addEventListener('input', () => {
+    showMoveDay();
+    setText($('move-error'), '');
+    $('move-date').removeAttribute('aria-invalid');
+  });
+  $('move-cancel').addEventListener('click', () => { closeMove(); renderJob(); $('move-toggle').focus(); });
+  const moveError = (text) => {
+    setText($('move-error'), text);
+    $('move-date').setAttribute('aria-invalid', 'true');
+    $('move-date').focus();
+  };
+  const markComplete = (id) => { const j = summary(id); if (j) applyJob(Object.assign({}, j, { status: 'complete' })); };
+  $('move-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const id = route.id, job = summary(id);
+    if (!job || busy.move.has(id)) return;
+    const to = $('move-date').value, from = job.date;
+    if (!isIso(to)) return moveError('Choose a date.');
+    if (to <= isoDay(0)) return moveError('Choose tomorrow or later.');
+    if (to === from) return moveError('The job is already booked for that day. Choose another date.');
+    busy.move.add(id);
+    renderJob();
+    let failed = '';
+    try {
+      applyJob(await api.moveJob(id, to));
+      msgs.set(id, { text: 'Moved to ' + dayPhrase(to) + '.', undoTo: from > isoDay(0) ? from : null });
+    } catch (e) {
+      if (e.code === 'COMPLETE') { markComplete(id); msgs.set(id, { text: 'This job is already complete, so it was not moved.', error: true }); }
+      else if (e.code === 'NOT_FOUND') jobLoad.set(id, { loading: false, error: 'notfound' });
+      else failed = e.code === 'PAST' ? 'Choose tomorrow or later.' : 'Job not moved.' + SIGNAL;
+    }
+    busy.move.delete(id);
+    const here = route.view === 'job' && route.id === id;
+    if (here && failed) { renderJob(); moveError(failed); return; }
+    if (here && !failed) { closeMove(); renderJob(); if (!$('job-actions').hidden && !isGone($('move-toggle'))) $('move-toggle').focus(); }
+    renderList();
+  });
+  $('job-undo').addEventListener('click', async () => {
+    const id = route.id, msg = msgs.get(id), job = summary(id);
+    if (!msg || !msg.undoTo || !job || busy.undo.has(id)) return;
+    const back = msg.undoTo, now = job.date;
+    busy.undo.add(id);
+    renderJob();
+    try {
+      applyJob(await api.moveJob(id, back));
+      msgs.set(id, { text: 'Move undone. The job is booked for ' + dayPhrase(back) + ' again.' });
+    } catch (e) {
+      if (e.code === 'ECONNRESET') msgs.set(id, { text: 'Could not undo the move. The job is still booked for ' + dayPhrase(now) + '.' + SIGNAL, undoTo: back, error: true });
+      else msgs.set(id, { text: 'The move can no longer be undone. The job is still booked for ' + dayPhrase(now) + '.', error: true });
+    }
+    busy.undo.delete(id);
+    renderJob();
+    renderList();
+  });
+
+  /* Complete: cannot be reversed, so it asks first. */
+  const dialog = $('complete-dialog');
+  let dialogJob = null;
+  $('complete-open').addEventListener('click', () => {
+    const job = summary(route.id);
+    if (!job || busy.complete.has(job.id)) return;
+    dialogJob = job.id;
+    setText($('cd-title'), 'Complete ' + job.ref + ' for ' + job.customer + '?');
+    setText($('cd-error'), '');
+    dialog.showModal();
+    $('cd-cancel').focus();
+  });
+  $('cd-cancel').addEventListener('click', () => { if (!busy.complete.has(dialogJob)) dialog.close(); });
+  dialog.addEventListener('cancel', (ev) => { if (busy.complete.has(dialogJob)) ev.preventDefault(); });
+  $('cd-confirm').addEventListener('click', async () => {
+    const id = dialogJob;
+    if (!id || busy.complete.has(id)) return;
+    busy.complete.add(id);
+    setText($('cd-error'), '');
+    renderJob();
+    let failed = '';
+    try {
+      applyJob(await api.completeJob(id));
+      msgs.set(id, { text: 'Job complete. The invoice has been emailed to the customer.' });
+    } catch (e) {
+      if (e.code === 'COMPLETE') { markComplete(id); msgs.set(id, { text: 'This job was already complete.' }); }
+      else if (e.code === 'NOT_FOUND') jobLoad.set(id, { loading: false, error: 'notfound' });
+      else failed = 'Job not completed.' + SIGNAL;
+    }
+    busy.complete.delete(id);
+    const here = route.view === 'job' && route.id === id;
+    if (failed && here && dialog.open) { renderJob(); setText($('cd-error'), failed); return; }
+    if (failed) msgs.set(id, { text: failed, error: true });
+    if (dialog.open && dialogJob === id) dialog.close();
+    renderJob();
+    renderList();
+    if (here) $('job-title').focus({ preventScroll: true });
+    if (here && !failed) window.scrollTo(0, 0);
+  });
+
+  /* Retry buttons */
+  $('list-retry').addEventListener('click', () => { loadList(route.date); });
+  $('job-retry').addEventListener('click', () => { loadJob(route.id); });
+  $('notes-retry').addEventListener('click', () => { loadJob(route.id); });
+
+  /* Search */
+  const setQuery = (q) => {
+    route.q = q;
+    history.replaceState(null, '', listHref(route.date, q.trim()) || '#/');
+    backHref = listHref(route.date, q.trim());
+    renderList();
+  };
+  $('q').addEventListener('input', () => { setQuery($('q').value); });
+  $('search-form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const first = $('job-list').querySelector('a');
+    if (first) first.focus();
+  });
+  $('list-action').addEventListener('click', () => {
+    if ($('list-action').textContent === 'Clear search') { $('q').value = ''; setQuery(''); $('q').focus(); }
+    else loadList(route.date);
+  });
+
+  /* Navigation */
+  const onRoute = (initial) => {
+    const prev = route;
+    if (prev) scrolls.set(keyOf(prev), window.scrollY);
+    route = parseRoute();
+    if (dialog.open) dialog.close();
+    if (prev && prev.view === 'job' && !(route.view === 'job' && route.id === prev.id)) msgs.delete(prev.id);
+    $('view-list').hidden = route.view !== 'list';
+    $('view-job').hidden = route.view !== 'job';
+    if (route.view === 'list') { backHref = listHref(route.date, route.q.trim()); showList(prev, initial); }
+    else showJob(initial);
+  };
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('hashchange', () => onRoute(false));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible' || !route) return;
+    if (route.view === 'list') {
+      const entry = lists.get(route.date);
+      if (!entry || Date.now() - entry.at > 60000) loadList(route.date);
+    } else if (!busy.note.has(route.id)) loadJob(route.id);
+  });
+  onRoute(true);
+})();
+</script>
+</body>
+</html>

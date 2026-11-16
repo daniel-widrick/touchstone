@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team settings - Northwind Studio</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0; color: #1f2937; background: #f8fafc; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px; }
+  .hero { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; padding: 40px 32px; border-radius: 16px; margin-bottom: 24px; }
+  .hero h1 { margin: 0 0 8px; font-size: 32px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .note { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 12px; margin: 10px 0; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+  button.primary { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  input, select { font: inherit; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; }
+  label { display: block; margin: 10px 0 4px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #e5e7eb; }
+  .toast { position: fixed; right: 16px; bottom: 16px; background: #111827; color: #fff; padding: 10px 14px; border-radius: 8px; }
+  .row-actions { display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1>Welcome back! Let's supercharge your team</h1>
+    <p>Everything you need to manage your team, beautifully organised in one place.</p>
+  </section>
+
+  <p>This page lets you manage your team. Use the first card to rename the team, the table below it to see and manage members, the form under the table to invite new people, and the switches at the bottom to control notifications.</p>
+  <div class="note">Note: this page was built with vanilla JavaScript and talks to a simulated API.</div>
+  <div class="note">Tip: changes are saved to the server, which may take a moment.</div>
+  <div class="note">Disclaimer: member activity times may not be fully accurate.</div>
+
+  <section class="card">
+    <h2>Team name</h2>
+    <label for="team-name">Team name</label>
+    <input id="team-name" type="text">
+    <button class="primary" id="rename">Save</button>
+  </section>
+
+  <section class="card">
+    <h2>Members</h2>
+    <table>
+      <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Last active</th><th scope="col">Actions</th></tr></thead>
+      <tbody id="members"><tr><td colspan="5">No members</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Invite</h2>
+    <form id="invite-form">
+      <label for="invite-email">Email</label>
+      <input id="invite-email" type="email" autocomplete="email">
+      <label for="invite-role">Role</label>
+      <select id="invite-role"><option value="member">member</option><option value="admin">admin</option></select>
+      <p><button class="primary" id="invite" type="submit" disabled>Submit</button></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Notifications</h2>
+    <div id="notifications"></div>
+    <p><button class="primary" id="reload">Refresh</button></p>
+  </section>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const team = {
+    name: 'Northwind Studio', plan: 'team', seats: 12,
+    members: q.get('empty') === '1' ? [] : [
+      { id: 'u1', name: 'Priya Raman', email: 'priya@northwind.example', role: 'owner', lastActive: '2026-11-15T16:20:00Z' },
+      { id: 'u2', name: 'Tomas Okafor', email: 'tomas@northwind.example', role: 'admin', lastActive: '2026-11-14T09:02:00Z' },
+      { id: 'u3', name: 'Wilhelmina Featherstonehaugh-Abernathy', email: 'wilhelmina.featherstonehaugh-abernathy@northwind.example', role: 'member', lastActive: '2026-10-02T11:45:00Z' },
+      { id: 'u4', name: 'Sam Lee', email: 'sam@northwind.example', role: 'member', lastActive: null },
+      { id: 'u5', name: 'Noor Haddad', email: 'noor@northwind.example', role: 'member', lastActive: '2026-11-15T08:10:00Z' },
+    ],
+    notifications: { weekly_digest: true, new_member: true, billing: true, mentions: false },
+  };
+  let n = 6;
+  return {
+    async getTeam() { await wait(); maybeFail('load team'); return JSON.parse(JSON.stringify(team)); },
+    async renameTeam(name) { await wait(); maybeFail('rename team'); if (!name.trim()) { const e = new Error('VALIDATION: name_required'); e.code = 'VALIDATION'; throw e; } team.name = name.trim(); return { name: team.name }; },
+    async inviteMember(email, role) {
+      await wait(); maybeFail('invite member');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { const e = new Error('VALIDATION: email_format'); e.code = 'VALIDATION'; throw e; }
+      if (team.members.some((m) => m.email === email)) { const e = new Error('CONFLICT: member_exists'); e.code = 'EXISTS'; throw e; }
+      if (team.members.length >= team.seats) { const e = new Error('LIMIT: seats_exhausted'); e.code = 'SEATS'; throw e; }
+      const m = { id: 'u' + n++, name: email.split('@')[0], email, role, lastActive: null }; team.members.push(m); return { ...m };
+    },
+    async changeRole(id, role) { await wait(); maybeFail('change role'); const m = team.members.find((x) => x.id === id); m.role = role; return { ...m }; },
+    async removeMember(id) { await wait(); maybeFail('remove member'); team.members = team.members.filter((x) => x.id !== id); return { ok: true }; },
+    async setNotification(key, on) { await wait(); maybeFail('save notification'); team.notifications[key] = on; return { ...team.notifications }; },
+  };
+})();
+
+let team = null;
+const $ = (id) => document.getElementById(id);
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+function render() {
+  $('team-name').value = team.name;
+  $('members').innerHTML = team.members.map((m) => `
+    <tr>
+      <td>${m.name}</td><td>${m.email}</td>
+      <td><select data-role="${m.id}" aria-label="Role for ${m.name}">
+        <option ${m.role === 'owner' ? 'selected' : ''}>owner</option>
+        <option ${m.role === 'admin' ? 'selected' : ''}>admin</option>
+        <option ${m.role === 'member' ? 'selected' : ''}>member</option></select></td>
+      <td>${new Date(m.lastActive).toLocaleDateString()}</td>
+      <td class="row-actions"><button data-remove="${m.id}">Remove</button></td>
+    </tr>`).join('');
+  $('notifications').innerHTML = Object.keys(team.notifications).map((k) => `
+    <p><label style="display:inline;font-weight:400"><input type="checkbox" data-notif="${k}" ${team.notifications[k] ? 'checked' : ''}> ${k}</label></p>`).join('');
+}
+
+async function load() {
+  try {
+    team = await api.getTeam();
+    render();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+$('rename').addEventListener('click', async () => {
+  if (!confirm('Are you sure?')) return;
+  try {
+    await api.renameTeam($('team-name').value);
+    toast('Team renamed successfully!');
+  } catch (e) {
+    alert(e.message);
+  }
+});
+
+$('invite-email').addEventListener('input', () => {
+  $('invite').disabled = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($('invite-email').value);
+});
+
+$('invite-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const email = $('invite-email').value, role = $('invite-role').value;
+  $('invite-form').reset();
+  $('invite').disabled = true;
+  try {
+    const m = await api.inviteMember(email, role);
+    team.members.push(m);
+    render();
+    toast('Invite sent successfully!');
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+});
+
+document.addEventListener('click', async (ev) => {
+  const id = ev.target.dataset.remove;
+  if (!id) return;
+  if (!confirm('Are you sure?')) return;
+  try {
+    await api.removeMember(id);
+    team.members = team.members.filter((m) => m.id !== id);
+    render();
+  } catch (e) {
+    toast('Failed: ' + e.message);
+  }
+});
+
+document.addEventListener('change', async (ev) => {
+  if (ev.target.dataset.role) {
+    try { await api.changeRole(ev.target.dataset.role, ev.target.value); }
+    catch (e) { toast('Failed to change role'); }
+  }
+  if (ev.target.dataset.notif) {
+    try { await api.setNotification(ev.target.dataset.notif, ev.target.checked); }
+    catch (e) { console.error(e); }
+  }
+});
+
+$('reload').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>

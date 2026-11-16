@@ -1,0 +1,12 @@
+{
+  "name": "touchstone",
+  "description": "Touchstone: rules for how web interfaces look and work, for AI coding agents.",
+  "owner": { "name": "Daniel Widrick", "url": "https://github.com/daniel-widrick" },
+  "plugins": [
+    {
+      "name": "touchstone",
+      "source": "./plugin",
+      "description": "Rules for how a web screen looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page."
+    }
+  ]
+}

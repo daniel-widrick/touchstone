@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - harbour 2.4 documentation</title>
+<meta name="description" content="Install harbour, create a repository, make your first encrypted backup, restore it, and schedule it to run every night.">
+<script>document.documentElement.className = "js";</script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfaf7;
+    --surface: #f1efe9;
+    --text: #1b2428;
+    --muted: #536168;
+    --border: #d9d5cb;
+    --accent: #0a6a6a;
+    --accent-soft: #e0efed;
+    --code-bg: #f1efe9;
+    --prompt: #7a868b;
+    --warn-bg: #fff3d4;
+    --warn-border: #a86a12;
+    --warn-text: #3d2a05;
+    --ok: #17693a;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1517;
+      --surface: #182124;
+      --text: #e3e9ea;
+      --muted: #9dabb0;
+      --border: #2b383c;
+      --accent: #62cdc4;
+      --accent-soft: #16302f;
+      --code-bg: #182124;
+      --prompt: #7c8b90;
+      --warn-bg: #2a210f;
+      --warn-border: #d9a441;
+      --warn-text: #f4e3bd;
+      --ok: #6fd39a;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.6 var(--sans);
+  }
+  a { color: var(--accent); text-underline-offset: 0.15em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+  .skip {
+    position: absolute; left: 16px; top: -100px;
+    background: var(--bg); padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; z-index: 10;
+  }
+  .skip:focus { top: 12px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+
+  /* Top bar */
+  .topbar { border-bottom: 1px solid var(--border); }
+  .topbar-inner {
+    max-width: 1080px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  }
+  .brand { font: 700 1.05rem var(--mono); letter-spacing: -0.01em; }
+  .version {
+    font: 0.8rem var(--mono); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px;
+  }
+  .crumb { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+
+  /* Layout */
+  .layout {
+    max-width: 1080px; margin: 0 auto; padding: 0 24px 96px;
+    display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 56px;
+  }
+  .toc { padding-top: 44px; }
+  .toc-inner { position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow-y: auto; }
+  .toc summary {
+    font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted); list-style: none; margin-bottom: 10px;
+  }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+  .toc a {
+    display: block; padding: 5px 0 5px 14px; margin-left: -1px;
+    border-left: 2px solid transparent;
+    color: var(--muted); text-decoration: none; font-size: 0.92rem; line-height: 1.35;
+  }
+  .toc a:hover { color: var(--text); }
+  .toc a.current { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+  main { min-width: 0; max-width: 720px; padding-top: 44px; }
+
+  h1 { font-size: 2.3rem; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 14px; }
+  .lede { font-size: 1.15rem; color: var(--muted); margin: 0 0 8px; }
+  h2 {
+    font-size: 1.45rem; line-height: 1.25; letter-spacing: -0.01em;
+    margin: 56px 0 12px; padding-top: 28px; border-top: 1px solid var(--border);
+    scroll-margin-top: 4px;
+  }
+  h2 .num {
+    display: inline-block; min-width: 1.7em; height: 1.7em; line-height: 1.7em; text-align: center;
+    margin-right: 10px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    font: 600 0.72em/1.7em var(--mono); vertical-align: 0.12em;
+  }
+  h3 { font-size: 1.08rem; margin: 30px 0 8px; scroll-margin-top: 16px; }
+  p { margin: 0 0 14px; }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+
+  code { font-family: var(--mono); font-size: 0.88em; }
+  :not(pre) > code {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.08em 0.36em; overflow-wrap: anywhere;
+  }
+  h3 code { font-size: 0.92em; }
+
+  /* Command blocks */
+  .cmd {
+    display: flex; align-items: stretch;
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    margin: 0 0 14px;
+  }
+  .cmd pre {
+    flex: 1; min-width: 0; margin: 0; padding: 13px 16px;
+    overflow-x: auto; font: 0.9rem/1.65 var(--mono); tab-size: 2;
+  }
+  .cmd pre code { font-size: 1em; }
+  .cmd .ln::before { content: "$ "; color: var(--prompt); user-select: none; -webkit-user-select: none; }
+  .cmd[data-prompt="win"] .ln::before { content: "> "; }
+  .cmd[data-prompt="none"] .ln::before { content: none; }
+  .copy {
+    flex: none; align-self: flex-start; margin: 7px 7px 7px 0; min-width: 68px; min-height: 34px;
+    padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg); color: var(--text); font: 600 0.8rem var(--sans); cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); color: var(--accent); }
+  .copy.done { color: var(--ok); border-color: var(--ok); }
+  html:not(.js) .copy { display: none; }
+  .cmd-label { font-size: 0.86rem; color: var(--muted); margin: 0 0 6px; }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--border); background: var(--surface);
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 18px 0;
+  }
+  .callout > :last-child { margin-bottom: 0; }
+  .callout-title { font-weight: 700; margin-bottom: 4px; }
+  .callout.warn { background: var(--warn-bg); border-left-color: var(--warn-border); color: var(--warn-text); }
+
+  /* OS tabs */
+  .tablist { display: none; }
+  .js .tablist {
+    display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 0 0 16px;
+  }
+  .tablist button {
+    appearance: none; background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px;
+    padding: 9px 16px; min-height: 44px; font: 600 0.95rem var(--sans); color: var(--muted); cursor: pointer;
+  }
+  .tablist button:hover { color: var(--text); }
+  .tablist button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .js .tabpanel > h3 { display: none; }
+  .js .tabpanel[hidden] { display: none; }
+
+  /* Requirements */
+  .reqs { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0 0 14px; }
+  .reqs dt { color: var(--muted); }
+  .reqs dd { margin: 0; }
+
+  /* Next pages */
+  .next { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .next li { margin: 0; }
+  .next a {
+    display: block; padding: 14px 18px; border: 1px solid var(--border); border-radius: 8px;
+    text-decoration: none; color: var(--text);
+  }
+  .next a:hover { border-color: var(--accent); }
+  .next strong { color: var(--accent); display: block; }
+  .next span { color: var(--muted); font-size: 0.93rem; }
+
+  @media (max-width: 860px) {
+    body { font-size: 16px; }
+    .topbar-inner { padding: 12px 16px; }
+    .layout { display: block; padding: 0 16px 64px; }
+    .toc { padding-top: 20px; }
+    .toc-inner { position: static; max-height: none; }
+    .toc details { border: 1px solid var(--border); border-radius: 8px; padding: 0 14px; }
+    .toc summary {
+      margin: 0; padding: 12px 0; cursor: pointer; display: flex; justify-content: space-between;
+    }
+    .toc summary::after { content: "+"; font-size: 1.1rem; line-height: 1; }
+    .toc details[open] summary::after { content: "-"; }
+    .toc ol { margin-bottom: 12px; }
+    .toc a { padding: 9px 0 9px 14px; }
+    main { padding-top: 28px; }
+    h1 { font-size: 1.85rem; }
+    h2 { margin-top: 40px; padding-top: 24px; font-size: 1.3rem; }
+    .cmd pre { padding: 12px; font-size: 0.84rem; }
+    .reqs { grid-template-columns: 1fr; gap: 0; }
+    .reqs dt { margin-top: 8px; font-size: 0.9rem; }
+  }
+
+  @media print {
+    .toc, .copy, .skip, .tablist { display: none !important; }
+    .layout { display: block; }
+    .tabpanel[hidden] { display: block !important; }
+    .tabpanel > h3 { display: block !important; }
+    .cmd pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">harbour</span>
+    <span class="version">v2.4</span>
+    <span class="crumb">Documentation / Getting started</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="On this page">
+    <div class="toc-inner">
+      <details open id="toc-details">
+        <summary>On this page</summary>
+        <ol>
+          <li><a href="#requirements">Before you start</a></li>
+          <li><a href="#install">1. Install harbour</a></li>
+          <li><a href="#repository">2. Create a repository</a></li>
+          <li><a href="#backup">3. Make your first backup</a></li>
+          <li><a href="#list">4. See what is stored</a></li>
+          <li><a href="#restore">5. Restore files</a></li>
+          <li><a href="#schedule">6. Back up every night</a></li>
+          <li><a href="#problems">Common problems</a></li>
+          <li><a href="#next">Where to go next</a></li>
+        </ol>
+      </details>
+    </div>
+  </nav>
+
+  <main id="main">
+    <h1>Getting started</h1>
+    <p class="lede">harbour makes encrypted, de-duplicated backups of your folders to a local disk or to any S3-compatible storage. This page takes you from nothing installed to a first backup, a test restore, and a nightly schedule.</p>
+
+    <h2 id="requirements">Before you start</h2>
+    <dl class="reqs">
+      <dt>Operating system</dt>
+      <dd>macOS 12 or later, Linux with glibc 2.31 or later, or Windows 10 or later</dd>
+      <dt>Disk space</dt>
+      <dd>About 60 MB for harbour itself, plus room for your backups</dd>
+      <dt>Dependencies</dt>
+      <dd>None</dd>
+    </dl>
+    <p>The examples back up <code>~/Documents</code> to a repository at <code>/mnt/backup/repo</code>. Swap in your own folder and repository location wherever you see them.</p>
+
+    <h2 id="install"><span class="num">1</span>Install harbour</h2>
+    <div class="tabs">
+      <div class="tablist" role="tablist" aria-label="Operating system">
+        <button type="button" role="tab" id="tab-macos" aria-controls="panel-macos" aria-selected="true">macOS</button>
+        <button type="button" role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+        <button type="button" role="tab" id="tab-windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-macos" aria-labelledby="tab-macos">
+        <h3>macOS</h3>
+        <p>Install with Homebrew:</p>
+        <div class="cmd"><pre><code><span class="ln">brew install harbour</span></code></pre></div>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+        <h3>Linux</h3>
+        <p>Run the install script:</p>
+        <div class="cmd"><pre><code><span class="ln">curl -fsSL https://get.harbour.example/install.sh | sh</span></code></pre></div>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-windows" aria-labelledby="tab-windows">
+        <h3>Windows</h3>
+        <p>Install with winget:</p>
+        <div class="cmd" data-prompt="win"><pre><code><span class="ln">winget install Harbour.Harbour</span></code></pre></div>
+      </div>
+    </div>
+
+    <p>Then check that it worked:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour --version</span></code></pre></div>
+    <p>You should see a version number starting with 2.4. If the command is not found, open a new terminal window and try again.</p>
+
+    <h2 id="repository"><span class="num">2</span>Create a repository</h2>
+    <p>A <strong>repository</strong> is where harbour stores your backups. Create one on the disk you want to back up to:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour init /mnt/backup/repo</span></code></pre></div>
+    <p>harbour asks you to type a passphrase, then to type it again to confirm. Everything in the repository is encrypted with it.</p>
+
+    <div class="callout warn" role="note">
+      <p class="callout-title">Your passphrase cannot be recovered</p>
+      <p>If you lose it, nobody can read your backups, including us. There is no reset. Before you go on, save it in a password manager or write it down and keep it somewhere safe, away from the computer you are backing up.</p>
+    </div>
+
+    <h3 id="s3">Using S3-compatible storage instead</h3>
+    <p>To keep backups in a bucket rather than on a local disk, first put your storage access key and secret in the environment.</p>
+    <p class="cmd-label">macOS and Linux</p>
+    <div class="cmd"><pre><code><span class="ln">export HARBOUR_S3_KEY="your-access-key"</span>
+<span class="ln">export HARBOUR_S3_SECRET="your-secret-key"</span></code></pre></div>
+    <p class="cmd-label">Windows (PowerShell)</p>
+    <div class="cmd" data-prompt="win"><pre><code><span class="ln">$env:HARBOUR_S3_KEY = "your-access-key"</span>
+<span class="ln">$env:HARBOUR_S3_SECRET = "your-secret-key"</span></code></pre></div>
+    <p>Then create the repository, using your own bucket name and path:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour init s3://bucket-name/path</span></code></pre></div>
+    <p>In the rest of this page, use your <code>s3://</code> address wherever you see <code>/mnt/backup/repo</code>. The two variables need to be set in every terminal session where you run harbour.</p>
+
+    <h2 id="backup"><span class="num">3</span>Make your first backup</h2>
+    <p>Back up a folder by naming it and the repository:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour backup ~/Documents --repo /mnt/backup/repo</span></code></pre></div>
+    <p>The first run copies everything, so it can take a long time. Later runs only send what has changed and are much quicker.</p>
+
+    <h2 id="list"><span class="num">4</span>See what is stored</h2>
+    <div class="cmd"><pre><code><span class="ln">harbour list --repo /mnt/backup/repo</span></code></pre></div>
+    <p>Each backup is called a <strong>snapshot</strong>. Every snapshot has an id such as <code>a1b2c3d4</code>, which is what you use to restore it.</p>
+
+    <h2 id="restore"><span class="num">5</span>Restore files</h2>
+    <p>Take a snapshot id from <code>harbour list</code> and choose a folder to restore into:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour restore a1b2c3d4 --to ~/restored --repo /mnt/backup/repo</span></code></pre></div>
+    <p>Replace <code>a1b2c3d4</code> with your own snapshot id.</p>
+    <p>harbour never overwrites existing files when it restores. If you do want files in the destination replaced, add <code>--overwrite</code> to the command.</p>
+    <div class="callout" role="note">
+      <p class="callout-title">Try a restore now</p>
+      <p>Restoring your first snapshot into an empty folder and opening a few files is the surest way to know your backups work before you need them.</p>
+    </div>
+
+    <h2 id="schedule"><span class="num">6</span>Back up every night</h2>
+    <p>On Linux and macOS you can use cron to run a backup every night at 02:00. Open your crontab for editing:</p>
+    <div class="cmd"><pre><code><span class="ln">crontab -e</span></code></pre></div>
+    <p>Add this line, then save and close the editor:</p>
+    <div class="cmd" data-prompt="none"><pre><code><span class="ln">0 2 * * * harbour backup ~/Documents --repo /mnt/backup/repo --quiet</span></code></pre></div>
+    <p>The first two fields are the minute and the hour, so <code>0 2</code> means 02:00. Change them to run at a different time.</p>
+
+    <h2 id="problems">Common problems</h2>
+
+    <h3 id="locked"><code>repository is locked</code></h3>
+    <p>Another harbour process is using the repository, or an earlier one crashed and left its lock behind. If a backup is still running, wait for it to finish. If you are sure nothing is running, remove the lock:</p>
+    <div class="cmd"><pre><code><span class="ln">harbour unlock --repo /mnt/backup/repo</span></code></pre></div>
+
+    <h3 id="wrong-passphrase"><code>wrong passphrase</code></h3>
+    <p>Check that caps lock is off and that your keyboard layout is the one you used when you created the repository, then try again. There is no way to reset a passphrase.</p>
+
+    <h3 id="permission-denied"><code>permission denied</code> reading a file</h3>
+    <p>harbour skips any file it is not allowed to read and carries on with the rest. When the backup finishes, it lists the files it skipped. To include them, run the backup with <code>sudo</code>:</p>
+    <div class="cmd"><pre><code><span class="ln">sudo harbour backup ~/Documents --repo /mnt/backup/repo</span></code></pre></div>
+
+    <h2 id="next">Where to go next</h2>
+    <ul class="next">
+      <li><a href="/docs/excludes"><strong>Excluding files</strong><span>Leave out folders and file types you do not need to back up.</span></a></li>
+      <li><a href="/docs/retention"><strong>Retention and pruning</strong><span>Decide how long snapshots are kept and remove old ones.</span></a></li>
+      <li><a href="/docs/check"><strong>Checking a repository</strong><span>Confirm that what is stored is intact and readable.</span></a></li>
+    </ul>
+  </main>
+</div>
+
+<div class="sr-only" role="status" aria-live="polite" id="status"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* Copy buttons */
+  var status = document.getElementById("status");
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () { return legacyCopy(text); });
+    }
+    return legacyCopy(text);
+  }
+  function legacyCopy(text) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      if (ok) { resolve(); } else { reject(new Error("copy failed")); }
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".cmd"), function (block) {
+    var code = block.querySelector("code");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy command: " + code.textContent.replace(/\s*\n\s*/g, "; "));
+    var timer;
+    btn.addEventListener("click", function () {
+      copyText(code.textContent).then(function () {
+        btn.textContent = "Copied";
+        btn.classList.add("done");
+        status.textContent = "Copied to clipboard";
+      }, function () {
+        btn.textContent = "Select it";
+        status.textContent = "Could not copy. The command is selected, press Ctrl or Command C.";
+        var range = document.createRange();
+        range.selectNodeContents(code);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      });
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        btn.textContent = "Copy";
+        btn.classList.remove("done");
+        status.textContent = "";
+      }, 2000);
+    });
+    block.appendChild(btn);
+  });
+
+  /* Operating system tabs */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (focus) { tab.focus(); }
+  }
+  function remember(id) { try { localStorage.setItem("harbour-docs-os", id); } catch (e) {} }
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener("click", function () { select(tab); remember(tab.id); });
+    tab.addEventListener("keydown", function (e) {
+      var next = null;
+      if (e.key === "ArrowRight") { next = tabs[(i + 1) % tabs.length]; }
+      else if (e.key === "ArrowLeft") { next = tabs[(i - 1 + tabs.length) % tabs.length]; }
+      else if (e.key === "Home") { next = tabs[0]; }
+      else if (e.key === "End") { next = tabs[tabs.length - 1]; }
+      if (next) { e.preventDefault(); select(next, true); remember(next.id); }
+    });
+  });
+  var saved = null;
+  try { saved = localStorage.getItem("harbour-docs-os"); } catch (e) {}
+  var platform = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "") + " " + navigator.userAgent;
+  var guess = /Win/i.test(platform) ? "tab-windows" : /Mac|iPhone|iPad/i.test(platform) ? "tab-macos" : /Linux|X11|CrOS/i.test(platform) ? "tab-linux" : "tab-macos";
+  select(document.getElementById(saved) || document.getElementById(guess) || tabs[0]);
+
+  /* Table of contents: collapse on small screens, highlight current section */
+  var details = document.getElementById("toc-details");
+  var narrow = window.matchMedia("(max-width: 860px)");
+  function syncToc() { details.open = !narrow.matches; }
+  syncToc();
+  if (narrow.addEventListener) { narrow.addEventListener("change", syncToc); }
+
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  var sections = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  links.forEach(function (a) {
+    a.addEventListener("click", function () { if (narrow.matches) { details.open = false; } });
+  });
+  var ticking = false;
+  function spy() {
+    ticking = false;
+    var current = 0;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].getBoundingClientRect().top <= 120) { current = i; }
+    }
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) { current = sections.length - 1; }
+    links.forEach(function (a, i) {
+      if (i === current) { a.classList.add("current"); a.setAttribute("aria-current", "location"); }
+      else { a.classList.remove("current"); a.removeAttribute("aria-current"); }
+    });
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(spy); }
+  }, { passive: true });
+  window.addEventListener("resize", spy);
+  spy();
+})();
+</script>
+</body>
+</html>

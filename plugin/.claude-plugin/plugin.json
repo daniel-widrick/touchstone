@@ -1,0 +1,11 @@
+{
+  "name": "touchstone",
+  "displayName": "Touchstone",
+  "version": "0.1.0",
+  "description": "Rules for how a web screen looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page.",
+  "author": { "name": "Daniel Widrick", "url": "https://github.com/daniel-widrick" },
+  "homepage": "https://github.com/daniel-widrick/touchstone",
+  "repository": "https://github.com/daniel-widrick/touchstone",
+  "license": "MIT",
+  "keywords": ["ux", "usability", "accessibility", "ui", "design", "frontend"]
+}

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a meeting room</title>
+<style>
+  :root {
+    --bg: #f4f5f2;
+    --surface: #ffffff;
+    --text: #1b2124;
+    --muted: #586469;
+    --line: #d5dad8;
+    --line-strong: #8b979b;
+    --accent: #0b5c6b;
+    --accent-hover: #084855;
+    --accent-text: #ffffff;
+    --accent-soft: #e2f0f1;
+    --danger: #a4261d;
+    --danger-soft: #fbecea;
+    --ok: #1c6b3c;
+    --ok-soft: #e5f3ea;
+    --focus: #c2570a;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14191b;
+      --surface: #1d2427;
+      --text: #ecf0f0;
+      --muted: #a3afb3;
+      --line: #344044;
+      --line-strong: #6f7d82;
+      --accent: #6cc5d3;
+      --accent-hover: #8bd5e1;
+      --accent-text: #0c2126;
+      --accent-soft: #1f3a40;
+      --danger: #ff9c91;
+      --danger-soft: #3d2220;
+      --ok: #7fd3a0;
+      --ok-soft: #1d3527;
+      --focus: #ffb166;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  header.top { margin-bottom: 20px; }
+  .app-name { margin: 0 0 12px; font-size: 0.875rem; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 6px; overflow-wrap: anywhere; }
+  h2 { font-size: 1.2rem; line-height: 1.3; margin: 0 0 4px; }
+  h3 { font-size: 1.05rem; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); margin-bottom: 20px; }
+  [tabindex="-1"]:focus { outline: none; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* Steps */
+  ol.steps { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 0; margin: 0; font-size: 0.875rem; color: var(--muted); }
+  ol.steps li { display: flex; align-items: center; gap: 8px; }
+  ol.steps .num {
+    display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+    border: 1.5px solid var(--line-strong); font-weight: 600; font-size: 0.8rem;
+  }
+  ol.steps li[aria-current="step"] { color: var(--text); font-weight: 600; }
+  ol.steps li[aria-current="step"] .num { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  ol.steps li.done .num { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card + .card, .card + section, section + .card { margin-top: 16px; }
+
+  /* Form */
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 680px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 380px) { .grid { grid-template-columns: 1fr; } }
+  .field { min-width: 0; }
+  .field + .field.stack { margin-top: 18px; }
+  label, .label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .optional { font-weight: 400; color: var(--muted); }
+  .hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 6px; }
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    width: 100%; min-height: 46px; padding: 9px 12px;
+    font: inherit; color: var(--text); background: var(--surface);
+    border: 1.5px solid var(--line-strong); border-radius: 8px;
+  }
+  textarea { min-height: 92px; resize: vertical; }
+  input[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
+  .error { color: var(--danger); font-size: 0.9rem; font-weight: 600; margin: 6px 0 0; }
+  .counter { color: var(--muted); font-size: 0.85rem; text-align: right; margin: 4px 0 0; }
+  .check { display: flex; align-items: flex-start; gap: 12px; }
+  .check input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+  .check label { margin: 0; }
+  .check input:disabled + div label { color: var(--muted); }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+
+  /* Buttons */
+  button { font: inherit; cursor: pointer; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 46px; padding: 10px 20px; border-radius: 8px;
+    border: 1.5px solid var(--accent); background: var(--accent); color: var(--accent-text); font-weight: 600;
+  }
+  .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn.secondary { background: transparent; color: var(--accent); }
+  .btn.secondary:hover { background: var(--accent-soft); }
+  .btn[aria-disabled="true"] { opacity: 0.75; cursor: progress; }
+  .link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font-weight: 600; min-height: 32px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
+  @media (max-width: 480px) { .actions .btn { width: 100%; } }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%; flex: none;
+    border: 2.5px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation-duration: 2.4s; }
+    .skeleton { animation: none !important; }
+  }
+
+  /* Results */
+  #results { margin-top: 28px; }
+  .results-head { margin-bottom: 12px; }
+  .results-head p { color: var(--muted); margin: 0; }
+  ul.rooms { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .room {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between;
+  }
+  .room .info { min-width: 0; }
+  .room .meta { color: var(--muted); margin: 2px 0 0; }
+  .tags { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tags li { font-size: 0.85rem; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .tags li.fit { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .room .btn { flex: none; }
+  @media (max-width: 520px) {
+    .room { flex-direction: column; align-items: stretch; }
+  }
+  .skeleton { height: 92px; border-radius: var(--radius); background: var(--line); opacity: 0.6; animation: pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes pulse { to { opacity: 0.25; } }
+  .status-line { display: flex; align-items: center; gap: 10px; color: var(--muted); margin: 0 0 12px; }
+
+  .notice { border-radius: var(--radius); padding: 16px 20px; border: 1px solid var(--line); background: var(--surface); }
+  .notice h2, .notice h3 { margin-bottom: 4px; }
+  .notice p:last-child, .notice ul:last-child { margin-bottom: 0; }
+  .notice.problem { border-color: var(--danger); background: var(--danger-soft); }
+  .notice ul { margin: 0 0 12px; padding-left: 20px; }
+  .notice .actions { margin-top: 12px; }
+
+  /* Summary */
+  dl.summary { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; }
+  dl.summary dt { color: var(--muted); }
+  dl.summary dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }
+  @media (max-width: 420px) {
+    dl.summary { grid-template-columns: 1fr; gap: 0; }
+    dl.summary dd { margin-bottom: 10px; }
+  }
+  .summary-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; margin-bottom: 12px; }
+  .switch-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
+  .switch-list .btn { min-height: 40px; padding: 6px 14px; text-align: left; font-weight: 600; }
+  .catering-help { margin: 6px 0 0; font-size: 0.95rem; color: var(--muted); }
+
+  .done-banner { display: flex; gap: 14px; align-items: flex-start; background: var(--ok-soft); border: 1px solid var(--ok); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
+  .done-banner svg { flex: none; color: var(--ok); margin-top: 2px; }
+  .done-banner h1 { font-size: 1.5rem; margin: 0 0 2px; }
+  .done-banner p { margin: 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <p class="app-name">Office rooms</p>
+    <nav aria-label="Progress">
+      <ol class="steps" id="steps">
+        <li data-step="search"><span class="num" aria-hidden="true">1</span>Find a room</li>
+        <li data-step="details"><span class="num" aria-hidden="true">2</span>Meeting details</li>
+        <li data-step="done"><span class="num" aria-hidden="true">3</span>Booked</li>
+      </ol>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Step 1: search and pick -->
+    <section id="view-search">
+      <h1 id="h-search" tabindex="-1">Book a meeting room</h1>
+      <p class="lead">Tell us when you need it and we will show the rooms that are free.</p>
+
+      <form id="search-form" class="card" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+            <p class="error" id="date-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="start">Start time</label>
+            <select id="start" name="start"></select>
+            <p class="error" id="start-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="minutes">How long</label>
+            <select id="minutes" name="minutes">
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1 hour 30 minutes</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+              <option value="240">4 hours</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="people">People</label>
+            <input type="number" id="people" name="people" min="1" max="500" step="1" value="2" inputmode="numeric" required>
+            <p class="error" id="people-error" hidden></p>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn" id="search-btn">Find free rooms</button>
+        </div>
+      </form>
+
+      <section id="results" aria-labelledby="results-title" hidden>
+        <div id="results-body"></div>
+      </section>
+    </section>
+
+    <!-- Step 2: details -->
+    <section id="view-details" hidden>
+      <h1 id="h-details" tabindex="-1">Meeting details</h1>
+      <p class="lead">Nothing is booked until you confirm.</p>
+
+      <div class="card">
+        <div class="summary-head">
+          <h2>Your room</h2>
+          <button type="button" class="link" id="change-room">Change room or time</button>
+        </div>
+        <dl class="summary" id="details-summary"></dl>
+      </div>
+
+      <form id="details-form" class="card" novalidate>
+        <div id="submit-problem" tabindex="-1" hidden></div>
+        <fieldset id="details-fields">
+          <legend class="sr-only">About the meeting</legend>
+          <div class="field">
+            <label for="title">Meeting title</label>
+            <p class="hint" id="title-hint">Shown on the room's calendar, for example "Quarterly planning".</p>
+            <input type="text" id="title" name="title" maxlength="80" autocomplete="off" aria-describedby="title-hint title-error" required>
+            <p class="error" id="title-error" hidden></p>
+          </div>
+
+          <div class="field stack">
+            <div class="check">
+              <input type="checkbox" id="catering" name="catering" aria-describedby="catering-help">
+              <div>
+                <label for="catering">Ask for catering <span class="optional">(optional)</span></label>
+                <p class="catering-help" id="catering-help"></p>
+              </div>
+            </div>
+            <div id="catering-switch" hidden></div>
+          </div>
+
+          <div class="field stack">
+            <label for="note">Note for reception <span class="optional">(optional)</span></label>
+            <p class="hint" id="note-hint">For example, visitors to expect or how the room should be set up.</p>
+            <textarea id="note" name="note" maxlength="300" aria-describedby="note-hint note-count"></textarea>
+            <p class="counter" id="note-count">300 characters left</p>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn" id="confirm-btn">Confirm booking</button>
+          <button type="button" class="btn secondary" id="back-btn">Back to rooms</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 3: done -->
+    <section id="view-done" hidden>
+      <div class="done-banner">
+        <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 16.5l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <h1 id="h-done" tabindex="-1">Room booked</h1>
+          <p id="done-lead"></p>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:12px">Booking details</h2>
+        <dl class="summary" id="done-summary"></dl>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="another-btn">Book another room</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const rooms = [
+    { id: 'r1', name: 'Harbour', floor: 1, capacity: 4, features: ['screen'] },
+    { id: 'r2', name: 'Lighthouse', floor: 1, capacity: 8, features: ['screen', 'video'] },
+    { id: 'r3', name: 'Quay', floor: 2, capacity: 12, features: ['screen', 'video', 'whiteboard'] },
+    { id: 'r4', name: 'Breakwater Boardroom and Client Suite', floor: 3, capacity: 20, features: ['screen', 'video', 'whiteboard', 'catering'] },
+    { id: 'r5', name: 'Tidepool', floor: 2, capacity: 2, features: [] },
+  ];
+  return {
+    // criteria: { date: 'YYYY-MM-DD', start: 'HH:MM', minutes: number, people: number }
+    async findRooms(c) {
+      await wait(); maybeFail('find rooms');
+      if (q.get('empty') === '1') return [];
+      if (new Date(c.date + 'T' + c.start) < new Date()) { const e = new Error('VALIDATION: start_in_past'); e.code = 'PAST'; throw e; }
+      return rooms.filter((r) => r.capacity >= c.people && !(r.id === 'r2' && c.start < '12:00')).map((r) => ({ ...r }));
+    },
+    // booking: { roomId, date, start, minutes, people, title, catering: boolean, note }
+    async createBooking(b) {
+      await wait(); maybeFail('create booking');
+      if (!b.title || !b.title.trim()) { const e = new Error('VALIDATION: title_required'); e.code = 'VALIDATION'; throw e; }
+      if (b.catering && !rooms.find((r) => r.id === b.roomId).features.includes('catering')) { const e = new Error('CONFLICT: room_has_no_catering'); e.code = 'NO_CATERING'; throw e; }
+      return { id: 'bk_' + Math.floor(Math.random() * 90000 + 10000), ...b };
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, '0');
+
+  function el(tag, props, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids) if (kid != null) n.append(kid);
+    return n;
+  }
+
+  /* ---------- Formatting ---------- */
+  const isoDate = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const parseDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  function fmtTimeMins(total) {
+    const d = new Date(2000, 0, 1, Math.floor(total / 60) % 24, total % 60);
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  const toMins = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+  const fmtPlainDate = (s) => parseDate(s).toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  function fmtDate(s) {
+    const text = fmtPlainDate(s);
+    const today = isoDate(new Date());
+    const tm = new Date(); tm.setDate(tm.getDate() + 1);
+    if (s === today) return 'Today, ' + text;
+    if (s === isoDate(tm)) return 'Tomorrow, ' + text;
+    return text;
+  }
+  function fmtDuration(m) {
+    const h = Math.floor(m / 60), r = m % 60;
+    const parts = [];
+    if (h) parts.push(h + (h === 1 ? ' hour' : ' hours'));
+    if (r) parts.push(r + ' minutes');
+    return parts.join(' ');
+  }
+  const fmtRange = (c) => fmtTimeMins(toMins(c.start)) + ' to ' + fmtTimeMins(toMins(c.start) + c.minutes) + ' (' + fmtDuration(c.minutes) + ')';
+  const fmtPeople = (n) => n + (n === 1 ? ' person' : ' people');
+  const FEATURES = { screen: 'Screen', video: 'Video calls', whiteboard: 'Whiteboard', catering: 'Catering available' };
+  const featureLabel = (f) => FEATURES[f] || (f.charAt(0).toUpperCase() + f.slice(1));
+  const hasCatering = (room) => room.features.includes('catering');
+  const roomMeta = (r) => 'Floor ' + r.floor + ', up to ' + fmtPeople(r.capacity);
+
+  /* ---------- State ---------- */
+  const state = { criteria: null, rooms: null, room: null, booking: null, bookedRoom: null };
+  let searchToken = 0;
+  let submitting = false;
+  let view = 'search';
+
+  const announce = (msg) => { $('live').textContent = ''; setTimeout(() => { $('live').textContent = msg; }, 50); };
+
+  /* ---------- Views ---------- */
+  const TITLES = { search: 'Book a meeting room', details: 'Meeting details', done: 'Room booked' };
+  function show(next, focus) {
+    view = next;
+    for (const v of ['search', 'details', 'done']) $('view-' + v).hidden = v !== next;
+    const order = ['search', 'details', 'done'];
+    for (const li of $('steps').children) {
+      const i = order.indexOf(li.dataset.step), cur = order.indexOf(next);
+      li.classList.toggle('done', i < cur);
+      if (i === cur) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    }
+    document.title = TITLES[next] + ' - Office rooms';
+    if (focus !== false) { window.scrollTo(0, 0); $('h-' + next).focus(); }
+  }
+  function go(next) {
+    try { history.pushState({ view: next }, ''); } catch (e) {}
+    show(next);
+  }
+  window.addEventListener('popstate', (e) => {
+    let v = (e.state && e.state.view) || 'search';
+    if (v === 'details' && !state.room) v = 'search';
+    if (v === 'done' && !state.booking) v = 'search';
+    if (v === 'details') renderDetails();
+    show(v);
+  });
+
+  /* ---------- Search form ---------- */
+  const FIRST = 7 * 60, LAST = 19 * 60 + 45;
+  function initForm() {
+    const sel = $('start');
+    for (let m = FIRST; m <= LAST; m += 15) {
+      sel.append(el('option', { value: pad(Math.floor(m / 60)) + ':' + pad(m % 60), text: fmtTimeMins(m) }));
+    }
+    const now = new Date();
+    let day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let mins = Math.ceil((now.getHours() * 60 + now.getMinutes() + 1) / 15) * 15;
+    if (mins < FIRST) mins = 9 * 60;
+    if (mins > LAST) { day.setDate(day.getDate() + 1); mins = 9 * 60; }
+    $('date').min = isoDate(now);
+    $('date').value = isoDate(day);
+    sel.value = pad(Math.floor(mins / 60)) + ':' + pad(mins % 60);
+  }
+
+  function setError(id, msg) {
+    const input = $(id), err = $(id + '-error');
+    if (msg) {
+      err.textContent = msg; err.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      if (id !== 'title') input.setAttribute('aria-describedby', id + '-error');
+    } else {
+      err.hidden = true; err.textContent = '';
+      input.removeAttribute('aria-invalid');
+      if (id !== 'title') input.removeAttribute('aria-describedby');
+    }
+  }
+
+  function readCriteria() {
+    let firstBad = null;
+    const bad = (id, msg) => { setError(id, msg); firstBad = firstBad || id; };
+    for (const id of ['date', 'start', 'people']) setError(id, '');
+
+    const date = $('date').value, start = $('start').value;
+    const now = new Date();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) bad('date', 'Choose a date.');
+    else if (date < isoDate(now)) bad('date', 'This date has passed. Choose today or a later date.');
+    else if (new Date(date + 'T' + start) < now) bad('start', 'This time has already passed. Choose a later time or another date.');
+
+    const raw = $('people').value.trim();
+    const people = Number(raw);
+    if (raw === '' || !Number.isInteger(people) || people < 1) bad('people', 'Enter how many people, 1 or more.');
+
+    if (firstBad) { $(firstBad).focus(); return null; }
+    return { date, start, minutes: Number($('minutes').value), people };
+  }
+
+  function setSearching(on) {
+    const b = $('search-btn');
+    b.setAttribute('aria-disabled', on ? 'true' : 'false');
+    b.replaceChildren();
+    if (on) b.append(el('span', { class: 'spinner', 'aria-hidden': 'true' }), 'Finding rooms...');
+    else b.append(state.rooms ? 'Search again' : 'Find free rooms');
+  }
+
+  function clearResults() {
+    searchToken++;
+    state.rooms = null; state.room = null;
+    $('results').hidden = true;
+    $('results-body').replaceChildren();
+    setSearching(false);
+  }
+
+  const criteriaLine = (c) => fmtDate(c.date) + ', ' + fmtRange(c) + ', ' + fmtPeople(c.people);
+
+  async function search() {
+    if ($('search-btn').getAttribute('aria-disabled') === 'true') return;
+    const c = readCriteria();
+    if (!c) return;
+    const token = ++searchToken;
+    state.criteria = c; state.rooms = null; state.room = null;
+    setSearching(true);
+    const body = $('results-body');
+    body.replaceChildren(
+      el('h2', { id: 'results-title', class: 'sr-only', text: 'Free rooms' }),
+      el('p', { class: 'status-line' }, el('span', { class: 'spinner', 'aria-hidden': 'true' }), 'Checking which rooms are free...'),
+      el('div', { class: 'rooms', 'aria-hidden': 'true' }, el('div', { class: 'skeleton' }), el('div', { class: 'skeleton' }), el('div', { class: 'skeleton' }))
+    );
+    $('results').hidden = false;
+    announce('Checking which rooms are free.');
+    try {
+      let rooms;
+      try { rooms = await api.findRooms(c); }
+      catch (e) {
+        // A dropped connection on a read is safe to retry once before bothering the person.
+        if (e && e.code === 'ECONNRESET' && token === searchToken) rooms = await api.findRooms(c);
+        else throw e;
+      }
+      if (token !== searchToken) return;
+      rooms.sort((a, b) => a.capacity - b.capacity || a.name.localeCompare(b.name));
+      state.rooms = rooms;
+      setSearching(false);
+      renderRooms();
+    } catch (e) {
+      if (token !== searchToken) return;
+      setSearching(false);
+      if (e && e.code === 'PAST') {
+        $('results').hidden = true; body.replaceChildren();
+        setError('start', 'This time has already passed. Choose a later time or another date.');
+        $('start').focus();
+      } else {
+        renderSearchProblem();
+      }
+    }
+  }
+
+  function renderSearchProblem() {
+    const retry = el('button', { type: 'button', class: 'btn', text: 'Try again', onclick: search });
+    $('results-body').replaceChildren(
+      el('div', { class: 'notice problem', role: 'alert' },
+        el('h2', { id: 'results-title', text: 'We could not check the rooms' }),
+        el('p', { text: 'The booking system did not respond. This is usually temporary, and your search is still filled in above.' }),
+        el('div', { class: 'actions' }, retry))
+    );
+    retry.focus();
+  }
+
+  function renderRooms() {
+    const c = state.criteria, rooms = state.rooms, body = $('results-body');
+    if (!rooms.length) {
+      body.replaceChildren(
+        el('div', { class: 'notice' },
+          el('h2', { id: 'results-title', tabindex: '-1', text: 'No rooms are free' }),
+          el('p', { text: 'Nothing is free on ' + fmtPlainDate(c.date) + ', ' + fmtRange(c) + ', for ' + fmtPeople(c.people) + '.' }),
+          el('p', { text: 'Change the search above and try again. These usually help:' }),
+          el('ul', null,
+            el('li', { text: 'A different start time or a shorter meeting' }),
+            el('li', { text: 'Another day' }),
+            c.people > 1 ? el('li', { text: 'Fewer people in the room, with the rest joining by video' }) : null))
+      );
+      announce('No rooms are free for this search.');
+      $('results-title').focus();
+      return;
+    }
+    const list = el('ul', { class: 'rooms' });
+    rooms.forEach((r, i) => {
+      const tags = el('ul', { class: 'tags', 'aria-label': 'Features' });
+      if (i === 0 && rooms.length > 1) tags.append(el('li', { class: 'fit', text: 'Closest fit for ' + fmtPeople(c.people) }));
+      r.features.forEach((f) => tags.append(el('li', { text: featureLabel(f) })));
+      list.append(el('li', { class: 'room' },
+        el('div', { class: 'info' },
+          el('h3', { text: r.name }),
+          el('p', { class: 'meta', text: roomMeta(r) }),
+          tags.children.length ? tags : null),
+        el('button', { type: 'button', class: 'btn', 'aria-label': 'Choose ' + r.name, text: 'Choose', onclick: () => chooseRoom(r) })
+      ));
+    });
+    const count = rooms.length === 1 ? '1 room is free' : rooms.length + ' rooms are free';
+    body.replaceChildren(
+      el('div', { class: 'results-head' },
+        el('h2', { id: 'results-title', tabindex: '-1', text: count }),
+        el('p', { text: criteriaLine(c) + '. Smallest room first.' })),
+      list
+    );
+    announce(count + '.');
+    $('results-title').focus({ preventScroll: true });
+    $('results').scrollIntoView({ block: 'nearest', behavior: 'auto' });
+  }
+
+  /* ---------- Details ---------- */
+  function summaryRows(dl, rows) {
+    dl.replaceChildren();
+    for (const [k, v] of rows) dl.append(el('dt', { text: k }), el('dd', { text: v }));
+  }
+
+  function chooseRoom(room) {
+    state.room = room;
+    clearSubmitProblem();
+    renderDetails();
+    go('details');
+  }
+
+  function renderDetails() {
+    const r = state.room, c = state.criteria;
+    summaryRows($('details-summary'), [
+      ['Room', r.name],
+      ['Where', roomMeta(r)],
+      ['Date', fmtDate(c.date)],
+      ['Time', fmtRange(c)],
+      ['People', String(c.people)],
+    ]);
+    renderCatering();
+  }
+
+  function renderCatering() {
+    const r = state.room, box = $('catering'), help = $('catering-help'), sw = $('catering-switch');
+    sw.replaceChildren(); sw.hidden = true;
+    if (hasCatering(r)) {
+      box.disabled = false;
+      help.textContent = r.name + ' can have catering.';
+      return;
+    }
+    box.checked = false; box.disabled = true;
+    const others = (state.rooms || []).filter(hasCatering);
+    if (!others.length) {
+      help.textContent = r.name + ' cannot have catering, and no room that can is free at this time.';
+      return;
+    }
+    help.textContent = r.name + ' cannot have catering. If you need it, switch to a free room that can:';
+    const list = el('ul', { class: 'switch-list' });
+    others.forEach((o) => list.append(el('li', null,
+      el('button', { type: 'button', class: 'btn secondary', text: 'Switch to ' + o.name + ' (' + roomMeta(o).toLowerCase() + ')', onclick: () => switchRoom(o) }))));
+    sw.append(list); sw.hidden = false;
+  }
+
+  function switchRoom(room) {
+    if (submitting) return;
+    state.room = room;
+    clearSubmitProblem();
+    renderDetails();
+    $('catering').checked = true;
+    announce('Room changed to ' + room.name + '. Catering is ticked.');
+    $('catering').focus();
+  }
+
+  function clearSubmitProblem() {
+    const p = $('submit-problem');
+    if (p.contains(document.activeElement)) $('confirm-btn').focus();
+    p.hidden = true; p.replaceChildren(); p.className = '';
+  }
+  function showSubmitProblem(title, text, extra) {
+    const p = $('submit-problem');
+    p.className = 'notice problem';
+    p.setAttribute('role', 'alert');
+    p.style.marginBottom = '20px';
+    p.replaceChildren(el('h2', { text: title }), el('p', { text }), extra || '');
+    p.hidden = false;
+    p.scrollIntoView({ block: 'nearest' });
+    p.focus({ preventScroll: true });
+  }
+
+  function setSubmitting(on) {
+    submitting = on;
+    $('details-fields').disabled = on;
+    const b = $('confirm-btn');
+    b.setAttribute('aria-disabled', on ? 'true' : 'false');
+    b.replaceChildren();
+    if (on) b.append(el('span', { class: 'spinner', 'aria-hidden': 'true' }), 'Booking...');
+    else b.append('Confirm booking');
+    $('back-btn').disabled = on;
+    $('change-room').disabled = on;
+  }
+
+  async function confirmBooking() {
+    if (submitting) return;
+    const title = $('title').value.trim();
+    if (!title) {
+      setError('title', 'Enter a title for the meeting.');
+      $('title').focus();
+      return;
+    }
+    setError('title', '');
+    clearSubmitProblem();
+    const room = state.room, c = state.criteria;
+    const cateringWanted = $('catering').checked && !$('catering').disabled;
+    const payload = {
+      roomId: room.id, date: c.date, start: c.start, minutes: c.minutes, people: c.people,
+      title, catering: cateringWanted, note: $('note').value.trim(),
+    };
+    setSubmitting(true);
+    announce('Booking ' + room.name + '.');
+    try {
+      const booking = await api.createBooking(payload);
+      state.booking = booking; state.bookedRoom = room;
+      state.rooms = null; state.room = null;
+      setSubmitting(false);
+      $('results').hidden = true; $('results-body').replaceChildren(); setSearching(false);
+      renderDone();
+      try { history.replaceState({ view: 'done' }, ''); } catch (e) {}
+      show('done');
+      announce(room.name + ' is booked.');
+    } catch (e) {
+      setSubmitting(false);
+      const code = e && e.code;
+      if (code === 'VALIDATION') {
+        setError('title', 'Enter a title for the meeting.');
+        $('title').focus();
+      } else if (code === 'NO_CATERING') {
+        $('catering').checked = false;
+        showSubmitProblem('This room cannot have catering',
+          room.name + ' is not booked yet. We have unticked catering. Confirm again to book without it, or go back and choose another room.');
+      } else {
+        showSubmitProblem('The room is not booked yet',
+          'The booking system did not respond, so nothing was saved. Your details are still here.',
+          el('div', { class: 'actions' }, el('button', { type: 'submit', class: 'btn', text: 'Try again' })));
+      }
+    }
+  }
+
+  /* ---------- Done ---------- */
+  function renderDone() {
+    const b = state.booking, r = state.bookedRoom;
+    $('done-lead').textContent = r.name + ' is yours on ' + fmtPlainDate(b.date) + ', ' + fmtTimeMins(toMins(b.start)) + ' to ' + fmtTimeMins(toMins(b.start) + b.minutes) + '.';
+    const rows = [
+      ['Meeting', b.title],
+      ['Room', r.name],
+      ['Where', 'Floor ' + r.floor],
+      ['Date', fmtDate(b.date)],
+      ['Time', fmtRange(b)],
+      ['People', String(b.people)],
+      ['Catering', b.catering ? 'Requested' : 'Not requested'],
+    ];
+    if (b.note) rows.push(['Note for reception', b.note]);
+    rows.push(['Booking reference', b.id]);
+    summaryRows($('done-summary'), rows);
+  }
+
+  function bookAnother() {
+    state.booking = null; state.bookedRoom = null; state.criteria = null;
+    $('details-form').reset(); updateCount(); setError('title', ''); clearSubmitProblem();
+    clearResults();
+    try { history.replaceState({ view: 'search' }, ''); } catch (e) {}
+    show('search');
+  }
+
+  /* ---------- Wiring ---------- */
+  function updateCount() {
+    const left = 300 - $('note').value.length;
+    $('note-count').textContent = left + (left === 1 ? ' character left' : ' characters left');
+  }
+
+  initForm();
+  try { history.replaceState({ view: 'search' }, ''); } catch (e) {}
+  show('search', false);
+
+  $('search-form').addEventListener('submit', (e) => { e.preventDefault(); search(); });
+  for (const id of ['date', 'start', 'minutes', 'people']) {
+    const onChange = () => {
+      if (id !== 'minutes') setError(id, '');
+      if (id === 'date') setError('start', '');
+      // Results only describe the search they were made for, so drop them when it changes.
+      if (!$('results').hidden || $('search-btn').getAttribute('aria-disabled') === 'true') clearResults();
+    };
+    $(id).addEventListener('change', onChange);
+    $(id).addEventListener('input', onChange);
+  }
+  $('details-form').addEventListener('submit', (e) => { e.preventDefault(); confirmBooking(); });
+  $('title').addEventListener('input', () => { if ($('title').value.trim()) setError('title', ''); });
+  $('note').addEventListener('input', updateCount);
+  $('back-btn').addEventListener('click', () => history.back());
+  $('change-room').addEventListener('click', () => history.back());
+  $('another-btn').addEventListener('click', bookAnother);
+})();
+</script>
+</body>
+</html>

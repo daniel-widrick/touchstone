@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d4a6b">
+<title>Jobs - Harbour Heating</title>
+<style>
+:root {
+  --bg: #f1f4f6;
+  --surface: #ffffff;
+  --text: #10202b;
+  --muted: #4d5c67;
+  --border: #d3dae0;
+  --brand: #0d4a6b;
+  --brand-ink: #ffffff;
+  --link: #0b5a85;
+  --ok: #17693f;
+  --ok-ink: #ffffff;
+  --ok-bg: #e2f4e9;
+  --ok-text: #0f5231;
+  --warn-bg: #fff3d1;
+  --warn-text: #5c4000;
+  --danger: #b3261e;
+  --danger-bg: #fdecea;
+  --danger-text: #8c1c15;
+  --sel: #e4eff6;
+  --skel: #e3e8ec;
+  --shadow: 0 1px 2px rgba(16, 32, 43, .08);
+  --focus: #b35c00;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d151b;
+    --surface: #17222b;
+    --text: #e8eef2;
+    --muted: #a6b4be;
+    --border: #2e3c47;
+    --brand: #0d4a6b;
+    --brand-ink: #ffffff;
+    --link: #8fd0f2;
+    --ok: #2f9a62;
+    --ok-ink: #04140b;
+    --ok-bg: #12301f;
+    --ok-text: #8fe0b3;
+    --warn-bg: #3a2e0a;
+    --warn-text: #ffdf8a;
+    --danger: #ff8a80;
+    --danger-bg: #3b1513;
+    --danger-text: #ffb4ab;
+    --sel: #1d3140;
+    --skel: #24313b;
+    --shadow: none;
+    --focus: #ffb454;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+h1, h2, h3, p { margin: 0; }
+a { color: var(--link); }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.vh {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+svg.ic { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 16px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+  font-weight: 600; text-decoration: none; cursor: pointer;
+  touch-action: manipulation;
+}
+.btn:active { transform: translateY(1px); }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: .6; cursor: default; }
+.btn-primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.btn-ok { background: var(--ok); border-color: var(--ok); color: var(--ok-ink); }
+.btn-quiet { border-color: transparent; background: transparent; color: var(--link); }
+.btn-small { min-height: 44px; padding: 6px 12px; }
+.btn-block { width: 100%; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; flex: none; position: relative;
+  border: 0; border-radius: 10px; background: transparent; color: inherit; cursor: pointer;
+  touch-action: manipulation;
+}
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Offline bar */
+#offline {
+  background: var(--warn-bg); color: var(--warn-text);
+  padding: 8px 16px; font-weight: 600; text-align: center;
+}
+
+/* Layout */
+#app { min-height: 100vh; min-height: 100dvh; }
+#listPane, #detailPane { min-width: 0; }
+body.has-job #listPane { display: none; }
+body:not(.has-job) #detailPane { display: none; }
+
+/* List header */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--brand); color: var(--brand-ink);
+  padding: calc(6px + env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 10px max(8px, env(safe-area-inset-left));
+}
+.top :focus-visible { outline-color: #ffd08a; }
+.brand { display: flex; align-items: center; justify-content: space-between; padding-left: 8px; }
+.brand-name { font-size: .8125rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .9; }
+.daynav { display: flex; align-items: center; gap: 2px; }
+.daynav-mid { flex: 1; min-width: 0; text-align: center; }
+.daynav h1 { font-size: 1.375rem; line-height: 1.2; }
+.daynav-sub { font-size: .875rem; opacity: .9; }
+.cal-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.search { position: relative; margin: 8px 8px 0; }
+.search svg { position: absolute; left: 12px; top: 13px; color: var(--muted); pointer-events: none; }
+.search input {
+  width: 100%; height: 48px; padding: 0 12px 0 42px;
+  border: 0; border-radius: 10px; background: var(--surface); color: var(--text);
+  -webkit-appearance: none; appearance: none;
+}
+.search input::placeholder { color: var(--muted); opacity: 1; }
+.totoday {
+  display: block; margin: 8px 8px 0; width: calc(100% - 16px); min-height: 44px;
+  border: 1.5px solid rgba(255, 255, 255, .6); border-radius: 10px;
+  background: transparent; color: inherit; font-weight: 600; cursor: pointer;
+}
+
+/* List body */
+#listBody { padding: 12px max(12px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 0 4px 8px; color: var(--muted); font-size: .875rem; }
+.summary strong { color: var(--text); }
+.jobs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.grouphead { margin: 16px 4px 8px; font-size: .9375rem; }
+.job {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 8px 14px 14px; min-height: 72px;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+  color: inherit; text-decoration: none; box-shadow: var(--shadow);
+}
+.job[aria-current="true"] { border-color: var(--link); background: var(--sel); }
+.job-time { flex: none; width: 3.4em; font-size: 1.125rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.job-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.job-cust { font-weight: 700; overflow-wrap: anywhere; }
+.job-work { overflow-wrap: anywhere; }
+.job-addr { color: var(--muted); font-size: .875rem; overflow-wrap: anywhere; }
+.job-side { flex: none; display: flex; align-items: center; align-self: stretch; color: var(--muted); }
+.job-main .badge { justify-self: start; margin-top: 4px; }
+.job.done .job-time, .job.done .job-cust, .job.done .job-work { color: var(--muted); }
+.job.done { box-shadow: none; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px; font-size: .8125rem; font-weight: 700; white-space: nowrap;
+  background: var(--sel); color: var(--text);
+}
+.badge svg.ic { width: 14px; height: 14px; stroke-width: 3; }
+.badge-ok { background: var(--ok-bg); color: var(--ok-text); }
+.badge-next { background: var(--warn-bg); color: var(--warn-text); }
+
+/* Messages */
+.msg { padding: 12px 14px; border-radius: 10px; margin-bottom: 12px; display: grid; gap: 8px; justify-items: start; }
+.msg-err { background: var(--danger-bg); color: var(--danger-text); }
+.msg-warn { background: var(--warn-bg); color: var(--warn-text); }
+.msg-ok { background: var(--ok-bg); color: var(--ok-text); font-weight: 600; }
+.msg .btn { color: var(--text); }
+.empty { text-align: center; padding: 40px 16px; color: var(--muted); display: grid; gap: 12px; justify-items: center; }
+.empty strong { color: var(--text); font-size: 1.0625rem; }
+.skel { background: var(--skel); border-radius: 12px; animation: pulse 1.2s ease-in-out infinite alternate; }
+.skel-row { height: 92px; }
+.skel-line { height: 18px; margin: 10px 0; border-radius: 6px; }
+@keyframes pulse { from { opacity: 1; } to { opacity: .5; } }
+
+/* Detail */
+#detailPane { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; background: var(--bg); }
+.dbar {
+  position: sticky; top: 0; z-index: 5; background: var(--brand); color: var(--brand-ink);
+  padding: calc(4px + env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) 4px max(4px, env(safe-area-inset-left));
+}
+.dbar a { display: inline-flex; align-items: center; gap: 2px; min-height: 48px; padding: 0 14px 0 6px; color: inherit; font-weight: 600; text-decoration: none; border-radius: 10px; }
+.dbar :focus-visible { outline-color: #ffd08a; outline-offset: -3px; }
+.dwrap { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); }
+.dhead { outline: none; margin-bottom: 12px; }
+.dhead h1 { font-size: 1.5rem; line-height: 1.2; overflow-wrap: anywhere; }
+.dmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; color: var(--muted); }
+.card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.card h2 { font-size: .8125rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 4px; }
+.card .big { font-size: 1.125rem; font-weight: 600; overflow-wrap: anywhere; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row + .row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.row > div { min-width: 0; overflow-wrap: anywhere; }
+.notes { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.notes li { padding: 10px 12px; border-radius: 10px; background: var(--bg); border-left: 4px solid var(--border); }
+.notes time { display: block; font-size: .8125rem; color: var(--muted); }
+.notes p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.noteform { margin-top: 14px; display: grid; gap: 8px; }
+.noteform label { font-weight: 600; }
+textarea, .dateinput {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--muted); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+}
+textarea { min-height: 96px; resize: vertical; }
+textarea[readonly] { opacity: .7; }
+.field-err { color: var(--danger-text); background: var(--danger-bg); padding: 8px 12px; border-radius: 8px; }
+.actions {
+  position: sticky; bottom: 0; z-index: 4;
+  background: var(--surface); border-top: 1.5px solid var(--border);
+  padding: 10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.actions-in { max-width: 688px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actions-note { max-width: 688px; margin: 0 auto; color: var(--muted); }
+.actions:empty { display: none; }
+.placeholder { margin: auto; padding: 40px; color: var(--muted); text-align: center; }
+
+/* Dialog */
+dialog {
+  width: 100%; max-width: 100%; max-height: 92dvh; margin: auto 0 0; padding: 0; border: 0;
+  border-radius: 18px 18px 0 0; background: var(--surface); color: var(--text); overflow: auto;
+}
+dialog::backdrop { background: rgba(6, 16, 23, .6); }
+.dlg { padding: 20px max(16px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); display: grid; gap: 14px; }
+.dlg h2 { font-size: 1.25rem; outline: none; }
+.dlg-sum { background: var(--bg); border-radius: 10px; padding: 12px; display: grid; gap: 2px; }
+.dlg-sum strong { overflow-wrap: anywhere; }
+.dlg-warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px; padding: 12px; font-weight: 600; }
+.dlg-btns { display: grid; gap: 10px; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 8px; }
+.days { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.day { position: relative; }
+.day input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.day span {
+  display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 6px 12px;
+  border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600;
+}
+.day small { font-weight: 400; color: var(--muted); font-size: .8125rem; }
+.day input:checked + span { border-color: var(--link); background: var(--sel); box-shadow: inset 0 0 0 1.5px var(--link); }
+.day input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+.day input:disabled + span { opacity: .55; }
+.other label { display: block; font-weight: 600; margin-bottom: 6px; }
+.dateinput { min-height: 48px; }
+
+/* Toast */
+#toast {
+  position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  max-width: calc(100% - 32px); z-index: 20;
+  background: #10202b; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .3); text-align: center;
+}
+
+@media (min-width: 600px) {
+  dialog { margin: auto; max-width: 480px; border-radius: 16px; }
+  .dlg { padding: 24px; }
+}
+@media (min-width: 900px) {
+  #app { display: grid; grid-template-columns: minmax(360px, 420px) 1fr; height: 100vh; height: 100dvh; min-height: 0; }
+  body.has-job #listPane, body:not(.has-job) #detailPane { display: flex; }
+  #listPane { display: flex; flex-direction: column; border-right: 1.5px solid var(--border); overflow: hidden; }
+  #listBody { flex: 1; overflow-y: auto; }
+  #detailPane { min-height: 0; overflow-y: auto; }
+  .top { position: static; }
+  .dbar { display: none; }
+  .dwrap { padding-top: 28px; }
+  #toast { bottom: 96px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel, .spin { animation: none; }
+  .btn:active { transform: none; }
+}
+</style>
+</head>
+<body>
+<div id="offline" role="status" hidden>You are offline. Changes can't be saved until you have signal.</div>
+
+<div id="app">
+  <section id="listPane" aria-label="Jobs list">
+    <header class="top">
+      <div class="brand">
+        <span class="brand-name">Harbour Heating jobs</span>
+        <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh jobs"></button>
+      </div>
+      <div class="daynav">
+        <button class="icon-btn" id="prevBtn" type="button" aria-label="Previous day"></button>
+        <div class="daynav-mid">
+          <h1 id="dayTitle">Today</h1>
+          <div class="daynav-sub" id="daySub"></div>
+        </div>
+        <span class="icon-btn" id="calWrap">
+          <input class="cal-input" id="calInput" type="date" aria-label="Go to a date">
+        </span>
+        <button class="icon-btn" id="nextBtn" type="button" aria-label="Next day"></button>
+      </div>
+      <button class="totoday" id="todayBtn" type="button" hidden>Back to today</button>
+      <div class="search" role="search">
+        <label class="vh" for="q">Find a job</label>
+        <input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Find by name, address, ref or work">
+      </div>
+    </header>
+    <div id="listBody"></div>
+  </section>
+
+  <section id="detailPane" aria-label="Job details"></section>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<div id="toast" hidden></div>
+<div id="live" class="vh" role="status" aria-live="polite"></div>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const people = ['Mrs A. Okonkwo', 'Mr D. Castellanos-Whitby', 'Greyfriars Dental Practice', 'Ms R. Lindqvist', 'Mr T. Babatunde', 'The Harbour Lights Hotel (kitchen)', 'Dr S. Mehta', 'Mr and Mrs Pemberton', 'Ivy Lane Books', 'Miss K. Dvorak'];
+  const work = ['Annual boiler service', 'No hot water, boiler showing fault F28', 'Radiator leaking in upstairs bedroom', 'Replace thermostat and rebalance system', 'Gas safety certificate for landlord', 'Noisy pump, intermittent'];
+  let jobs = q.get('empty') === '1' ? [] : Array.from({ length: 14 }, (_, i) => ({
+    id: 'job_' + (700 + i), ref: 'HH-' + (5120 + i), customer: people[i % people.length],
+    address: (12 + i * 7) + ' ' + ['Quay Street', 'Lighthouse Road', 'Breakwater Terrace', 'Tidepool Lane'][i % 4] + ', Harbourton, HB' + (1 + (i % 6)) + ' ' + (2 + (i % 7)) + 'QT',
+    phone: '01632 9601' + String(10 + i), date: day(i < 9 ? 0 : 1), slot: ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30', '17:00'][i % 7],
+    work: work[i % work.length], status: i < 2 ? 'complete' : 'booked',
+    notes: i % 3 === 0 ? [{ at: new Date(Date.now() - 86400000).toISOString(), text: 'Customer asked us to use the side gate. Dog in the garden.' }] : [],
+  }));
+  const find = (id) => { const j = jobs.find((x) => x.id === id); if (!j) { const e = new Error('NOT_FOUND: job'); e.code = 'NOT_FOUND'; throw e; } return j; };
+  const copy = (j) => JSON.parse(JSON.stringify(j));
+  return {
+    // date: 'YYYY-MM-DD'. Resolves to the jobs on that day, without their notes.
+    async listJobs(date) { await wait(); maybeFail('list jobs'); return jobs.filter((j) => j.date === date).map((j) => { const c = copy(j); delete c.notes; return c; }); },
+    async getJob(id) { await wait(); maybeFail('load job'); return copy(find(id)); },
+    async addNote(id, text) {
+      await wait(); maybeFail('add note');
+      if (!text || !text.trim()) { const e = new Error('VALIDATION: note_empty'); e.code = 'VALIDATION'; throw e; }
+      const j = find(id); j.notes.push({ at: new Date().toISOString(), text: text.trim() }); return copy(j);
+    },
+    async moveJob(id, date) {
+      await wait(); maybeFail('move job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      if (date <= day(0)) { const e = new Error('VALIDATION: date_not_future'); e.code = 'PAST'; throw e; }
+      j.date = date; return copy(j);
+    },
+    async completeJob(id) {
+      await wait(); maybeFail('complete job');
+      const j = find(id);
+      if (j.status === 'complete') { const e = new Error('CONFLICT: job_complete'); e.code = 'COMPLETE'; throw e; }
+      j.status = 'complete'; return copy(j);
+    },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- small helpers ---------- */
+  const $ = (s) => document.querySelector(s);
+  const ICONS = {
+    left: '<path d="M15 5l-7 7 7 7"/>',
+    right: '<path d="M9 5l7 7-7 7"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    refresh: '<path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/>',
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+    pin: '<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.500C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>',
+    check: '<path d="M5 12.500l4.500 4.500L19 7.500"/>',
+    search: '<circle cx="11" cy="11" r="6.500"/><path d="M16 16l4.500 4.500"/>',
+  };
+  const icon = (name, cls) => {
+    const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('class', 'ic' + (cls ? ' ' + cls : ''));
+    s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = ICONS[name];
+    return s;
+  };
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v === false || v == null) continue;
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, '');
+      else el.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) {
+      if (kid == null || kid === false) continue;
+      el.append(kid);
+    }
+    return el;
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /* ---------- dates (kept in step with the server's idea of "today") ---------- */
+  const dayKey = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const today = () => dayKey(0);
+  const shift = (ds, n) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const fmtShort = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const fmtYear = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const fmtWeekday = new Intl.DateTimeFormat('en-GB', { weekday: 'long', timeZone: 'UTC' });
+  const fmtDate = (ds) => {
+    const f = ds.slice(0, 4) === today().slice(0, 4) ? fmtShort : fmtYear;
+    return f.format(new Date(ds + 'T00:00:00Z')).replace(/,/g, '');
+  };
+  const relDay = (ds) => {
+    const t = today();
+    return ds === t ? 'Today' : ds === shift(t, 1) ? 'Tomorrow' : ds === shift(t, -1) ? 'Yesterday' : null;
+  };
+  const dateLabel = (ds) => { const r = relDay(ds); return r ? r + ', ' + fmtDate(ds) : fmtDate(ds); };
+  const clock = (d) => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  const fmtNoteTime = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const diff = Math.floor((start - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+    const day = diff === 0 ? 'Today' : diff === 1 ? 'Yesterday'
+      : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() === start.getFullYear() ? undefined : 'numeric' });
+    return day + ' at ' + clock(d);
+  };
+
+  /* ---------- state ---------- */
+  const S = {
+    date: today(),
+    jobId: null,
+    days: new Map(),     // date -> { status: 'loading' | 'ready' | 'error', jobs, at }
+    job: new Map(),      // id -> job (notes present once fully loaded)
+    jobLoad: new Map(),  // id -> 'loading' | 'ready' | 'error' | 'missing'
+    banner: new Map(),   // id -> { kind, text }
+    query: '',
+    wide: null,          // { status: 'loading' | 'done', jobs, failed }
+    mut: 0,
+    cameFromList: false,
+    listScroll: 0,
+    dlgBusy: false,
+  };
+  let D = null; // current detail view parts
+
+  /* ---------- server access ---------- */
+  const DEFINITE = new Set(['VALIDATION', 'PAST', 'COMPLETE', 'NOT_FOUND']);
+  // Reads are safe to repeat, so a dropped connection is retried quietly.
+  async function read(fn, tries = 3) {
+    for (let i = 0; ; i++) {
+      try { return await fn(); }
+      catch (e) {
+        if (DEFINITE.has(e.code) || i >= tries - 1) throw e;
+        await sleep(250);
+      }
+    }
+  }
+  // Writes are sent once. If the connection drops we look the job up to find out
+  // whether the change went through, rather than guess.
+  async function write(id, call, isDone, onCheck) {
+    try { return { ok: true, job: await call() }; }
+    catch (e) {
+      if (DEFINITE.has(e.code)) return { ok: false, code: e.code };
+      if (onCheck) onCheck();
+      try {
+        const j = await read(() => api.getJob(id), 2);
+        return isDone(j) ? { ok: true, job: j } : { ok: false, code: 'NET', job: j };
+      } catch (e2) {
+        return { ok: false, code: DEFINITE.has(e2.code) ? e2.code : 'UNKNOWN' };
+      }
+    }
+  }
+
+  const bySlot = (a, b) => (a.slot || '').localeCompare(b.slot || '') || (a.ref || '').localeCompare(b.ref || '');
+  const basics = (j) => { const c = Object.assign({}, j); delete c.notes; return c; };
+  function remember(j) {
+    const prev = S.job.get(j.id);
+    S.job.set(j.id, Object.assign({}, prev, j));
+  }
+
+  async function loadDay(date) {
+    const cur = S.days.get(date) || {};
+    if (cur.status === 'loading') return;
+    S.days.set(date, Object.assign({}, cur, { status: 'loading' }));
+    if (S.date === date) renderList();
+    const m = S.mut;
+    let next;
+    try {
+      const jobs = await read(() => api.listJobs(date));
+      if (S.mut !== m) { S.days.set(date, Object.assign({}, cur, { status: 'ready' })); return loadDay(date); }
+      jobs.sort(bySlot);
+      jobs.forEach(remember);
+      next = { status: 'ready', jobs, at: Date.now() };
+    } catch (e) {
+      next = { status: 'error', jobs: cur.jobs, at: cur.at };
+    }
+    S.days.set(date, next);
+    if (S.date === date) renderList();
+    if (D && S.job.has(D.id)) updateDetail();
+  }
+
+  async function loadJob(id) {
+    if (S.jobLoad.get(id) === 'loading') return;
+    S.jobLoad.set(id, 'loading');
+    if (S.jobId === id) updateDetail();
+    const m = S.mut;
+    try {
+      const j = await read(() => api.getJob(id));
+      if (S.mut !== m) { S.jobLoad.set(id, 'ready'); return loadJob(id); }
+      S.jobLoad.set(id, 'ready');
+      applyJob(j, true);
+    } catch (e) {
+      S.jobLoad.set(id, e.code === 'NOT_FOUND' ? 'missing' : 'error');
+      if (S.jobId === id) updateDetail();
+    }
+  }
+
+  // Fold a fresh copy of a job into everything we are showing.
+  function applyJob(j, fromRead) {
+    remember(j);
+    if (j.notes) S.jobLoad.set(j.id, 'ready');
+    const b = basics(j);
+    for (const [date, entry] of S.days) {
+      if (!entry.jobs) continue;
+      const i = entry.jobs.findIndex((x) => x.id === j.id);
+      if (date === j.date) {
+        if (i >= 0) entry.jobs[i] = b; else entry.jobs.push(b);
+        entry.jobs.sort(bySlot);
+      } else if (i >= 0) entry.jobs.splice(i, 1);
+    }
+    if (S.wide) {
+      const i = S.wide.jobs.findIndex((x) => x.id === j.id);
+      if (i >= 0) S.wide.jobs[i] = b;
+    }
+    if (!fromRead) S.mut++;
+    renderList();
+    if (S.jobId === j.id) updateDetail();
+  }
+
+  /* ---------- announcements ---------- */
+  let toastTimer, liveTimer;
+  function announce(text) {
+    const live = $('#live');
+    live.textContent = '';
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => { live.textContent = text; }, 60);
+  }
+  function toast(text) {
+    const t = $('#toast');
+    t.textContent = text;
+    t.hidden = false;
+    announce(text);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 5000);
+  }
+
+  /* ---------- routing ---------- */
+  const hashFor = (date, id) => '#/day/' + date + (id ? '/job/' + id : '');
+  function parseHash() {
+    const m = location.hash.match(/^#\/day\/(\d{4}-\d{2}-\d{2})(?:\/job\/([\w-]+))?$/);
+    return m ? { date: m[1], jobId: m[2] || null } : { date: today(), jobId: null };
+  }
+  const isWide = () => window.matchMedia('(min-width: 900px)').matches;
+
+  function route(first) {
+    const r = parseHash();
+    const prevJob = S.jobId;
+    const dateChanged = r.date !== S.date;
+    S.date = r.date;
+    S.jobId = r.jobId;
+    if (!S.dlgBusy && $('#dlg').open) $('#dlg').close();
+
+    if (!prevJob && S.jobId && !first) { S.listScroll = window.scrollY; S.cameFromList = true; }
+    if (first || !S.jobId) S.cameFromList = !!S.jobId && S.cameFromList && !first;
+    document.body.classList.toggle('has-job', !!S.jobId);
+
+    const entry = S.days.get(S.date);
+    if (!entry || (entry.status !== 'loading' && (!entry.at || Date.now() - entry.at > 60000))) loadDay(S.date);
+    renderList();
+
+    if (first || prevJob !== S.jobId) {
+      if (prevJob) S.banner.delete(prevJob);
+      buildDetail();
+      if (S.jobId) {
+        loadJob(S.jobId);
+        if (!first) {
+          if (isWide()) $('#detailPane').scrollTop = 0; else window.scrollTo(0, 0);
+          D.head.focus({ preventScroll: true });
+        }
+      } else if (prevJob && !first) {
+        if (!isWide()) window.scrollTo(0, S.listScroll);
+        const link = document.getElementById('row-' + prevJob);
+        if (link) link.focus({ preventScroll: true });
+      }
+    } else if (dateChanged && !isWide()) {
+      window.scrollTo(0, 0);
+    }
+  }
+  const go = (date, id) => { location.hash = hashFor(date, id); };
+
+  /* ---------- list ---------- */
+  const matches = (j, q) => {
+    const hay = [j.customer, j.address, j.ref, j.work, j.phone, j.slot].join(' ').toLowerCase();
+    const flat = hay.replace(/\s+/g, '');
+    return q.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t) || flat.includes(t));
+  };
+
+  function jobRow(j, nextId) {
+    const done = j.status === 'complete';
+    return h('li', null,
+      h('a', {
+        class: 'job' + (done ? ' done' : ''), id: 'row-' + j.id, href: hashFor(S.date, j.id),
+        'aria-current': S.jobId === j.id ? 'true' : null,
+      },
+        h('span', { class: 'job-time' }, j.slot),
+        h('span', { class: 'job-main' },
+          h('span', { class: 'job-cust' }, j.customer),
+          h('span', { class: 'job-work' }, j.work),
+          h('span', { class: 'job-addr' }, j.address),
+          done ? h('span', { class: 'badge badge-ok' }, icon('check'), 'Complete')
+            : j.id === nextId ? h('span', { class: 'badge badge-next' }, 'Next job') : null),
+        h('span', { class: 'job-side' }, icon('right'))));
+  }
+
+  const skeletonList = (label) => h('div', { 'aria-busy': 'true' },
+    h('p', { class: 'vh' }, label),
+    h('div', { class: 'jobs' }, [0, 1, 2, 3, 4].map(() => h('div', { class: 'skel skel-row' }))));
+
+  function renderHeader() {
+    const rel = relDay(S.date);
+    $('#dayTitle').textContent = rel || fmtWeekday.format(new Date(S.date + 'T00:00:00Z'));
+    $('#daySub').textContent = fmtDate(S.date);
+    $('#todayBtn').hidden = S.date === today();
+    $('#calInput').value = S.date;
+    if (!S.jobId) document.title = (rel || fmtDate(S.date)) + "'s jobs - Harbour Heating";
+    const loading = (S.days.get(S.date) || {}).status === 'loading';
+    const rb = $('#refreshBtn');
+    rb.firstChild.classList.toggle('spin', loading);
+    rb.setAttribute('aria-label', loading ? 'Refreshing jobs' : 'Refresh jobs');
+  }
+
+  let countTimer;
+  function announceCount(text) {
+    clearTimeout(countTimer);
+    countTimer = setTimeout(() => announce(text), 700);
+  }
+
+  function renderList() {
+    renderHeader();
+    const body = $('#listBody');
+    const q = S.query.trim();
+    const out = [];
+    const dayName = relDay(S.date) ? relDay(S.date).toLowerCase() : fmtDate(S.date);
+
+    if (q && S.wide) {
+      out.push(h('button', { class: 'btn btn-small', type: 'button', style: 'margin-bottom:12px', onclick: () => { S.wide = null; renderList(); } },
+        icon('left'), 'Back to ' + dayName + "'s jobs"));
+      if (S.wide.status === 'loading') {
+        out.push(skeletonList('Searching the next 14 days'));
+      } else {
+        const hits = S.wide.jobs.filter((j) => matches(j, q)).sort((a, b) => a.date.localeCompare(b.date) || bySlot(a, b));
+        if (S.wide.failed) {
+          out.push(h('div', { class: 'msg msg-warn', role: 'alert' },
+            h('p', null, "Couldn't check " + S.wide.failed + (S.wide.failed === 1 ? ' day' : ' days') + ', so some jobs may be missing.'),
+            h('button', { class: 'btn btn-small', type: 'button', onclick: startWide }, 'Search again')));
+        }
+        out.push(h('p', { class: 'summary' }, h('span', null, h('strong', null, hits.length + (hits.length === 1 ? ' job' : ' jobs')), ' matching "' + q + '" in the next 14 days')));
+        if (!hits.length) {
+          out.push(h('div', { class: 'empty' }, h('strong', null, 'No matching jobs'), h('p', null, 'Try a surname, street, postcode or job reference.')));
+        }
+        let last = null, ul = null;
+        for (const j of hits) {
+          if (j.date !== last) {
+            last = j.date;
+            out.push(h('h2', { class: 'grouphead' }, dateLabel(j.date)));
+            ul = h('ul', { class: 'jobs' });
+            out.push(ul);
+          }
+          ul.append(jobRow(j, null));
+        }
+        announceCount(hits.length + (hits.length === 1 ? ' job found' : ' jobs found'));
+      }
+      body.replaceChildren(...out);
+      return;
+    }
+
+    const entry = S.days.get(S.date) || { status: 'loading' };
+    const jobs = entry.jobs;
+
+    if (!jobs) {
+      if (entry.status === 'error') {
+        out.push(h('div', { class: 'empty', role: 'alert' },
+          h('strong', null, "Couldn't load " + dayName + "'s jobs"),
+          h('p', null, 'The connection dropped. Check your signal and try again.'),
+          h('button', { class: 'btn btn-primary', type: 'button', onclick: () => loadDay(S.date) }, 'Try again')));
+      } else {
+        out.push(skeletonList('Loading jobs'));
+      }
+      body.replaceChildren(...out);
+      return;
+    }
+
+    if (entry.status === 'error') {
+      out.push(h('div', { class: 'msg msg-warn', role: 'alert' },
+        h('p', null, "Couldn't refresh. Showing jobs as they were at " + clock(new Date(entry.at)) + '.'),
+        h('button', { class: 'btn btn-small', type: 'button', onclick: () => loadDay(S.date) }, 'Try again')));
+    }
+
+    if (!jobs.length) {
+      out.push(h('div', { class: 'empty' },
+        h('strong', null, 'No jobs booked for ' + dayName),
+        h('p', null, 'If you were expecting some, refresh or call the office.'),
+        h('button', { class: 'btn', type: 'button', onclick: () => loadDay(S.date) }, 'Refresh')));
+      if (q) out.push(wideButton(q));
+      body.replaceChildren(...out);
+      return;
+    }
+
+    const todo = jobs.filter((j) => j.status !== 'complete');
+    const nextId = S.date === today() && todo.length ? todo[0].id : null;
+    const shown = q ? jobs.filter((j) => matches(j, q)) : jobs;
+
+    out.push(h('p', { class: 'summary' },
+      q ? h('span', null, h('strong', null, shown.length + ' of ' + jobs.length), ' jobs match "' + q + '"')
+        : h('span', null, h('strong', null, todo.length + ' to do'), ', ' + (jobs.length - todo.length) + ' complete'),
+      h('span', null, entry.status === 'loading' ? 'Refreshing...' : 'Updated ' + clock(new Date(entry.at)))));
+
+    if (shown.length) out.push(h('ul', { class: 'jobs' }, shown.map((j) => jobRow(j, nextId))));
+    else out.push(h('div', { class: 'empty' }, h('strong', null, 'No jobs ' + (relDay(S.date) ? dayName : 'on ' + dayName) + ' match "' + q + '"')));
+    if (q) {
+      out.push(wideButton(q));
+      announceCount(shown.length + ' of ' + jobs.length + ' jobs match');
+    }
+    body.replaceChildren(...out);
+  }
+
+  const wideButton = () => h('p', { style: 'margin-top:16px;text-align:center' },
+    h('button', { class: 'btn', type: 'button', onclick: startWide }, icon('search'), 'Search the next 14 days'));
+
+  async function startWide() {
+    const w = { status: 'loading', jobs: [], failed: 0 };
+    S.wide = w;
+    renderList();
+    const t = today();
+    await Promise.all(Array.from({ length: 14 }, (_, i) => shift(t, i)).map(async (d) => {
+      try {
+        const jobs = await read(() => api.listJobs(d), 4);
+        jobs.forEach(remember);
+        w.jobs.push(...jobs);
+      } catch (e) { w.failed++; }
+    }));
+    w.status = 'done';
+    if (S.wide === w) renderList();
+  }
+
+  /* ---------- detail ---------- */
+  const draftKey = (id) => 'hh-note-draft-' + id;
+  const getDraft = (id) => { try { return localStorage.getItem(draftKey(id)) || ''; } catch (e) { return ''; } };
+  const setDraft = (id, v) => { try { if (v) localStorage.setItem(draftKey(id), v); else localStorage.removeItem(draftKey(id)); } catch (e) { /* storage unavailable */ } };
+
+  function buildNoteForm(id) {
+    const ta = h('textarea', { id: 'noteText', rows: '3', 'aria-describedby': 'noteErr', enterkeyhint: 'enter' });
+    ta.value = getDraft(id);
+    const err = h('p', { class: 'field-err', id: 'noteErr', role: 'alert', hidden: true });
+    const btn = h('button', { class: 'btn btn-primary', type: 'submit' }, 'Save note');
+    let busy = false, unsure = false;
+    const showErr = (t) => { err.textContent = t; err.hidden = !t; };
+    ta.addEventListener('input', () => { setDraft(id, ta.value); if (!err.hidden) showErr(''); });
+
+    const form = h('form', {
+      class: 'noteform', novalidate: true,
+      onsubmit: async (ev) => {
+        ev.preventDefault();
+        if (busy) return;
+        const text = ta.value.trim();
+        if (!text) { showErr('Write the note first, then save it.'); ta.focus(); return; }
+        busy = true; showErr('');
+        ta.readOnly = true; btn.disabled = true; btn.textContent = 'Saving...';
+        const started = Date.now();
+        const landed = (j) => (j.notes || []).some((n) => n.text === text && Date.parse(n.at) >= started - 120000);
+        let r = null;
+        if (unsure) {
+          // Last time we could not tell if the note was saved. Look before sending it again.
+          try { const j = await read(() => api.getJob(id), 2); if (landed(j)) r = { ok: true, job: j }; } catch (e) { /* fall through and send */ }
+        }
+        if (!r) r = await write(id, () => api.addNote(id, text), landed, () => { btn.textContent = 'Checking...'; });
+        busy = false; ta.readOnly = false; btn.disabled = false; btn.textContent = 'Save note';
+        if (r.ok) {
+          unsure = false;
+          ta.value = ''; setDraft(id, '');
+          applyJob(r.job);
+          toast('Note saved');
+          return;
+        }
+        if (r.job) applyJob(r.job, true);
+        unsure = r.code === 'UNKNOWN';
+        if (r.code === 'NOT_FOUND') showErr("This job is no longer on the system, so the note can't be saved. Call the office.");
+        else if (r.code === 'VALIDATION') showErr('Write the note first, then save it.');
+        else if (r.code === 'NET') showErr('Note not saved: the connection dropped. Your note is still here. Tap Save note to try again.');
+        else showErr("Couldn't reach the system, so the note is probably not saved. Your note is still here. Tap Save note to try again when you have signal.");
+      },
+    },
+      h('label', { for: 'noteText' }, 'Add a note'),
+      ta, err, btn);
+    return form;
+  }
+
+  function buildDetail() {
+    const pane = $('#detailPane');
+    D = null;
+    if (!S.jobId) {
+      pane.replaceChildren(h('p', { class: 'placeholder' }, 'Choose a job from the list to see its details.'));
+      return;
+    }
+    const id = S.jobId;
+    D = {
+      id,
+      head: h('div', { class: 'dhead', tabindex: '-1' }),
+      banner: h('div'),
+      info: h('div'),
+      notes: h('div'),
+      form: buildNoteForm(id),
+      notesCard: null,
+      actions: h('div', { class: 'actions' }),
+    };
+    D.notesCard = h('section', { class: 'card', 'aria-labelledby': 'notesH' }, D.notes, D.form);
+    const back = h('a', {
+      href: hashFor(S.date),
+      onclick: (ev) => { if (S.cameFromList) { ev.preventDefault(); history.back(); } },
+    }, icon('left'), 'Jobs');
+    pane.replaceChildren(
+      h('nav', { class: 'dbar', 'aria-label': 'Back' }, back),
+      h('div', { class: 'dwrap' }, D.head, D.banner, D.info, D.notesCard),
+      D.actions);
+    updateDetail();
+  }
+
+  function updateDetail() {
+    if (!D) return;
+    const id = D.id;
+    const j = S.job.get(id);
+    const st = S.jobLoad.get(id);
+
+    if (!j) {
+      D.notesCard.hidden = true;
+      D.info.replaceChildren();
+      D.banner.replaceChildren();
+      D.actions.replaceChildren();
+      if (st === 'missing') {
+        D.head.replaceChildren(h('div', { class: 'empty', role: 'alert' },
+          h('strong', null, 'Job not found'),
+          h('p', null, 'It may have been removed by the office.'),
+          h('a', { class: 'btn', href: hashFor(S.date) }, 'Back to jobs')));
+      } else if (st === 'error') {
+        D.head.replaceChildren(h('div', { class: 'empty', role: 'alert' },
+          h('strong', null, "Couldn't load this job"),
+          h('p', null, 'The connection dropped. Check your signal and try again.'),
+          h('button', { class: 'btn btn-primary', type: 'button', onclick: () => loadJob(id) }, 'Try again')));
+      } else {
+        D.head.replaceChildren(h('div', { 'aria-busy': 'true' },
+          h('p', { class: 'vh' }, 'Loading job'),
+          h('div', { class: 'skel skel-line', style: 'width:70%;height:28px' }),
+          h('div', { class: 'skel skel-line', style: 'width:40%' }),
+          h('div', { class: 'skel skel-row', style: 'margin-top:16px' }),
+          h('div', { class: 'skel skel-row', style: 'margin-top:12px' })));
+      }
+      return;
+    }
+
+    const done = j.status === 'complete';
+    D.notesCard.hidden = false;
+    document.title = j.customer + ' - Harbour Heating';
+
+    D.head.replaceChildren(
+      h('h1', null, j.customer),
+      h('p', { class: 'dmeta' },
+        h('span', null, 'Job ' + j.ref),
+        done ? h('span', { class: 'badge badge-ok' }, icon('check'), 'Complete') : h('span', { class: 'badge' }, 'Booked')));
+
+    const b = S.banner.get(id);
+    D.banner.replaceChildren(b ? h('p', { class: 'msg msg-' + b.kind }, b.text) : '');
+
+    D.info.replaceChildren(
+      h('section', { class: 'card' },
+        h('h2', null, 'What needs doing'),
+        h('p', { class: 'big' }, j.work),
+        h('p', { style: 'margin-top:6px;color:var(--muted)' }, dateLabel(j.date) + ' at ' + j.slot)),
+      h('section', { class: 'card' },
+        h('div', { class: 'row' },
+          h('div', null, h('h2', null, 'Address'), h('p', null, j.address)),
+          h('a', {
+            class: 'btn btn-small', target: '_blank', rel: 'noopener noreferrer',
+            href: 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(j.address),
+            'aria-label': 'Directions to ' + j.address + ' (opens maps)',
+          }, icon('pin'), 'Directions')),
+        h('div', { class: 'row' },
+          h('div', null, h('h2', null, 'Phone'), h('p', null, j.phone)),
+          h('a', { class: 'btn btn-small', href: 'tel:' + String(j.phone).replace(/[^\d+]/g, ''), 'aria-label': 'Call ' + j.customer + ' on ' + j.phone },
+            icon('phone'), 'Call'))));
+
+    const nk = [];
+    nk.push(h('h2', { id: 'notesH' }, 'Notes' + (j.notes ? ' (' + j.notes.length + ')' : '')));
+    if (j.notes) {
+      if (st === 'error') {
+        nk.push(h('div', { class: 'msg msg-warn', role: 'alert', style: 'margin-top:8px' },
+          h('p', null, "Couldn't check for newer notes."),
+          h('button', { class: 'btn btn-small', type: 'button', onclick: () => loadJob(id) }, 'Try again')));
+      }
+      if (j.notes.length) {
+        nk.push(h('ul', { class: 'notes' }, j.notes.map((n) => h('li', null,
+          h('time', { datetime: n.at }, fmtNoteTime(n.at)),
+          h('p', null, n.text)))));
+      } else {
+        nk.push(h('p', { style: 'color:var(--muted)' }, 'No notes yet.'));
+      }
+    } else if (st === 'error') {
+      nk.push(h('div', { class: 'msg msg-err', role: 'alert', style: 'margin-top:8px' },
+        h('p', null, "Couldn't load the notes. The connection dropped."),
+        h('button', { class: 'btn btn-small', type: 'button', onclick: () => loadJob(id) }, 'Try again')));
+    } else {
+      nk.push(h('div', { 'aria-busy': 'true' },
+        h('p', { class: 'vh' }, 'Loading notes'),
+        h('div', { class: 'skel skel-line', style: 'width:90%' }),
+        h('div', { class: 'skel skel-line', style: 'width:60%' })));
+    }
+    D.notes.replaceChildren(...nk);
+
+    if (done) {
+      D.actions.replaceChildren(h('p', { class: 'actions-note' }, 'This job is complete and the invoice has been emailed. It can no longer be moved. You can still add notes.'));
+    } else if (!D.actions.querySelector('button')) {
+      D.actions.replaceChildren(h('div', { class: 'actions-in' },
+        h('button', { class: 'btn', type: 'button', onclick: () => openMove(id) }, 'Move day'),
+        h('button', { class: 'btn btn-ok', type: 'button', onclick: () => openComplete(id) }, icon('check'), 'Complete')));
+    }
+  }
+
+  /* ---------- dialogs ---------- */
+  const dlg = $('#dlg');
+  function openDialog(content) {
+    dlg.replaceChildren(content);
+    if (!dlg.open) dlg.showModal();
+    const t = dlg.querySelector('#dlgTitle');
+    if (t) t.focus();
+  }
+  function closeDialog() { S.dlgBusy = false; if (dlg.open) dlg.close(); }
+  dlg.addEventListener('cancel', (ev) => { if (S.dlgBusy) ev.preventDefault(); });
+  dlg.addEventListener('click', (ev) => { if (ev.target === dlg && !S.dlgBusy) dlg.close(); });
+  dlg.addEventListener('close', () => { dlg.replaceChildren(); });
+  const afterDialog = () => { if (D) D.head.focus({ preventScroll: true }); };
+
+  function jobSummary(j) {
+    return h('div', { class: 'dlg-sum' },
+      h('strong', null, j.customer),
+      h('span', null, j.work),
+      h('span', { style: 'color:var(--muted)' }, j.address),
+      h('span', { style: 'color:var(--muted)' }, 'Job ' + j.ref + ', ' + dateLabel(j.date) + ' at ' + j.slot));
+  }
+
+  function openMove(id) {
+    const j = S.job.get(id);
+    if (!j) return;
+    const t = today();
+    let chosen = null;
+    const err = h('p', { class: 'field-err', role: 'alert', hidden: true });
+    const showErr = (x) => { err.textContent = x; err.hidden = !x; };
+    const confirm = h('button', { class: 'btn btn-primary btn-block', type: 'submit' }, 'Move job');
+    const cancel = h('button', { class: 'btn btn-block', type: 'button', onclick: closeDialog }, 'Cancel');
+    const other = h('input', { class: 'dateinput', type: 'date', id: 'mvOther', min: shift(t, 1) });
+    const radios = [];
+    const setChosen = (v) => {
+      chosen = v || null;
+      confirm.textContent = chosen ? 'Move to ' + fmtDate(chosen) : 'Move job';
+      showErr('');
+    };
+    const dayOpts = Array.from({ length: 6 }, (_, i) => shift(t, i + 1)).map((ds) => {
+      const current = ds === j.date;
+      const input = h('input', { type: 'radio', name: 'mvDay', value: ds, disabled: current });
+      input.addEventListener('change', () => { other.value = ''; setChosen(ds); });
+      radios.push(input);
+      return h('label', { class: 'day' }, input,
+        h('span', null, relDay(ds) || fmtWeekday.format(new Date(ds + 'T00:00:00Z')),
+          h('small', null, current ? 'Booked for this day now' : fmtDate(ds))));
+    });
+    other.addEventListener('input', () => {
+      if (other.value) radios.forEach((r) => { r.checked = false; });
+      setChosen(other.value);
+    });
+
+    const form = h('form', {
+      class: 'dlg', novalidate: true,
+      onsubmit: async (ev) => {
+        ev.preventDefault();
+        if (S.dlgBusy) return;
+        if (!chosen) { showErr('Choose the day to move this job to.'); return; }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(chosen) || chosen <= today()) { showErr('Choose a day after today.'); return; }
+        if (chosen === j.date) { showErr('The job is already booked for that day. Choose a different one.'); return; }
+        const target = chosen;
+        S.dlgBusy = true; showErr('');
+        const fields = [confirm, cancel, other, ...radios];
+        const was = fields.map((f) => f.disabled);
+        fields.forEach((f) => { f.disabled = true; });
+        confirm.textContent = 'Moving...';
+        const r = await write(id, () => api.moveJob(id, target), (x) => x.date === target, () => { confirm.textContent = 'Checking...'; });
+        S.dlgBusy = false;
+        if (r.ok) {
+          const text = 'Moved to ' + dateLabel(target) + ' at ' + r.job.slot + '.';
+          S.banner.set(id, { kind: 'ok', text });
+          closeDialog();
+          applyJob(r.job);
+          toast(text);
+          afterDialog();
+          return;
+        }
+        fields.forEach((f, i) => { f.disabled = was[i]; });
+        confirm.textContent = 'Move to ' + fmtDate(target);
+        if (r.job) applyJob(r.job, true);
+        if (r.code === 'COMPLETE') {
+          closeDialog();
+          S.banner.set(id, { kind: 'warn', text: "This job has already been marked complete, so it can't be moved." });
+          loadJob(id); updateDetail(); afterDialog();
+        } else if (r.code === 'NOT_FOUND') showErr('This job is no longer on the system. Call the office.');
+        else if (r.code === 'PAST') showErr('Choose a day after today.');
+        else if (r.code === 'NET') showErr('Not moved: the connection dropped. The job is still on ' + dateLabel(j.date) + '. Try again.');
+        else showErr("Couldn't reach the system, so the job has probably not moved. Try again when you have signal.");
+      },
+    },
+      h('h2', { id: 'dlgTitle', tabindex: '-1' }, 'Move to another day'),
+      jobSummary(j),
+      h('p', null, 'The job keeps its ' + j.slot + ' time.'),
+      h('fieldset', null, h('legend', null, 'Move to'), h('div', { class: 'days' }, dayOpts)),
+      h('div', { class: 'other' }, h('label', { for: 'mvOther' }, 'Or pick a later date'), other),
+      err,
+      h('div', { class: 'dlg-btns' }, confirm, cancel));
+    openDialog(form);
+  }
+
+  function openComplete(id) {
+    const j = S.job.get(id);
+    if (!j) return;
+    const opened = Date.now();
+    const err = h('p', { class: 'field-err', role: 'alert', hidden: true });
+    const showErr = (x) => { err.textContent = x; err.hidden = !x; };
+    const confirm = h('button', { class: 'btn btn-ok btn-block', type: 'submit' }, 'Complete job and email invoice');
+    const cancel = h('button', { class: 'btn btn-block', type: 'button', onclick: closeDialog }, 'Not yet');
+    const hasDraft = D && D.id === id && D.form.querySelector('textarea').value.trim();
+
+    const form = h('form', {
+      class: 'dlg',
+      onsubmit: async (ev) => {
+        ev.preventDefault();
+        // Guard against a double tap carrying through from the button that opened this.
+        if (S.dlgBusy || Date.now() - opened < 600) return;
+        S.dlgBusy = true; showErr('');
+        confirm.disabled = cancel.disabled = true;
+        confirm.textContent = 'Completing...';
+        const r = await write(id, () => api.completeJob(id), (x) => x.status === 'complete', () => { confirm.textContent = 'Checking...'; });
+        S.dlgBusy = false;
+        if (r.ok) {
+          const text = 'Job complete. Invoice emailed to ' + j.customer + '.';
+          S.banner.set(id, { kind: 'ok', text });
+          closeDialog();
+          applyJob(r.job);
+          toast(text);
+          afterDialog();
+          return;
+        }
+        if (r.job) applyJob(r.job, true);
+        if (r.code === 'COMPLETE') {
+          closeDialog();
+          S.banner.set(id, { kind: 'ok', text: 'This job was already marked complete. No second invoice was sent.' });
+          const cur = S.job.get(id);
+          if (cur) applyJob(Object.assign({}, cur, { status: 'complete' }), true);
+          loadJob(id); afterDialog();
+          return;
+        }
+        confirm.disabled = cancel.disabled = false;
+        confirm.textContent = 'Complete job and email invoice';
+        if (r.code === 'NOT_FOUND') showErr('This job is no longer on the system. Call the office.');
+        else if (r.code === 'NET') showErr('Not completed: the connection dropped. No invoice has been sent. Try again.');
+        else showErr("Couldn't reach the system to confirm. The job is probably not complete. Try again when you have signal: the invoice is only ever sent once.");
+      },
+    },
+      h('h2', { id: 'dlgTitle', tabindex: '-1' }, 'Complete this job?'),
+      jobSummary(j),
+      h('p', { class: 'dlg-warn' }, 'The customer is emailed their invoice straight away. This cannot be undone.'),
+      hasDraft ? h('p', null, "You have a note you haven't saved yet. It will stay on this phone and you can still save it afterwards.") : null,
+      err,
+      h('div', { class: 'dlg-btns' }, confirm, cancel));
+    openDialog(form);
+  }
+
+  /* ---------- wiring ---------- */
+  $('#prevBtn').append(icon('left'));
+  $('#nextBtn').append(icon('right'));
+  $('#refreshBtn').append(icon('refresh'));
+  $('#calWrap').prepend(icon('cal'));
+  $('.search').prepend(icon('search'));
+
+  $('#prevBtn').addEventListener('click', () => go(shift(S.date, -1), isWide() ? S.jobId : null));
+  $('#nextBtn').addEventListener('click', () => go(shift(S.date, 1), isWide() ? S.jobId : null));
+  $('#todayBtn').addEventListener('click', () => go(today(), isWide() ? S.jobId : null));
+  $('#refreshBtn').addEventListener('click', () => {
+    loadDay(S.date);
+    if (S.jobId) loadJob(S.jobId);
+    if (S.wide && S.query.trim()) startWide();
+  });
+  const cal = $('#calInput');
+  cal.addEventListener('click', () => { try { cal.showPicker(); } catch (e) { /* native tap handles it */ } });
+  cal.addEventListener('change', () => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cal.value)) go(cal.value, isWide() ? S.jobId : null);
+    else cal.value = S.date;
+  });
+  $('#q').addEventListener('input', (ev) => {
+    S.query = ev.target.value;
+    if (!S.query.trim()) S.wide = null;
+    renderList();
+  });
+  $('#q').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') ev.target.blur(); });
+
+  const offline = $('#offline');
+  const net = () => { offline.hidden = navigator.onLine !== false; };
+  window.addEventListener('online', () => { net(); loadDay(S.date); });
+  window.addEventListener('offline', net);
+  net();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    const e = S.days.get(S.date);
+    if (e && e.status !== 'loading' && (!e.at || Date.now() - e.at > 120000)) loadDay(S.date);
+    renderHeader();
+  });
+
+  window.addEventListener('hashchange', () => route(false));
+  route(true);
+})();
+</script>
+</body>
+</html>

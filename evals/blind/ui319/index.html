@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Import contacts</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #1b1f24;
+    --muted: #4d5560;
+    --line: #c9ced6;
+    --control: #6b7280;
+    --bg: #ffffff;
+    --soft: #f3f5f8;
+    --accent: #1a56c4;
+    --accent-dark: #123f93;
+    --bad: #a8201a;
+    --bad-bg: #fdf1f0;
+    --good: #17663a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 4rem; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 64rem; margin: 0 auto; padding: 1.25rem 1.25rem 4rem; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 .75rem; }
+  h2 { font-size: 1.25rem; line-height: 1.3; margin: 0 0 .5rem; }
+  p { margin: 0 0 .75rem; }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  h2:focus { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+  .steps { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; list-style: none; padding: 0 0 .75rem; margin: 0 0 1.25rem; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .steps li[aria-current] { color: var(--text); font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+
+  .field { margin-bottom: 1.25rem; }
+  label, legend { font-weight: 600; }
+  .field > label { display: block; margin-bottom: .25rem; }
+  .hint { color: var(--muted); margin: 0 0 .4rem; }
+  .field-error, .error { color: var(--bad); font-weight: 600; }
+  .field-error:empty, .error:empty, .note:empty { display: none; }
+  .field-error { margin-top: .35rem; }
+  .field-error::before, .error::before { content: "Problem: "; }
+  .note { color: var(--muted); margin-top: .35rem; }
+
+  input[type="file"] { font: inherit; max-width: 100%; padding: .4rem 0; min-height: 44px; }
+  input[type="file"]::file-selector-button {
+    font: inherit; min-height: 44px; padding: .4rem .9rem; margin-right: .75rem;
+    border: 1px solid var(--control); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer;
+  }
+  textarea {
+    display: block; width: 100%; min-height: 15rem; padding: .6rem .7rem; resize: vertical;
+    font: 16px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text); background: var(--bg); border: 1px solid var(--control); border-radius: 6px;
+    white-space: pre; overflow: auto;
+  }
+  textarea[aria-invalid="true"] { border: 2px solid var(--bad); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1rem 0; }
+  button {
+    font: inherit; font-weight: 600; min-height: 44px; padding: .5rem 1rem; cursor: pointer;
+    border: 1px solid var(--control); border-radius: 6px; background: var(--bg); color: var(--text);
+  }
+  button:hover { background: var(--soft); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-dark); }
+  button[aria-disabled="true"] { cursor: progress; opacity: .8; }
+  button.small { min-height: 32px; padding: .2rem .7rem; margin-left: .5rem; }
+
+  fieldset { border: 0; padding: 0; margin: 1.25rem 0 .5rem; }
+  legend { padding: 0; margin-bottom: .25rem; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0 1.25rem; }
+  .choices label { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; font-weight: 400; cursor: pointer; }
+  .choices input { width: 1.15rem; height: 1.15rem; margin: 0; accent-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: .5rem; table-layout: fixed; }
+  .c-name { width: 17%; } .c-email { width: 22%; } .c-phone { width: 14%; } .c-company { width: 13%; }
+  caption { text-align: left; color: var(--muted); padding: .25rem 0 .5rem; }
+  th, td { text-align: left; vertical-align: top; padding: .45rem .6rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+  thead th { position: sticky; top: 0; background: var(--soft); border-bottom: 1px solid var(--control); white-space: nowrap; z-index: 1; }
+  th.num, td.num { text-align: right; white-space: nowrap; width: 4rem; }
+  td.wrong { background: var(--bad-bg); color: var(--bad); font-weight: 600; }
+  td.wrong .mark { font-weight: 700; }
+  .ready { color: var(--good); }
+  .problems { margin: 0; padding: 0; list-style: none; color: var(--bad); font-weight: 600; }
+
+  progress { display: block; width: 100%; max-width: 32rem; height: 1.25rem; margin: .75rem 0 .5rem; accent-color: var(--accent); }
+  .big { font-size: 1.05rem; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  @media (max-width: 700px) {
+    main { padding: 1rem 1rem 3rem; }
+    .actions { flex-direction: column; align-items: stretch; }
+    .actions button { width: 100%; }
+    table, caption, tbody, tr, td { display: block; width: auto; }
+    thead { display: none; }
+    tr { border: 1px solid var(--line); border-radius: 6px; padding: .5rem .7rem; margin-bottom: .6rem; }
+    td, td.num { border: 0; padding: .15rem 0; text-align: left; width: auto; min-width: 0; }
+    td::before { content: attr(data-label) ": "; color: var(--muted); font-weight: 400; }
+    td.blank { display: none; }
+    td.wrong { padding: .15rem .35rem; margin: .1rem -.35rem; border-radius: 4px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Import contacts</h1>
+
+  <ol class="steps" aria-label="Steps">
+    <li id="step-edit" aria-current="step">1. Add contacts</li>
+    <li id="step-review">2. Review</li>
+    <li id="step-import">3. Import</li>
+  </ol>
+
+  <!-- Step 1 -->
+  <form id="view-edit" novalidate>
+    <div class="field">
+      <label for="file">Load from a CSV file (optional)</label>
+      <input type="file" id="file" accept=".csv,.txt,.tsv,text/csv,text/plain" aria-describedby="file-error file-note">
+      <div id="file-error" class="field-error" role="alert"></div>
+      <div class="note"><span id="file-note" role="status"></span><button type="button" id="undo-file" class="small" hidden>Undo</button></div>
+    </div>
+
+    <div class="field">
+      <label for="csv">Contacts as CSV text</label>
+      <p class="hint" id="csv-hint">First row: name, email, phone, company. Every contact needs a name and an email.</p>
+      <textarea id="csv" rows="12" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="csv-hint csv-error"></textarea>
+      <div id="csv-error" class="field-error" role="alert"></div>
+    </div>
+
+    <p id="check-error" class="error" role="alert"></p>
+    <div class="actions">
+      <button type="submit" id="check" class="primary">Check contacts</button>
+    </div>
+  </form>
+
+  <!-- Step 2 -->
+  <section id="view-review" aria-labelledby="review-h" hidden>
+    <h2 id="review-h" tabindex="-1"></h2>
+    <p id="review-summary" class="big"></p>
+    <p id="review-columns" class="hint"></p>
+    <div class="actions">
+      <button type="button" id="start" class="primary"></button>
+      <button type="button" id="back">Change the CSV</button>
+      <button type="button" id="download-bad"></button>
+    </div>
+
+    <fieldset id="filter">
+      <legend>Show</legend>
+      <div class="choices">
+        <label><input type="radio" name="show" value="bad"> <span id="lab-bad"></span></label>
+        <label><input type="radio" name="show" value="good"> <span id="lab-good"></span></label>
+        <label><input type="radio" name="show" value="all"> <span id="lab-all"></span></label>
+      </div>
+    </fieldset>
+
+    <table>
+      <caption id="table-count" role="status"></caption>
+      <thead>
+        <tr>
+          <th scope="col" class="num">Row</th>
+          <th scope="col" class="c-name">Name</th>
+          <th scope="col" class="c-email">Email</th>
+          <th scope="col" class="c-phone">Phone</th>
+          <th scope="col" class="c-company">Company</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="actions">
+      <button type="button" id="more" hidden></button>
+    </div>
+  </section>
+
+  <!-- Step 3 -->
+  <section id="view-import" aria-labelledby="import-h" hidden>
+    <h2 id="import-h" tabindex="-1"></h2>
+    <div id="running">
+      <progress id="bar" value="0" max="1" aria-label="Import progress"></progress>
+      <p id="progress-text" class="big" role="status"></p>
+      <div class="actions">
+        <button type="button" id="stop">Stop import</button>
+      </div>
+    </div>
+    <div id="outcome">
+      <p id="outcome-text" class="big" role="status"></p>
+      <p id="outcome-skipped"></p>
+      <div class="actions">
+        <button type="button" id="resume" hidden></button>
+        <button type="button" id="download-rest" hidden></button>
+        <button type="button" id="restart" hidden>Start a new import</button>
+      </div>
+    </div>
+  </section>
+
+  <p id="status" class="sr" role="status"></p>
+</main>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms || 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  return {
+    // rows: [{ name, email, phone, company }]. Resolves to [{ row: index, field, code }] where code is
+    // 'REQUIRED', 'EMAIL_FORMAT', 'PHONE_FORMAT' or 'DUPLICATE_IN_CRM'.
+    async validateImport(rows) {
+      await wait(); maybeFail('validate import');
+      const out = [];
+      rows.forEach((r, i) => {
+        if (!r.name || !r.name.trim()) out.push({ row: i, field: 'name', code: 'REQUIRED' });
+        if (!r.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) out.push({ row: i, field: 'email', code: r.email ? 'EMAIL_FORMAT' : 'REQUIRED' });
+        else if (/@example\.org$/.test(r.email)) out.push({ row: i, field: 'email', code: 'DUPLICATE_IN_CRM' });
+        if (r.phone && !/^[+\d][\d\s()-]{5,}$/.test(r.phone)) out.push({ row: i, field: 'phone', code: 'PHONE_FORMAT' });
+      });
+      return out;
+    },
+    // Imports the rows in batches. Calls onProgress(done, total) as it goes. Takes roughly 8 to 15 seconds.
+    // signal is an optional AbortSignal; aborting stops the import, and rows already imported stay imported.
+    // Resolves to { imported, skipped }. May reject part way; error.imported says how many rows were saved.
+    async runImport(rows, onProgress, signal) {
+      const total = rows.length; let done = 0;
+      const steps = 12, f = q.get('fail');
+      const failAt = f === '1' ? 5 : (f !== '0' && Math.random() < 0.25 ? 3 + Math.floor(Math.random() * 7) : -1);
+      for (let s = 1; s <= steps; s++) {
+        await wait(650 + Math.random() * 600);
+        if (signal && signal.aborted) { const e = new Error('ABORTED'); e.code = 'ABORTED'; e.imported = done; throw e; }
+        if (s === failAt) { const e = new Error('ETIMEDOUT: upstream timed out during batch ' + s); e.code = 'ETIMEDOUT'; e.imported = done; throw e; }
+        done = Math.min(total, Math.round((total * s) / steps)); if (onProgress) onProgress(done, total);
+      }
+      return { imported: total, skipped: 0 };
+    },
+  };
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FIELDS = ['name', 'email', 'phone', 'company'];
+  var LABELS = { name: 'Name', email: 'Email', phone: 'Phone', company: 'Company' };
+  var HEADER_WORDS = {
+    name: ['name', 'fullname', 'contactname', 'contact'],
+    email: ['email', 'emailaddress', 'mail'],
+    phone: ['phone', 'phonenumber', 'telephone', 'tel', 'mobile'],
+    company: ['company', 'companyname', 'organisation', 'organization', 'employer']
+  };
+  var PAGE = 100;
+  var DRAFT_KEY = 'import-contacts-draft';
+  var fmt = new Intl.NumberFormat('en');
+
+  var view = 'edit';
+  var checking = false;
+  var review = null;      // { text, rows, good, bad, hasHeader, ignored }
+  var filter = 'all';
+  var shown = PAGE;
+  var run = null;         // { total, done, remaining, controller, active }
+  var fileUndo = null;
+
+  function n(x) { return fmt.format(x); }
+  function count(x, one, many) { return n(x) + ' ' + (x === 1 ? one : (many || one + 's')); }
+  function say(text) { $('status').textContent = text; }
+
+  /* ---------- reading CSV ---------- */
+
+  function guessDelimiter(text) {
+    var line = text.split(/\r\n|\n|\r/).find(function (l) { return l.trim() !== ''; }) || '';
+    var best = ',', bestCount = 0;
+    [',', ';', '\t'].forEach(function (d) {
+      var c = 0, inQuotes = false;
+      for (var i = 0; i < line.length; i++) {
+        if (line[i] === '"') inQuotes = !inQuotes;
+        else if (line[i] === d && !inQuotes) c++;
+      }
+      if (c > bestCount) { best = d; bestCount = c; }
+    });
+    return best;
+  }
+
+  function parseCsv(text, d) {
+    var out = [], rec = [], cell = '', inQuotes = false, i = 0, c;
+    while (i < text.length) {
+      c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { cell += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
+        }
+        cell += c; i++; continue;
+      }
+      if (c === '"' && cell.trim() === '') { cell = ''; inQuotes = true; i++; continue; }
+      if (c === d) { rec.push(cell); cell = ''; i++; continue; }
+      if (c === '\r' || c === '\n') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        rec.push(cell); out.push(rec); rec = []; cell = ''; i++; continue;
+      }
+      cell += c; i++;
+    }
+    if (cell !== '' || rec.length) { rec.push(cell); out.push(rec); }
+    return out;
+  }
+
+  function headerField(cell) {
+    var key = cell.toLowerCase().replace(/[^a-z]/g, '');
+    for (var f in HEADER_WORDS) if (HEADER_WORDS[f].indexOf(key) !== -1) return f;
+    return null;
+  }
+
+  // Returns { error } or { rows, hasHeader, ignored }.
+  function readCsv(text) {
+    text = text.replace(/^﻿/, '');
+    if (text.trim() === '') return { error: 'Paste CSV text or load a file.' };
+    var records = parseCsv(text, guessDelimiter(text));
+    var isBlank = function (r) { return r.every(function (c) { return c.trim() === ''; }); };
+    var first = records.findIndex(function (r) { return !isBlank(r); });
+    var head = records[first].map(function (c) { return c.trim(); });
+    var map = {}, ignored = [], hasHeader = false;
+    head.forEach(function (c, i) {
+      var f = headerField(c);
+      if (f && !(f in map)) { map[f] = i; hasHeader = true; }
+    });
+    if (hasHeader) {
+      head.forEach(function (c, i) {
+        if (c && FIELDS.every(function (f) { return map[f] !== i; })) ignored.push(c);
+      });
+      var missing = ['name', 'email'].filter(function (f) { return !(f in map); });
+      if (missing.length) {
+        return { error: 'The first row has no ' + missing.join(' or ') + ' column. It has: ' + head.filter(Boolean).join(', ') + '.' };
+      }
+    } else {
+      if (head.length < 2) return { error: 'This is not CSV. Put each contact on its own line as name, email, phone, company.' };
+      FIELDS.forEach(function (f, i) { map[f] = i; });
+    }
+    var rows = [];
+    records.forEach(function (rec, i) {
+      if ((hasHeader && i <= first) || isBlank(rec)) return;
+      var row = { line: i + 1 };
+      FIELDS.forEach(function (f) { row[f] = (map[f] in rec ? rec[map[f]] : '').trim(); });
+      rows.push(row);
+    });
+    if (!rows.length) return { error: 'There are no contacts under the first row.' };
+    return { rows: rows, hasHeader: hasHeader, ignored: ignored };
+  }
+
+  function problemText(p) {
+    if (p.code === 'REQUIRED') return LABELS[p.field] + ' is missing';
+    if (p.code === 'EMAIL_FORMAT') return 'Email is not a valid address';
+    if (p.code === 'PHONE_FORMAT') return 'Phone can only have digits, spaces, brackets and hyphens, with + allowed at the start';
+    if (p.code === 'DUPLICATE_IN_CRM') return 'Already in the CRM with this email';
+    return (LABELS[p.field] || 'This row') + ' was not accepted';
+  }
+
+  /* ---------- views ---------- */
+
+  var TITLES = { edit: 'Import contacts', review: 'Review - Import contacts', import: 'Import - Import contacts' };
+
+  function show(name, focusEl) {
+    view = name;
+    ['edit', 'review', 'import'].forEach(function (v) {
+      $('view-' + v).hidden = v !== name;
+      if (v === name) $('step-' + v).setAttribute('aria-current', 'step');
+      else $('step-' + v).removeAttribute('aria-current');
+    });
+    document.title = TITLES[name];
+    window.scrollTo(0, 0);
+    if (focusEl) focusEl.focus();
+  }
+
+  /* ---------- step 1: add contacts ---------- */
+
+  var csv = $('csv');
+
+  function saveDraft() { try { sessionStorage.setItem(DRAFT_KEY, csv.value); } catch (e) {} }
+  function setCsvError(text) {
+    $('csv-error').textContent = text;
+    if (text) csv.setAttribute('aria-invalid', 'true'); else csv.removeAttribute('aria-invalid');
+  }
+  function clearFileNote() { $('file-note').textContent = ''; $('undo-file').hidden = true; fileUndo = null; }
+
+  csv.addEventListener('input', function () {
+    saveDraft();
+    if ($('csv-error').textContent) setCsvError('');
+    $('check-error').textContent = '';
+    if (fileUndo !== null) clearFileNote();
+  });
+
+  $('file').addEventListener('change', function () {
+    var input = this, file = input.files && input.files[0];
+    if (!file) return;
+    $('file-error').textContent = '';
+    clearFileNote();
+    if (/\.(xlsx|xls|xlsm|ods|numbers)$/i.test(file.name)) {
+      $('file-error').textContent = file.name + ' is a spreadsheet file, not CSV. Open it, save it as CSV, then load that file.';
+      input.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onerror = function () {
+      $('file-error').textContent = file.name + ' could not be read. Load it again, or paste its contents below.';
+      input.value = '';
+    };
+    reader.onload = function () {
+      var text;
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(reader.result); }
+      catch (e) { text = new TextDecoder('windows-1252').decode(reader.result); }
+      if (text.indexOf('\u0000') !== -1) {
+        $('file-error').textContent = file.name + ' is not a text file. Save your spreadsheet as CSV, then load that file.';
+        input.value = '';
+        return;
+      }
+      var before = csv.value;
+      csv.value = text;
+      saveDraft();
+      setCsvError('');
+      $('check-error').textContent = '';
+      var lines = text.split(/\r\n|\n|\r/).filter(function (l) { return l.trim() !== ''; }).length;
+      if (before.trim() !== '' && before !== text) {
+        fileUndo = before;
+        $('file-note').textContent = file.name + ' replaced the text below (' + count(lines, 'line') + ').';
+        $('undo-file').hidden = false;
+      } else {
+        $('file-note').textContent = file.name + ' loaded below (' + count(lines, 'line') + ').';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  $('undo-file').addEventListener('click', function () {
+    if (fileUndo === null) return;
+    csv.value = fileUndo;
+    saveDraft();
+    $('file').value = '';
+    clearFileNote();
+    $('file-note').textContent = 'Your earlier text is back.';
+    csv.focus();
+  });
+
+  $('view-edit').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (checking) return;
+    $('check-error').textContent = '';
+    var text = csv.value;
+    var parsed = readCsv(text);
+    if (parsed.error) { setCsvError(parsed.error); csv.focus(); return; }
+    setCsvError('');
+
+    checking = true;
+    var btn = $('check');
+    btn.setAttribute('aria-disabled', 'true');
+    btn.textContent = 'Checking ' + count(parsed.rows.length, 'row') + '...';
+    say('Checking ' + count(parsed.rows.length, 'row') + '.');
+
+    var payload = parsed.rows.map(function (r) { return { name: r.name, email: r.email, phone: r.phone, company: r.company }; });
+    api.validateImport(payload).then(function (issues) {
+      if (csv.value !== text) { say(''); return; } // edited while the check ran
+      parsed.rows.forEach(function (r) { r.problems = []; });
+      issues.forEach(function (p) { if (parsed.rows[p.row]) parsed.rows[p.row].problems.push(p); });
+      review = {
+        text: text, rows: parsed.rows, hasHeader: parsed.hasHeader, ignored: parsed.ignored,
+        good: parsed.rows.filter(function (r) { return !r.problems.length; }),
+        bad: parsed.rows.filter(function (r) { return r.problems.length; })
+      };
+      say('');
+      history.pushState(null, '', '#review');
+      openReview();
+    }, function () {
+      say('');
+      $('check-error').textContent = 'The server did not answer, so the contacts were not checked. Your CSV is unchanged. Select Check contacts to try again.';
+    }).then(function () {
+      checking = false;
+      btn.removeAttribute('aria-disabled');
+      btn.textContent = 'Check contacts';
+    });
+  });
+
+  /* ---------- step 2: review ---------- */
+
+  function openReview() {
+    var total = review.rows.length, good = review.good.length, bad = review.bad.length;
+    var heading, summary;
+    if (!bad) {
+      heading = total === 1 ? 'The 1 row is ready to import' : 'All ' + n(total) + ' rows are ready to import';
+      summary = '';
+    } else if (!good) {
+      heading = total === 1 ? 'The 1 row has a problem and cannot be imported' : 'All ' + n(total) + ' rows have problems and cannot be imported';
+      summary = 'Fix them in the CSV, then check again.';
+    } else {
+      heading = n(bad) + ' of ' + count(total, 'row') + (bad === 1 ? ' has a problem' : ' have problems');
+      summary = count(good, 'row is', 'rows are') + ' ready to import. The ' + (bad === 1 ? 'row with a problem' : n(bad) + ' rows with problems') + ' will not be imported.';
+    }
+    $('review-h').textContent = heading;
+    $('review-summary').textContent = summary;
+    $('review-summary').hidden = !summary;
+
+    var notes = [];
+    if (!review.hasHeader) notes.push('No column names in the first row, so columns were read in the order name, email, phone, company.');
+    if (review.ignored.length) notes.push('Columns not imported: ' + review.ignored.join(', ') + '.');
+    $('review-columns').textContent = notes.join(' ');
+    $('review-columns').hidden = !notes.length;
+
+    var start = $('start'), back = $('back');
+    start.hidden = !good;
+    start.textContent = 'Import ' + count(good, 'contact');
+    back.className = good ? '' : 'primary';
+    $('download-bad').hidden = !bad;
+    $('download-bad').textContent = 'Download the ' + (bad === 1 ? 'row with a problem' : n(bad) + ' rows with problems');
+
+    $('filter').hidden = !bad || !good;
+    $('lab-bad').textContent = 'Rows with problems (' + n(bad) + ')';
+    $('lab-good').textContent = 'Rows ready to import (' + n(good) + ')';
+    $('lab-all').textContent = 'All rows (' + n(total) + ')';
+    filter = bad && good ? 'bad' : 'all';
+    document.querySelector('input[name="show"][value="' + filter + '"]').checked = true;
+    shown = PAGE;
+    $('rows').textContent = '';
+    renderRows();
+    show('review', $('review-h'));
+  }
+
+  function listFor(f) { return f === 'bad' ? review.bad : f === 'good' ? review.good : review.rows; }
+
+  function cellFor(row, field) {
+    var td = document.createElement('td');
+    td.setAttribute('data-label', LABELS[field]);
+    var wrong = row.problems.some(function (p) { return p.field === field; });
+    if (wrong) {
+      td.className = 'wrong';
+      var mark = document.createElement('span');
+      mark.className = 'mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = '! ';
+      td.appendChild(mark);
+      td.appendChild(document.createTextNode(row[field] || 'missing'));
+    } else {
+      td.textContent = row[field];
+      if (!row[field]) td.className = 'blank';
+    }
+    return td;
+  }
+
+  function rowEl(row) {
+    var tr = document.createElement('tr');
+    var num = document.createElement('td');
+    num.className = 'num'; num.setAttribute('data-label', 'Row'); num.textContent = n(row.line);
+    tr.appendChild(num);
+    FIELDS.forEach(function (f) { tr.appendChild(cellFor(row, f)); });
+    var st = document.createElement('td');
+    st.className = 'status'; st.setAttribute('data-label', 'Status');
+    if (row.problems.length) {
+      var ul = document.createElement('ul');
+      ul.className = 'problems';
+      row.problems.forEach(function (p) {
+        var li = document.createElement('li'); li.textContent = problemText(p); ul.appendChild(li);
+      });
+      st.appendChild(ul);
+    } else {
+      st.className += ' ready';
+      st.textContent = 'Ready';
+    }
+    tr.appendChild(st);
+    return tr;
+  }
+
+  function renderRows() {
+    var list = listFor(filter), body = $('rows');
+    var upTo = Math.min(shown, list.length);
+    while (body.rows.length > upTo) body.deleteRow(-1);
+    var frag = document.createDocumentFragment();
+    for (var i = body.rows.length; i < upTo; i++) frag.appendChild(rowEl(list[i]));
+    body.appendChild(frag);
+    var what = filter === 'bad' ? (list.length === 1 ? 'row with a problem' : 'rows with problems')
+      : filter === 'good' ? (list.length === 1 ? 'row ready to import' : 'rows ready to import')
+      : (list.length === 1 ? 'row' : 'rows');
+    $('table-count').textContent = upTo < list.length
+      ? 'Showing the first ' + n(upTo) + ' of ' + n(list.length) + ' ' + what + '.'
+      : (list.length === 1 ? 'Showing the 1 ' : 'Showing all ' + n(list.length) + ' ') + what + '.';
+    var left = list.length - upTo;
+    $('more').hidden = !left;
+    $('more').textContent = 'Show ' + count(Math.min(PAGE, left), 'more row', 'more rows');
+  }
+
+  $('filter').addEventListener('change', function (ev) {
+    filter = ev.target.value;
+    shown = PAGE;
+    $('rows').textContent = '';
+    renderRows();
+  });
+
+  $('more').addEventListener('click', function () {
+    var body = $('rows'), firstNew = body.rows.length;
+    shown += PAGE;
+    renderRows();
+    if ($('more').hidden && body.rows[firstNew]) {
+      // the button is gone: keep keyboard users in place
+      $('back').focus({ preventScroll: true });
+    }
+  });
+
+  $('back').addEventListener('click', function () { history.back(); });
+
+  function toCsv(rows, why) {
+    var esc = function (v) { return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var lines = [FIELDS.concat('problem').join(',')];
+    rows.forEach(function (r) {
+      var note = r.problems.length ? r.problems.map(problemText).join('; ') : why;
+      lines.push(FIELDS.map(function (f) { return esc(r[f]); }).concat(esc(note)).join(','));
+    });
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function download(name, text) {
+    var url = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    say('');
+    setTimeout(function () { say('Downloaded ' + name + '.'); }, 50);
+  }
+
+  $('download-bad').addEventListener('click', function () {
+    download('contacts-with-problems.csv', toCsv(review.bad, ''));
+  });
+
+  /* ---------- step 3: import ---------- */
+
+  $('start').addEventListener('click', function () {
+    if (run && run.active) return;
+    run = { total: review.good.length, done: 0, remaining: review.good.slice(), controller: null, active: false };
+    history.replaceState(null, '', '#import');
+    show('import', null);
+    runBatch();
+  });
+
+  function runBatch() {
+    var rows = run.remaining, base = run.done;
+    run.active = true;
+    run.controller = new AbortController();
+    $('import-h').textContent = 'Importing ' + count(run.total, 'contact');
+    $('running').hidden = false;
+    $('outcome-text').textContent = '';
+    $('outcome-skipped').textContent = '';
+    ['resume', 'download-rest', 'restart'].forEach(function (id) { $(id).hidden = true; });
+    var stop = $('stop');
+    stop.textContent = 'Stop import';
+    stop.removeAttribute('aria-disabled');
+    $('bar').max = run.total;
+    setProgress(base);
+    $('import-h').focus();
+
+    var payload = rows.map(function (r) { return { name: r.name, email: r.email, phone: r.phone, company: r.company }; });
+    api.runImport(payload, function (done) {
+      setProgress(base + done);
+    }, run.controller.signal).then(function (res) {
+      var imported = res && typeof res.imported === 'number' ? res.imported : rows.length;
+      run.done = base + imported;
+      run.remaining = rows.slice(imported);
+      finish('done');
+    }, function (err) {
+      var saved = err && typeof err.imported === 'number' ? Math.max(0, Math.min(rows.length, err.imported)) : 0;
+      run.done = base + saved;
+      run.remaining = rows.slice(saved);
+      finish(err && err.code === 'ABORTED' ? 'stopped' : 'failed');
+    });
+  }
+
+  function setProgress(done) {
+    $('bar').value = done;
+    if (!$('stop').hasAttribute('aria-disabled')) {
+      $('progress-text').textContent = n(done) + ' of ' + n(run.total) + ' imported';
+    }
+  }
+
+  $('stop').addEventListener('click', function () {
+    if (!run || !run.active || this.hasAttribute('aria-disabled')) return;
+    this.setAttribute('aria-disabled', 'true');
+    this.textContent = 'Stopping...';
+    $('progress-text').textContent = 'Stopping. Contacts already imported stay in the CRM.';
+    run.controller.abort();
+  });
+
+  function finish(how) {
+    run.active = false;
+    say('');
+    var left = run.remaining.length, bad = review.bad.length, notIn = left + bad;
+    var heading, text;
+    if (!left) {
+      heading = count(run.done, 'contact') + ' imported';
+      text = '';
+    } else {
+      heading = how === 'stopped' ? 'Import stopped' : 'Import interrupted';
+      text = (how === 'stopped' ? 'You stopped the import. ' : 'The server stopped answering part way through. ')
+        + n(run.done) + ' of ' + count(run.total, 'contact') + (run.done === 1 ? ' was' : ' were') + ' imported and '
+        + n(left) + (left === 1 ? ' was' : ' were') + ' not.';
+    }
+    $('running').hidden = true;
+    $('progress-text').textContent = '';
+    $('import-h').textContent = heading;
+    $('outcome-text').textContent = text;
+    $('outcome-skipped').textContent = bad
+      ? (bad === 1 ? 'The row with a problem was not imported.' : 'The ' + n(bad) + ' rows with problems were not imported.')
+      : '';
+
+    var resume = $('resume'), rest = $('download-rest'), restart = $('restart');
+    resume.hidden = !left;
+    resume.className = 'primary';
+    resume.textContent = 'Import the remaining ' + count(left, 'contact');
+    rest.hidden = !notIn;
+    rest.textContent = 'Download the ' + (notIn === 1 ? 'row' : n(notIn) + ' rows') + ' not imported';
+    restart.hidden = false;
+    restart.className = left ? '' : 'primary';
+    if (!left) { try { sessionStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+    $('import-h').focus();
+  }
+
+  $('resume').addEventListener('click', function () {
+    if (run.active || !run.remaining.length) return;
+    runBatch();
+  });
+
+  $('download-rest').addEventListener('click', function () {
+    download('contacts-not-imported.csv', toCsv(review.bad.concat(run.remaining), 'Not imported yet'));
+  });
+
+  $('restart').addEventListener('click', function () {
+    csv.value = '';
+    saveDraft();
+    $('file').value = '';
+    clearFileNote();
+    setCsvError('');
+    $('file-error').textContent = '';
+    $('check-error').textContent = '';
+    review = null; run = null;
+    history.replaceState(null, '', location.pathname + location.search);
+    show('edit', csv);
+  });
+
+  /* ---------- history, reload, leaving ---------- */
+
+  window.addEventListener('popstate', function () {
+    if (run && run.active) {
+      history.pushState(null, '', '#import');
+      say('');
+      setTimeout(function () { say('The import is still running. Stop it before you go back.'); }, 50);
+      return;
+    }
+    if (location.hash === '#review' && review && review.text === csv.value && !run) {
+      openReview();
+    } else {
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      if (view !== 'edit') show('edit', csv);
+    }
+  });
+
+  window.addEventListener('beforeunload', function (ev) {
+    if (run && run.active) { ev.preventDefault(); ev.returnValue = ''; }
+  });
+
+  try {
+    var draft = sessionStorage.getItem(DRAFT_KEY);
+    if (draft && !csv.value) csv.value = draft;
+  } catch (e) {}
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+})();
+</script>
+</body>
+</html>

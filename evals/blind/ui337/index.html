@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Invoices - Northwind</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --surface: #f2f8f8;
+    --surface-raised: #fbfefe;
+    --text: #121d1d;
+    --text-muted: #4f5b5b;
+    --border: #d2d9d9;
+    --border-strong: #717d7e;
+    --accent: #066166;
+    --on-accent: #fbfefe;
+    --accent-soft: #d2eef0;
+    --danger: #b02a2d;
+    --backdrop: rgba(10, 17, 17, 0.55);
+
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --text-xs: 0.8125rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-xl: 1.5rem;
+
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s5: 24px;
+    --s6: 32px;
+
+    --control-h: 32px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #0a1111;
+      --surface-raised: #121a1a;
+      --text: #e2eaea;
+      --text-muted: #9ca7a7;
+      --border: #282f30;
+      --border-strong: #6b7778;
+      --accent: #5dcbd1;
+      --on-accent: #0a1111;
+      --accent-soft: #0b2f31;
+      --danger: #f7857d;
+      --backdrop: rgba(0, 0, 0, 0.65);
+    }
+  }
+  @media (pointer: coarse), (max-width: 759px) {
+    :root { --control-h: 44px; }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-padding-top: 56px; }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--text);
+    font: 400 var(--text-base)/1.5 var(--font-sans);
+  }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--s5) var(--s5) var(--s6);
+  }
+  h1 {
+    font-size: var(--text-xl);
+    line-height: 1.25;
+    font-weight: 600;
+    margin: 0 0 var(--s4);
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+
+  /* Controls */
+  button {
+    font: 400 var(--text-sm)/1.2 var(--font-sans);
+    min-height: var(--control-h);
+    padding: 0 var(--s3);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface-raised);
+    color: var(--text);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 120ms;
+  }
+  button:hover { background: var(--accent-soft); }
+  button:active { background: var(--border); }
+  button:disabled { color: var(--text-muted); border-color: var(--border); background: var(--surface); cursor: default; }
+  button.danger { color: var(--danger); border-color: var(--danger); }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s4) var(--s6);
+    align-items: flex-end;
+    margin-bottom: var(--s4);
+  }
+  .field { flex: 0 1 22rem; min-width: 0; }
+  .field label, .group-label {
+    display: block;
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    margin-bottom: var(--s1);
+  }
+  input[type="search"] {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--s3);
+    font: 400 var(--text-base)/1.2 var(--font-sans);
+    color: var(--text);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+  }
+  @media (pointer: coarse), (max-width: 759px) {
+    input[type="search"] { height: 44px; }
+  }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .filters button { min-height: 40px; }
+  @media (pointer: coarse), (max-width: 759px) {
+    .filters button { min-height: 44px; }
+  }
+  .filters button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+  .filters .n { color: var(--text-muted); margin-left: var(--s1); font-variant-numeric: tabular-nums; }
+
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s2) var(--s4);
+    min-height: var(--control-h);
+    margin-bottom: var(--s2);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+  .summary p { margin: 0; }
+  #outcome { color: var(--text-muted); }
+
+  /* Failures for invoices that are not in the rows on screen */
+  #notices:empty { display: none; }
+  #notices { margin: 0 0 var(--s3); padding: 0; list-style: none; }
+  #notices li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s2) var(--s3);
+    padding: var(--s2) var(--s3);
+    margin-bottom: var(--s2);
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    background: var(--surface-raised);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+  #notices li span { flex: 1 1 16rem; }
+
+  /* Table */
+  #results { min-height: 320px; }
+  #results:focus { outline: none; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); line-height: 1.45; }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+    text-align: left;
+    font-weight: 600;
+    padding: var(--s2) var(--s3);
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+  }
+  tbody th, tbody td {
+    padding: 5px var(--s3);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    text-align: left;
+    font-weight: 400;
+  }
+  tbody tr { background: var(--surface-raised); height: 44px; }
+  tbody th { font-weight: 600; overflow-wrap: anywhere; }
+  .c-number, .c-due { white-space: nowrap; }
+  .c-amount { text-align: right; white-space: nowrap; }
+  thead th.c-amount { text-align: right; }
+  td, .c-amount { font-variant-numeric: tabular-nums; }
+  .c-status { width: 12.5rem; }
+  .c-actions { width: 17rem; }
+  .meta { display: block; font-size: var(--text-xs); line-height: 1.4; color: var(--text-muted); }
+  .overdue { color: var(--danger); font-weight: 600; white-space: nowrap; }
+  .overdue svg, .row-error svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: var(--s1); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; min-height: var(--control-h); }
+  .row-error { flex: 1 0 100%; margin: 0; color: var(--danger); font-size: var(--text-xs); line-height: 1.4; }
+  .working { color: var(--text-muted); }
+
+  .state {
+    padding: var(--s6) var(--s4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-raised);
+  }
+  .state p { margin: 0 0 var(--s3); max-width: 70ch; }
+  .state p:last-child { margin-bottom: 0; }
+  .state button { min-height: 40px; }
+  @media (pointer: coarse), (max-width: 759px) {
+    .state button { min-height: 44px; }
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    margin-top: var(--s4);
+    font-size: var(--text-sm);
+  }
+  .pager[hidden] { display: none; }
+  .pager p { margin: 0; font-variant-numeric: tabular-nums; }
+
+  /* Dialog */
+  dialog {
+    width: min(28rem, calc(100vw - 32px));
+    padding: var(--s5);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface-raised);
+    color: var(--text);
+  }
+  dialog::backdrop { background: var(--backdrop); }
+  dialog h2 { font-size: 1.25rem; line-height: 1.3; font-weight: 600; margin: 0 0 var(--s3); overflow-wrap: anywhere; }
+  dialog p { margin: 0 0 var(--s3); overflow-wrap: anywhere; }
+  #del-error { color: var(--danger); }
+  #del-error:empty { display: none; }
+  .dialog-actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s5); }
+  .dialog-actions button { min-height: 40px; padding: 0 var(--s4); }
+  @media (pointer: coarse), (max-width: 759px) {
+    .dialog-actions button { min-height: 44px; flex: 1 1 auto; }
+  }
+
+  /* Narrow screens: each invoice becomes a block, same order */
+  @media (max-width: 759px) {
+    main { padding: var(--s4) var(--s4) var(--s5); }
+    .field { flex-basis: 100%; }
+    thead {
+      position: absolute; width: 1px; height: 1px; margin: -1px;
+      overflow: hidden; clip-path: inset(50%);
+    }
+    table, tbody { display: block; }
+    tbody tr {
+      height: auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--s1) var(--s3);
+      padding: var(--s3);
+      margin-bottom: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    tbody th, tbody td { display: block; padding: 0; border: 0; width: auto; }
+    .c-customer { grid-column: 1; }
+    .c-amount { grid-column: 2; grid-row: 1; }
+    .c-number { grid-column: 1; grid-row: 2; }
+    .c-due { grid-column: 2; grid-row: 2; text-align: right; }
+    .c-due::before { content: "Due "; color: var(--text-muted); }
+    .c-status { grid-column: 1 / -1; }
+    .c-actions { grid-column: 1 / -1; }
+    .c-actions:empty { display: none; }
+    .actions { margin-top: var(--s1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Invoices</h1>
+
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Search by customer or invoice number</label>
+      <input type="search" id="search" autocomplete="off" spellcheck="false">
+    </div>
+    <div role="group" aria-labelledby="status-label">
+      <span class="group-label" id="status-label">Status</span>
+      <div class="filters" id="filters">
+        <button type="button" data-status="all" aria-pressed="true">All<span class="n"></span></button>
+        <button type="button" data-status="overdue" aria-pressed="false">Overdue<span class="n"></span></button>
+        <button type="button" data-status="sent" aria-pressed="false">Sent<span class="n"></span></button>
+        <button type="button" data-status="draft" aria-pressed="false">Draft<span class="n"></span></button>
+        <button type="button" data-status="paid" aria-pressed="false">Paid<span class="n"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <p id="summary" role="status">Loading invoices...</p>
+    <button type="button" id="clear" hidden>Clear search and filter</button>
+    <p id="outcome" role="status"></p>
+  </div>
+
+  <ul id="notices" role="alert"></ul>
+
+  <div id="results" tabindex="-1" role="region" aria-labelledby="title">
+    <div id="load-state" class="state" role="alert" hidden></div>
+    <table id="table" role="table" hidden>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader" scope="col" class="c-customer">Customer</th>
+          <th role="columnheader" scope="col" class="c-number">Invoice</th>
+          <th role="columnheader" scope="col" class="c-due" aria-sort="ascending">Due <span aria-hidden="true">&#8593;</span></th>
+          <th role="columnheader" scope="col" class="c-amount">Amount</th>
+          <th role="columnheader" scope="col" class="c-status">Status</th>
+          <th role="columnheader" scope="col" class="c-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup" id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="pager" id="pager" hidden>
+    <button type="button" id="prev">Previous page</button>
+    <button type="button" id="next">Next page</button>
+    <p id="page-info"></p>
+  </div>
+
+  <div id="announce" class="sr-only" role="status"></div>
+  <div id="alert" class="sr-only" role="alert"></div>
+</main>
+
+<dialog id="del" aria-labelledby="del-title" aria-describedby="del-desc">
+  <h2 id="del-title"></h2>
+  <p id="del-desc"></p>
+  <p id="del-error" role="alert"></p>
+  <div class="dialog-actions">
+    <button type="button" id="del-keep" autofocus>Keep draft</button>
+    <button type="button" id="del-go" class="danger">Delete draft</button>
+  </div>
+</dialog>
+
+<script>
+// Simulated server. Do not change this block.
+const api = (() => {
+  const q = new URLSearchParams(location.search);
+  const wait = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 1100));
+  const maybeFail = (what) => {
+    const f = q.get('fail');
+    if (f === '1' || (f !== '0' && Math.random() < 0.2)) {
+      const e = new Error('ECONNRESET: socket hang up while trying to ' + what); e.code = 'ECONNRESET'; throw e;
+    }
+  };
+  const customers = ['Acme Ltd', 'Brightside Bakery', 'Castellan Freight and Logistics International', 'Dovetail Joinery', 'Eastfield Primary School', 'Fennel & Rye', 'Greyfriars Dental', 'Harbour Lights Hotel', 'Ivy Lane Books', 'Juniper Health'];
+  const statuses = ['draft', 'sent', 'sent', 'paid', 'paid', 'paid', 'overdue', 'overdue'];
+  let invoices = q.get('empty') === '1' ? [] : Array.from({ length: 46 }, (_, i) => ({
+    id: 'inv_' + (9000 + i), number: 'NW-' + (2041 + i), customer: customers[i % customers.length],
+    issued: new Date(2026, 8, 1 + i).toISOString(), due: new Date(2026, 9, 1 + i).toISOString(),
+    amount: Math.round((120 + ((i * 7919) % 48000)) * 100) / 100 + (i % 9 === 0 ? 1250000 : 0), currency: 'GBP',
+    status: statuses[i % statuses.length], reminderSentAt: null,
+  }));
+  return {
+    async listInvoices() { await wait(); maybeFail('list invoices'); return invoices.map((x) => ({ ...x })); },
+    async markPaid(id) { await wait(); maybeFail('mark paid'); const x = invoices.find((v) => v.id === id); x.status = 'paid'; return { ...x }; },
+    async sendReminder(id) { await wait(); maybeFail('send reminder'); const x = invoices.find((v) => v.id === id); x.reminderSentAt = new Date().toISOString(); return { ...x }; },
+    async deleteInvoice(id) { await wait(); maybeFail('delete invoice'); invoices = invoices.filter((v) => v.id !== id); return { ok: true }; },
+  };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const PAGE_SIZE = 20;
+  const UNDO_MS = 8000;
+  const STATUS_WORD = { all: 'All', overdue: 'Overdue', sent: 'Sent', draft: 'Draft', paid: 'Paid' };
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    search: $('search'), filters: $('filters'), summary: $('summary'), clear: $('clear'),
+    outcome: $('outcome'), notices: $('notices'), results: $('results'), loadState: $('load-state'),
+    table: $('table'), rows: $('rows'), pager: $('pager'), prev: $('prev'), next: $('next'),
+    pageInfo: $('page-info'), announce: $('announce'), alert: $('alert'),
+    del: $('del'), delTitle: $('del-title'), delDesc: $('del-desc'), delError: $('del-error'),
+    delKeep: $('del-keep'), delGo: $('del-go'),
+  };
+
+  const params = new URLSearchParams(location.search);
+  const state = {
+    phase: 'loading',            // loading | ready | failed
+    invoices: [],
+    q: params.get('q') || '',
+    status: STATUS_WORD[params.get('status')] ? params.get('status') : 'all',
+    page: Math.max(1, parseInt(params.get('page'), 10) || 1),
+    viewIds: [],                 // rows in the current view; only changes when the search, filter or data set changes
+    ui: new Map(),               // per invoice: { pending, busy, error }
+  };
+  let noticesKey = '';
+  let deleting = null;           // { id, busy }
+
+  /* ---------- formatting ---------- */
+
+  const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const stampFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const validDate = (iso) => { const d = iso ? new Date(iso) : null; return d && !isNaN(d) ? d : null; };
+  const fmtDate = (iso) => { const d = validDate(iso); return d ? dateFmt.format(d) : 'Not set'; };
+  const fmtMoney = (amount, currency) => {
+    if (typeof amount !== 'number' || isNaN(amount)) return 'Not set';
+    try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currency || 'GBP' }).format(amount); }
+    catch (e) { return amount.toFixed(2) + ' ' + currency; }
+  };
+  const daysOverdue = (iso) => {
+    const d = validDate(iso); if (!d) return null;
+    const a = new Date(); a.setHours(0, 0, 0, 0);
+    const b = new Date(d); b.setHours(0, 0, 0, 0);
+    const n = Math.round((a - b) / 86400000);
+    return n > 0 ? n : null;
+  };
+  const customerOf = (inv) => inv.customer || 'No customer name';
+
+  /* ---------- small helpers ---------- */
+
+  function h(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const k in attrs || {}) {
+      if (attrs[k] === false || attrs[k] == null) continue;
+      if (k === 'class') n.className = attrs[k]; else n.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+    }
+    for (const kid of kids) if (kid != null && kid !== false) n.append(kid);
+    return n;
+  }
+  function warnIcon() {
+    const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+    s.innerHTML = '<path fill="currentColor" d="M8 1.2 15.4 14H.6L8 1.2Zm-.8 5v4.2h1.6V6.2H7.2Zm0 5.2V13h1.6v-1.6H7.2Z"/>';
+    return s;
+  }
+  // Refill a live region so that the same message twice in a row is still announced.
+  function say(region, text) { region.textContent = ''; setTimeout(() => { region.textContent = text; }, 50); }
+  const uiOf = (id) => { if (!state.ui.has(id)) state.ui.set(id, {}); return state.ui.get(id); };
+  const byId = (id) => state.invoices.find((v) => v.id === id);
+  const shownStatus = (inv) => {
+    const u = state.ui.get(inv.id) || {};
+    return (u.pending === 'paid' || u.busy === 'paid') ? 'paid' : inv.status;
+  };
+
+  function syncUrl() {
+    const p = new URLSearchParams(location.search);
+    state.q ? p.set('q', state.q) : p.delete('q');
+    state.status !== 'all' ? p.set('status', state.status) : p.delete('status');
+    state.page > 1 ? p.set('page', state.page) : p.delete('page');
+    const s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) { /* file URLs may refuse */ }
+  }
+
+  /* ---------- view ---------- */
+
+  const squash = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  function matches(inv, q) {
+    if (!q) return true;
+    const t = q.trim().toLowerCase();
+    if (!t) return true;
+    if (String(inv.customer || '').toLowerCase().includes(t)) return true;
+    if (String(inv.number || '').toLowerCase().includes(t)) return true;
+    const sq = squash(t);
+    return !!sq && squash(inv.number).includes(sq);
+  }
+  function recomputeView() {
+    state.viewIds = state.invoices
+      .filter((v) => (state.status === 'all' || shownStatus(v) === state.status) && matches(v, state.q))
+      .sort((a, b) => (validDate(a.due) || 0) - (validDate(b.due) || 0))
+      .map((v) => v.id);
+  }
+  const pageCount = () => Math.max(1, Math.ceil(state.viewIds.length / PAGE_SIZE));
+  function pageIds() {
+    state.page = Math.min(state.page, pageCount());
+    return state.viewIds.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+  }
+
+  /* ---------- rendering ---------- */
+
+  function rowFor(inv) {
+    const u = state.ui.get(inv.id) || {};
+    const status = shownStatus(inv);
+    const label = inv.number + ', ' + customerOf(inv);
+
+    // Status cell
+    const statusCell = h('td', { role: 'cell', class: 'c-status' });
+    if (status === 'overdue') {
+      const n = daysOverdue(inv.due);
+      statusCell.append(h('span', { class: 'overdue' }, warnIcon(), n ? 'Overdue ' + n + (n === 1 ? ' day' : ' days') : 'Overdue'));
+    } else {
+      statusCell.append(STATUS_WORD[status] || status);
+    }
+    if (u.pending === 'reminder' || u.busy === 'reminder') {
+      statusCell.append(h('span', { class: 'meta' }, 'Sending reminder'));
+    } else if (validDate(inv.reminderSentAt) && status !== 'paid') {
+      statusCell.append(h('span', { class: 'meta' }, 'Reminder sent ' + stampFmt.format(validDate(inv.reminderSentAt))));
+    }
+
+    // Actions cell
+    const actions = h('div', { class: 'actions' });
+    const btn = (act, text, cls) => h('button', {
+      type: 'button', class: cls, 'data-act': act, 'data-id': inv.id, 'data-k': inv.id + ':' + act,
+      'aria-label': text + ', ' + label,
+    }, text);
+    if (u.error) actions.append(h('p', { class: 'row-error' }, warnIcon(), u.error + ' Try again.'));
+    if (u.pending) {
+      actions.append(btn('undo', 'Undo'));
+    } else if (u.busy) {
+      actions.append(h('span', { class: 'working' }, u.busy === 'paid' ? 'Saving...' : 'Sending...'));
+    } else if (inv.status === 'overdue') {
+      actions.append(btn('paid', 'Mark paid'), btn('reminder', 'Send reminder'));
+    } else if (inv.status === 'sent') {
+      actions.append(btn('paid', 'Mark paid'));
+    } else if (inv.status === 'draft') {
+      actions.append(btn('delete', 'Delete', 'danger'));
+    }
+    const actionsCell = h('td', { role: 'cell', class: 'c-actions' });
+    if (actions.childNodes.length) actionsCell.append(actions);
+
+    return h('tr', { role: 'row', 'data-row': inv.id },
+      h('th', { role: 'rowheader', scope: 'row', class: 'c-customer', tabindex: '-1', 'data-k': inv.id + ':row' }, customerOf(inv)),
+      h('td', { role: 'cell', class: 'c-number' }, inv.number || 'No number'),
+      h('td', { role: 'cell', class: 'c-due' }, fmtDate(inv.due)),
+      h('td', { role: 'cell', class: 'c-amount' }, fmtMoney(inv.amount, inv.currency)),
+      statusCell,
+      actionsCell);
+  }
+
+  function renderFilters() {
+    const counts = { all: state.invoices.length, overdue: 0, sent: 0, draft: 0, paid: 0 };
+    for (const v of state.invoices) { const s = shownStatus(v); if (s in counts) counts[s]++; }
+    for (const b of el.filters.querySelectorAll('button')) {
+      const s = b.dataset.status;
+      b.setAttribute('aria-pressed', String(s === state.status));
+      b.querySelector('.n').textContent = state.phase === 'ready' ? String(counts[s]) : '';
+    }
+  }
+
+  function setText(node, text) { if (node.textContent !== text) node.textContent = text; }
+
+  function renderSummary(ids) {
+    const total = state.invoices.length, n = state.viewIds.length;
+    const q = state.q.trim();
+    const filtered = !!q || state.status !== 'all';
+    let text = '';
+    if (state.phase === 'loading') text = 'Loading invoices...';
+    else if (state.phase === 'failed') text = '';
+    else if (total === 0) text = '';
+    else if (n === 0) text = '';
+    else {
+      const range = n > PAGE_SIZE
+        ? ((state.page - 1) * PAGE_SIZE + 1) + ' to ' + ((state.page - 1) * PAGE_SIZE + ids.length) + ' of ' + n
+        : String(n);
+      const what = state.status === 'all' ? (n === 1 && n <= PAGE_SIZE ? 'invoice' : 'invoices')
+        : STATUS_WORD[state.status].toLowerCase() + (n === 1 && n <= PAGE_SIZE ? ' invoice' : ' invoices');
+      text = range + ' ' + what + (q ? ' matching "' + q + '"' : '') + (filtered ? ', from ' + total + ' in total' : '');
+    }
+    setText(el.summary, text);
+    el.clear.hidden = !(state.phase === 'ready' && filtered && n > 0);
+    el.clear.textContent = q && state.status !== 'all' ? 'Clear search and filter' : q ? 'Clear search' : 'Clear filter';
+  }
+
+  function stateBox(lines, button) {
+    el.loadState.textContent = '';
+    for (const l of lines) el.loadState.append(h('p', null, l));
+    if (button) el.loadState.append(h('p', null, h('button', { type: 'button', 'data-act': button.act, 'data-k': 'state:' + button.act }, button.text)));
+    el.loadState.hidden = false;
+  }
+
+  function renderNotices(ids) {
+    const off = state.invoices.filter((v) => (state.ui.get(v.id) || {}).error && !ids.includes(v.id));
+    const key = off.map((v) => v.id + state.ui.get(v.id).error).join('|');
+    if (key === noticesKey) return;
+    noticesKey = key;
+    el.notices.textContent = '';
+    for (const v of off) {
+      const u = state.ui.get(v.id);
+      el.notices.append(h('li', null,
+        h('span', null, v.number + ', ' + customerOf(v) + ': ' + u.error),
+        h('button', { type: 'button', 'data-act': u.errorAct, 'data-id': v.id, 'data-k': v.id + ':n-' + u.errorAct,
+          'aria-label': 'Try again, ' + v.number }, 'Try again'),
+        h('button', { type: 'button', 'data-act': 'dismiss', 'data-id': v.id, 'data-k': v.id + ':n-dismiss',
+          'aria-label': 'Dismiss, ' + v.number }, 'Dismiss')));
+    }
+  }
+
+  function render(focusKey) {
+    const active = document.activeElement;
+    const hadKey = active && active.dataset ? active.dataset.k : null;
+    const wasInside = active && active !== document.body && (el.results.contains(active) || el.notices.contains(active) || el.pager.contains(active) || active === el.clear);
+
+    const ids = state.phase === 'ready' ? pageIds() : [];
+    renderFilters();
+    renderSummary(ids);
+    renderNotices(ids);
+
+    el.rows.textContent = '';
+    el.loadState.hidden = true;
+    el.table.hidden = true;
+    el.pager.hidden = true;
+
+    if (state.phase === 'loading') {
+      el.loadState.textContent = '';
+      el.loadState.hidden = true;
+    } else if (state.phase === 'failed') {
+      stateBox(['Could not load invoices. Check your connection, then try again.'], { act: 'reload', text: 'Try again' });
+    } else if (state.invoices.length === 0) {
+      stateBox(['No invoices yet. They are listed here once they have been created.'], { act: 'reload', text: 'Check again' });
+    } else if (state.viewIds.length === 0) {
+      const q = state.q.trim();
+      const where = state.status === 'all' ? '' : ' with status ' + STATUS_WORD[state.status];
+      stateBox([q ? 'No invoices' + where + ' match "' + q + '".' : 'No invoices' + where + '.'],
+        { act: 'clear', text: q && state.status !== 'all' ? 'Clear search and filter' : q ? 'Clear search' : 'Show all invoices' });
+    } else {
+      for (const id of ids) { const inv = byId(id); if (inv) el.rows.append(rowFor(inv)); }
+      el.table.hidden = false;
+      const pages = pageCount();
+      if (pages > 1) {
+        el.pager.hidden = false;
+        el.prev.disabled = state.page <= 1;
+        el.next.disabled = state.page >= pages;
+        setText(el.pageInfo, 'Page ' + state.page + ' of ' + pages);
+      }
+    }
+
+    // Keep or place keyboard focus.
+    const find = (k) => k ? document.querySelector('[data-k="' + k + '"]') : null;
+    let target = find(focusKey);
+    if (!target && wasInside && !document.contains(active)) {
+      target = find(hadKey);
+      if (!target && hadKey) {
+        const id = hadKey.split(':')[0];
+        target = document.querySelector('[data-row="' + id + '"] button') || find(id + ':row');
+      }
+      if (!target) target = el.results;
+    }
+    if (!target && wasInside && active.disabled) target = active === el.prev ? el.next : active === el.next ? el.prev : el.results;
+    if (!target && wasInside && active.hidden) target = el.results;
+    if (target) target.focus({ preventScroll: target !== el.results ? false : true });
+  }
+
+  /* ---------- loading ---------- */
+
+  async function load() {
+    state.phase = 'loading';
+    render();
+    try {
+      const list = await api.listInvoices();
+      state.invoices = Array.isArray(list) ? list : [];
+      state.phase = 'ready';
+      recomputeView();
+    } catch (e) {
+      state.phase = 'failed';
+    }
+    render();
+  }
+
+  /* ---------- mark paid and send reminder: shown at once, sent after the undo window ---------- */
+
+  const WORDS = {
+    paid: {
+      started: (inv) => inv.number + ' marked paid. Undo is available for a few seconds.',
+      undone: (inv) => inv.number + ' is no longer marked paid.',
+      failed: 'Could not mark as paid.',
+      call: (id) => api.markPaid(id),
+    },
+    reminder: {
+      started: (inv) => 'Sending a reminder for ' + inv.number + '. Undo is available for a few seconds.',
+      undone: (inv) => 'Reminder for ' + inv.number + ' was not sent.',
+      failed: 'Could not send the reminder.',
+      done: (inv) => 'Reminder sent for ' + inv.number + '.',
+      call: (id) => api.sendReminder(id),
+    },
+  };
+
+  function start(id, act) {
+    const inv = byId(id); if (!inv) return;
+    const u = uiOf(id);
+    if (u.pending || u.busy) return;
+    u.error = null; u.errorAct = null;
+    u.pending = act;
+    u.startedAt = Date.now();
+    // A retry for an invoice that is not among the rows on screen has nowhere to show Undo, so it is sent now.
+    if (!pageIds().includes(id)) { commit(id); return; }
+    u.timer = setTimeout(() => commit(id), UNDO_MS);
+    setText(el.outcome, '');
+    say(el.announce, WORDS[act].started(inv));
+    render(id + ':undo');
+  }
+
+  function undo(id) {
+    const u = state.ui.get(id); const inv = byId(id);
+    if (!u || !u.pending || !inv) return;
+    if (Date.now() - u.startedAt < 600) return;   // the second half of a double click
+    clearTimeout(u.timer);
+    const act = u.pending;
+    u.pending = null;
+    say(el.announce, WORDS[act].undone(inv));
+    render(id + ':' + act);
+  }
+
+  async function commit(id) {
+    const u = state.ui.get(id);
+    if (!u || !u.pending) return;
+    clearTimeout(u.timer);
+    const act = u.pending;
+    u.pending = null;
+    u.busy = act;
+    render();
+    try {
+      const updated = await WORDS[act].call(id);
+      const i = state.invoices.findIndex((v) => v.id === id);
+      if (i >= 0 && updated) state.invoices[i] = updated;
+      u.busy = null;
+      if (WORDS[act].done && byId(id)) say(el.announce, WORDS[act].done(byId(id)));
+    } catch (e) {
+      u.busy = null;
+      u.error = WORDS[act].failed;
+      u.errorAct = act;
+      const inv = byId(id);
+      if (inv && pageIds().includes(id)) say(el.alert, inv.number + ', ' + customerOf(inv) + ': ' + u.error + ' Try again.');
+    }
+    render();
+  }
+
+  // Leaving the page sends anything still inside its undo window.
+  window.addEventListener('pagehide', () => {
+    for (const [id, u] of state.ui) if (u.pending) commit(id);
+  });
+
+  /* ---------- delete a draft: permanent, so it asks first ---------- */
+
+  function askDelete(id) {
+    const inv = byId(id); if (!inv) return;
+    deleting = { id, busy: false };
+    el.delTitle.textContent = 'Permanently delete draft ' + inv.number + '?';
+    el.delDesc.textContent = customerOf(inv) + ', ' + fmtMoney(inv.amount, inv.currency) + ', issued ' + fmtDate(inv.issued) + '. This cannot be undone.';
+    el.delError.textContent = '';
+    el.delGo.textContent = 'Delete draft';
+    el.delKeep.disabled = false; el.delGo.disabled = false;
+    el.del.showModal();
+    el.delKeep.focus();
+  }
+
+  async function confirmDelete() {
+    if (!deleting || deleting.busy) return;
+    const id = deleting.id; const inv = byId(id);
+    deleting.busy = true;
+    el.delError.textContent = '';
+    el.delGo.textContent = 'Deleting...';
+    el.delGo.disabled = true; el.delKeep.disabled = true;
+    try {
+      await api.deleteInvoice(id);
+    } catch (e) {
+      deleting.busy = false;
+      el.delGo.textContent = 'Delete draft';
+      el.delGo.disabled = false; el.delKeep.disabled = false;
+      el.delError.textContent = 'Could not delete this draft, so it is still here. Try again, or keep it.';
+      el.delGo.focus();
+      return;
+    }
+    // Where focus goes once the row is gone: the next row, else the one before.
+    const ids = pageIds(); const at = ids.indexOf(id);
+    const neighbour = at >= 0 ? (ids[at + 1] || ids[at - 1]) : null;
+    state.invoices = state.invoices.filter((v) => v.id !== id);
+    state.viewIds = state.viewIds.filter((v) => v !== id);
+    state.ui.delete(id);
+    deleting = null;
+    el.del.close();
+    setText(el.outcome, 'Draft ' + (inv ? inv.number : '') + ' deleted.');
+    render(neighbour ? neighbour + ':row' : null);
+    if (!neighbour) el.results.focus();
+    syncUrl();
+  }
+
+  el.delKeep.addEventListener('click', () => { if (!deleting || !deleting.busy) el.del.close(); });
+  el.delGo.addEventListener('click', confirmDelete);
+  el.del.addEventListener('cancel', (e) => { if (deleting && deleting.busy) e.preventDefault(); });
+  el.del.addEventListener('close', () => { if (deleting && !deleting.busy) deleting = null; });
+
+  /* ---------- events ---------- */
+
+  function clearFilters() {
+    state.q = ''; state.status = 'all'; state.page = 1;
+    el.search.value = '';
+    recomputeView(); syncUrl();
+    setText(el.outcome, '');
+    render();
+    el.search.focus();
+  }
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const id = b.dataset.id, act = b.dataset.act;
+    if (act === 'paid' || act === 'reminder') start(id, act);
+    else if (act === 'undo') undo(id);
+    else if (act === 'delete') askDelete(id);
+    else if (act === 'dismiss') { const u = state.ui.get(id); if (u) { u.error = null; u.errorAct = null; } render(); }
+    else if (act === 'reload') load();
+    else if (act === 'clear') clearFilters();
+  });
+
+  el.clear.addEventListener('click', clearFilters);
+
+  el.search.value = state.q;
+  el.search.addEventListener('input', () => {
+    state.q = el.search.value; state.page = 1;
+    setText(el.outcome, '');
+    if (state.phase === 'ready') recomputeView();
+    syncUrl(); render();
+  });
+
+  el.filters.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-status]');
+    if (!b) return;
+    state.status = b.dataset.status; state.page = 1;
+    setText(el.outcome, '');
+    if (state.phase === 'ready') recomputeView();
+    syncUrl(); render();
+  });
+
+  function turnPage(by) {
+    state.page = Math.min(pageCount(), Math.max(1, state.page + by));
+    syncUrl(); render();
+    el.results.scrollIntoView({ block: 'start' });
+  }
+  el.prev.addEventListener('click', () => turnPage(-1));
+  el.next.addEventListener('click', () => turnPage(1));
+
+  load();
+})();
+</script>
+</body>
+</html>
