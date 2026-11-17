@@ -38,3 +38,20 @@ scrolled sideways with several tabs cut off.
 Rule: NAV-014. The combination of visible links plus a menu is backed by
 published research for phones; ruling out the sideways scroll rests on this
 decision.
+
+## 2026-11-17 saving model per panel, shown by the controls
+
+Reviewing an audit of a settings screen whose tabs save differently
+(assignments at once, text forms behind Save), after pushback from a UX
+engineer on the team.
+
+- Mixing models across tabs or panels is fine; the published sources already
+  say so, and the rule's wording ("a screen") had let an audit read the whole
+  product as one form.
+- Each panel should make its model plain through its controls: a "Saved"
+  beside each instant change, or a Save button that enables only when
+  something has changed.
+- A written note per tab explaining how it saves is a fallback, not the fix,
+  because it is the interface explaining itself.
+
+Rule: FORM-016, reworded so the unit is the form or panel.

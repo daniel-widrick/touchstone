@@ -120,7 +120,7 @@ Any screen where the user types, picks or submits values.
 - FORM-013 The submit button stays enabled, and an incomplete form explains what is missing when submitted.
 - FORM-014 Pressing submit twice sends the request once.
 - FORM-015 A form is one column, with fields sharing a row only when they form one unit.
-- FORM-016 Related fields are submitted together by one explicit action, and one form uses one saving model.
+- FORM-016 Each form or panel uses one saving model, and its own controls show which one it is.
 - FORM-017 The form asks only for what will be used.
 - FORM-018 Field width reflects the expected length of the answer, and units and separators are supplied by the form.
 

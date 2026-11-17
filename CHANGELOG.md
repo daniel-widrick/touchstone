@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.2
+
+Rules
+- FORM-016 now applies per form or panel, not per screen: tabs or panels may
+  use different saving models. Each panel must show its model through its
+  controls (a "Saved" beside each instant change, or a Save button that
+  enables only once something changes), not through a written note, which is
+  allowed only as a fallback.
+
 ## 0.2.1
 
 Skill

@@ -23,7 +23,7 @@ Read this while building. The records below are for judging.
 - **FORM-013** The submit button stays enabled, and an incomplete form explains what is missing when submitted.
 - **FORM-014** Pressing submit twice sends the request once.
 - **FORM-015** A form is one column, with fields sharing a row only when they form one unit.
-- **FORM-016** Related fields are submitted together by one explicit action, and one form uses one saving model.
+- **FORM-016** Each form or panel uses one saving model, and its own controls show which one it is.
 - **FORM-017** The form asks only for what will be used.
 - **FORM-018** Field width reflects the expected length of the answer, and units and separators are supplied by the form.
 
@@ -217,15 +217,16 @@ Read this while building. The records below are for judging.
 - Not applicable: A form of three fields or fewer.
 - Sources: baymard:avoid-multi-column-forms; bargas2010:6; carbon:patterns/forms-pattern; primer:ui-patterns/forms
 
-### FORM-016 Related fields are submitted together by one explicit action, and one form uses one saving model.
+### FORM-016 Each form or panel uses one saving model, and its own controls show which one it is.
 
 - Why: Mixing fields that save themselves with fields that wait for Save leaves people unsure what has been saved.
-- Applies when: A screen lets the user change more than one setting or field.
-- Passes when: Either every change applies immediately and says so, or every change waits for one Save; the two are not mixed in one form.
+- Applies when: A form or panel lets the user change more than one setting or field. The unit is the form or panel, not the screen or the product: different tabs or panels may use different models.
+- Passes when: Within each form or panel, either every change applies immediately and confirms itself where it was made (a 'Saved' beside it, or the old value restored with an error if it fails), or every change waits for one Save that is disabled until something changes; the two are not mixed within one form or panel. The model is shown by the controls and their feedback, not by a written note explaining it.
 - Evidence: do the step in the running UI and observe
 - Severity: major. Support: consensus of published practice.
-- Passing example: A profile form with one 'Save changes' button; a separate list of toggles that each apply at once and show 'Saved'.
-- Failing example: In one form, the toggle saves on click while the text fields need 'Save', with nothing to tell them apart.
+- Exceptions: A one-line note on the panel is acceptable as a fallback when testing shows people still cannot tell the model from the controls and their feedback.
+- Passing example: Settings tabs where People assignments apply at once and show 'Saved' beside each change, while the Templates tab edits text behind a Save button that enables once something changes.
+- Failing example: In one form, the toggle saves on click while the text fields need 'Save', with nothing to tell them apart; or each tab carries a paragraph explaining how it saves instead of showing it.
 - Not applicable: A single-field form.
 - Sources: sm86:1.4/1; sm86:1.0/9; primer:ui-patterns/saving; shopify:user-experience/forms
 

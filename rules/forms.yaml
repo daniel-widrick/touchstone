@@ -244,18 +244,19 @@ rules:
       na: "A form of three fields or fewer."
 
   - id: FORM-016
-    rule: "Related fields are submitted together by one explicit action, and one form uses one saving model."
+    rule: "Each form or panel uses one saving model, and its own controls show which one it is."
     why: "Mixing fields that save themselves with fields that wait for Save leaves people unsure what has been saved."
-    applies_when: "A screen lets the user change more than one setting or field."
-    pass_when: "Either every change applies immediately and says so, or every change waits for one Save; the two are not mixed in one form."
+    applies_when: "A form or panel lets the user change more than one setting or field. The unit is the form or panel, not the screen or the product: different tabs or panels may use different models."
+    pass_when: "Within each form or panel, either every change applies immediately and confirms itself where it was made (a 'Saved' beside it, or the old value restored with an error if it fails), or every change waits for one Save that is disabled until something changes; the two are not mixed within one form or panel. The model is shown by the controls and their feedback, not by a written note explaining it."
     evidence: walk
     severity: major
     support: practice-consensus
     sources: ["sm86:1.4/1", "sm86:1.0/9", "primer:ui-patterns/saving", "shopify:user-experience/forms"]
     counters: [B9.1]
+    exceptions: ["A one-line note on the panel is acceptable as a fallback when testing shows people still cannot tell the model from the controls and their feedback."]
     examples:
-      pass: "A profile form with one 'Save changes' button; a separate list of toggles that each apply at once and show 'Saved'."
-      fail: "In one form, the toggle saves on click while the text fields need 'Save', with nothing to tell them apart."
+      pass: "Settings tabs where People assignments apply at once and show 'Saved' beside each change, while the Templates tab edits text behind a Save button that enables once something changes."
+      fail: "In one form, the toggle saves on click while the text fields need 'Save', with nothing to tell them apart; or each tab carries a paragraph explaining how it saves instead of showing it."
       na: "A single-field form."
 
   - id: FORM-017
