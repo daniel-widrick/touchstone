@@ -1,7 +1,7 @@
 {
   "name": "touchstone",
   "displayName": "Touchstone",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Rules for how a web screen looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page.",
   "author": { "name": "Daniel Widrick", "url": "https://github.com/daniel-widrick" },
   "homepage": "https://github.com/daniel-widrick/touchstone",

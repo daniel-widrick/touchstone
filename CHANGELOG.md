@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.3
+
+Checker and runner
+- The settle wait added in 0.2.0 no longer runs to its limit on ordinary
+  pages. A progress bar with a value (storage used, step 2 of 4) is not
+  counted as loading, and a class counts as a loading indicator only when it
+  starts or ends with a loading word ("is-loading", "mat-progress-spinner"),
+  not when the word appears in the middle ("lazy-loading-list").
+- Network activity alone holds the wait for at most 3 seconds, since pages
+  that poll or stream never go quiet. Visible spinners are still waited on up
+  to the full limit.
+- The runner and the checker no longer both wait on the network, and the
+  runner no longer warns just because requests kept running; `networkIdle`
+  still records it.
+
 ## 0.2.2
 
 Rules

@@ -207,16 +207,18 @@ def check(url, width=1280, height=800, focus=True, axe=False, settle=0.3, scheme
             page.call("Page.addScriptToEvaluateOnNewDocument", source=source)
         page.call("Page.navigate", url=url)
         page.wait_for("Page.loadEventFired")
-        network_idle = page.wait_idle(timeout=settle_timeout)
+        # Requests alone hold the run for at most 3 s: a page that polls or streams never goes
+        # quiet. Loading indicators are waited on, up to settle_timeout, by the checker itself.
+        network_idle = page.wait_idle(timeout=min(settle_timeout, 3.0))
         time.sleep(settle)
         if axe and os.path.isfile(os.path.join(HERE, "axe.min.js")):
             page.evaluate(open(os.path.join(HERE, "axe.min.js"), encoding="utf-8").read() + "\n;true")
-        opts = {"focus": focus, "singleTheme": single_theme, "settleMs": int(settle_timeout * 1000)}
+        # netCapMs 0: the requests were already waited on above, so the checker waits only for loading indicators.
+        opts = {"focus": focus, "singleTheme": single_theme, "settleMs": int(settle_timeout * 1000), "netCapMs": 0}
         page.evaluate("window.__uxCheckOptions = %s; true" % json.dumps(opts))
         result = page.evaluate(open(os.path.join(HERE, "ux-check.js"), encoding="utf-8").read())
+        # Recorded, not warned about: requests that never stop are usually polling, not loading.
         result["networkIdle"] = network_idle
-        if not network_idle and result.get("settled", {}).get("settled", True):
-            result["warning"] = "Requests were still running when the page was measured."
         if net:
             result["network"] = page.evaluate("(window.__uxNet && window.__uxNet.log) || []")
         return result

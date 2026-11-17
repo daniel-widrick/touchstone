@@ -13,7 +13,8 @@
  * indicators to clear before measuring; default 10000, 0 to skip).
  *
  * Before measuring it waits for the page to settle: no visible loading
- * indicator and no resource finishing for half a second. If the page never
+ * indicator and no resource finishing for half a second (requests alone hold
+ * it for at most 3 seconds, since polling pages never go quiet). If the page never
  * settles, the result carries a warning.
  *
  * Each check reports one of:
@@ -29,7 +30,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '0.2.2';
+  const VERSION = '0.2.3';
   const MAX_ITEMS = 12;
   // Which rules each check gives evidence for. The build tool writes this from rules/.
   const RULE_MAP = /* RULE_MAP:begin */ {"accessible-name":["ACT-001"],"autocomplete":["FORM-011"],"callout-count":["COPY-002"],"contrast":["ACC-005"],"dead-button":["TASK-001"],"dead-link":["ACT-005"],"dialog-semantics":["NAV-010"],"disabled-submit":["FORM-013"],"fake-control":["ACT-004"],"focus-visible":["ACC-002"],"font-families":["VIS-004"],"font-sizes":["VIS-005"],"gradient-text":["VIS-010"],"heading-contrast":["VIS-006"],"heading-order":["ACC-009"],"headline-fit":["VIS-009"],"horizontal-scroll":["RESP-001"],"hover-only":["ACT-003","DATA-011"],"hype-words":["COPY-006"],"icon-only-control":["ACT-002"],"image-alt":["ACC-011"],"img-dimensions":["VIS-008"],"infinite-animation":["VIS-016"],"input-label":["FORM-001"],"input-type":["FORM-010"],"label-wrap":["VIS-018"],"landmarks":["ACC-010"],"leftover-text":["COPY-001","PAGE-004","STATE-007","TASK-002"],"line-height":["VIS-003"],"line-length":["VIS-002"],"nested-dialog":["NAV-009"],"page-lang":["ACC-012"],"page-title":["NAV-001"],"paste-blocked":["FORM-012"],"primary-button-count":["ACT-007"],"raw-error-text":["COPY-011"],"reduced-motion":["ACC-015"],"required-attr":["FORM-005"],"scroll-hidden":["VIS-017"],"small-input-font":["RESP-003"],"spacing-scale":["VIS-012"],"system-theme":["VIS-011"],"tabindex-positive":["ACC-003"],"table-headers":["DATA-006"],"target-size":["ACC-007"],"text-size":["VIS-001"],"text-style":["VIS-007"],"text-volume":["COPY-003","COPY-014"],"transition-duration":["VIS-015"],"transition-props":["VIS-014"],"vague-label":["COPY-007","COPY-008"],"visible-label":["FORM-002"],"zoom-disabled":["RESP-002"]} /* RULE_MAP:end */;
@@ -103,20 +104,29 @@
   }
 
   // Loading indicators still on screen: a page measured mid-load reports the spinner, not the page.
+  // A determinate progress bar (one with a value) shows a quantity, not loading, and a class
+  // counts only when it starts or ends with a loading word ("is-loading", "spinner-border",
+  // "mat-progress-spinner"), so "lazy-loading-list" does not.
+  const BUSY_WORD = /^(spinner|loader|loading|skeleton)([-_]|$)|[-_](spinner|loader|loading|skeleton)$/i;
   function busyIndicators() {
-    return $$('[aria-busy="true"], [role=progressbar], [class*=spinner i], [class*=loading i], [class*=skeleton i]')
-      .filter((el) => visible(el) && !srOnly(el) && el.getBoundingClientRect().width > 4);
+    return $$('[aria-busy="true"], [role=progressbar]:not([aria-valuenow]), progress:not([value]), [class]')
+      .filter((el) => (el.matches('[aria-busy="true"], [role=progressbar], progress') || [...el.classList].some((c) => BUSY_WORD.test(c)))
+        && visible(el) && !srOnly(el) && el.getBoundingClientRect().width > 4);
   }
 
   // Wait until no loading indicator is visible and no resource has finished loading for a
-  // short quiet period, or until the timeout. Returns what was still busy, if anything.
-  async function settle(timeoutMs, quietMs) {
+  // short quiet period, or until the timeout. Requests alone hold the wait for at most
+  // NET_CAP_MS: a page that polls or streams never goes quiet, and that is not loading.
+  // Returns what was still busy, if anything.
+  async function settle(timeoutMs, quietMs, netCapMs) {
+    const NET_CAP_MS = netCapMs == null ? 3000 : netCapMs;
     const start = Date.now();
     let lastCount = -1, lastChange = Date.now();
     while (Date.now() - start < timeoutMs) {
       const count = performance.getEntriesByType('resource').length;
       if (count !== lastCount) { lastCount = count; lastChange = Date.now(); }
-      if (Date.now() - lastChange >= quietMs && !busyIndicators().length) return { settled: true, waitedMs: Date.now() - start };
+      const netDone = Date.now() - lastChange >= quietMs || Date.now() - start >= NET_CAP_MS;
+      if (netDone && !busyIndicators().length) return { settled: true, waitedMs: Date.now() - start };
       await new Promise((r) => setTimeout(r, 100));
     }
     return { settled: false, waitedMs: Date.now() - start, busy: busyIndicators().slice(0, 5).map((el) => where(el)) };
@@ -931,7 +941,7 @@
     // Measure the page at rest. Waits for loading indicators to clear and resource loads to
     // stop, up to settleMs (default 10 s; 0 skips the wait).
     const settled = opts.settleMs === 0 ? { settled: true, waitedMs: 0, skipped: true }
-      : await settle(opts.settleMs || 10000, opts.quietMs || 500);
+      : await settle(opts.settleMs || 10000, opts.quietMs || 500, opts.netCapMs);
     const out = {
       tool: 'ux-check', version: VERSION, url: location.href,
       viewport: { width: window.innerWidth, height: window.innerHeight },

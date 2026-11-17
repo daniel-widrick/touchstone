@@ -1,7 +1,7 @@
 ---
 name: touchstone
 description: "Rules for how a web interface looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page. Use when building, changing, redesigning or reviewing any web screen: forms, tables, lists, dashboards, settings, dialogs, multi-step flows, landing and product pages, pricing, documentation. Use when asked to design a page, to audit or improve the UX, usability or visual design of an interface, or to check a UI before calling it done."
-version: 0.2.2
+version: 0.2.3
 ---
 
 # Touchstone
