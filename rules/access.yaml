@@ -86,7 +86,7 @@ rules:
     rule: "The outlines and states of controls have a contrast of at least 3 to 1 against what is next to them."
     why: "A field or toggle whose edge cannot be seen cannot be found."
     applies_when: "The screen has form fields, toggles, checkboxes, icons that carry meaning, or focus indicators."
-    pass_when: "The boundary or fill that identifies each control, and each state of it, meets 3:1 against adjacent colours."
+    pass_when: "The boundary or fill that identifies each control, and each state of it, meets 3:1 against adjacent colors."
     evidence: measured
     severity: minor
     support: practice-consensus
@@ -114,11 +114,11 @@ rules:
       na: "No controls."
 
   - id: ACC-008
-    rule: "Anything shown by colour is also shown another way."
-    why: "Colour alone is invisible to people with colour vision deficiency and to screen readers."
-    applies_when: "The screen uses colour to show status, errors, required fields, selection or series in a chart."
+    rule: "Anything shown by color is also shown another way."
+    why: "Color alone is invisible to people with color vision deficiency and to screen readers."
+    applies_when: "The screen uses color to show status, errors, required fields, selection or series in a chart."
     pass_when: "Each such distinction also has text, an icon or a shape."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
     sources: ["wcag22:1.4.1", "hhs:3:3", "sm86:2.6/30"]
@@ -126,7 +126,7 @@ rules:
     examples:
       pass: "A status column reading 'Overdue' with an icon, in red."
       fail: "A red dot or green dot with no text."
-      na: "Colour carries no meaning on the screen."
+      na: "Color carries no meaning on the screen."
 
   - id: ACC-009
     rule: "Headings form an outline: one top heading, then levels in order."

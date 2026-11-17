@@ -1,10 +1,10 @@
 # Palette
 
-A recipe for building a full colour set from one hue. Read it when a new project has no colours yet. A product that already has a palette or design system uses that instead.
+A recipe for building a full color set from one hue. Read it when a new project has no colors yet. A product that already has a palette or design system uses that instead.
 
 ## Recipe
 
-Pick one hue angle (H) that suits the product. Values are OKLCH: lightness (L), chroma (C), hue. Every neutral carries H at low chroma, so greys and accent agree.
+Pick one hue angle (H) that suits the product. Values are OKLCH: lightness (L), chroma (C), hue. Every neutral carries H at low chroma, so grays and accent agree.
 
 | Token | Light | Dark |
 |---|---|---|
@@ -21,14 +21,14 @@ Pick one hue angle (H) that suits the product. Values are OKLCH: lightness (L), 
 
 - The hue is the same in both themes; only lightness and chroma move. In dark, raised surfaces are lighter than the page.
 - One accent with fixed jobs, for example the main action, links, the current item and the focus ring. Nothing else.
-- Status colours keep their own hues whatever H is: red near 25, amber near 70, green near 150. The accent never means success or danger, and a status always has a word or icon as well as a colour.
-- Chroma beyond what a screen can show is clipped and the colour shifts. Lower it.
+- Status colors keep their own hues whatever H is: red near 25, amber near 70, green near 150. The accent never means success or danger, and a status always has a word or icon as well as a color.
+- Chroma beyond what a screen can show is clipped and the color shifts. Lower it.
 
 ## Check, do not estimate
 
 Convert each token to hex and compute the WCAG contrast ratio of every pair in use:
 
-- 4.5 to 1: `--text` and `--text-muted` on both surfaces and on `--accent-soft`; `--accent` and each status colour as text on both surfaces; `--on-accent` on `--accent`.
+- 4.5 to 1: `--text` and `--text-muted` on both surfaces and on `--accent-soft`; `--accent` and each status color as text on both surfaces; `--on-accent` on `--accent`.
 - 3 to 1: `--border-strong` and the focus ring against both surfaces.
 - `--border` has no target, so it is never the only edge of a control.
 
@@ -86,4 +86,4 @@ Computed ratios, on the page surface then the raised surface:
 | success | 6.0, 6.3 | 10.0, 9.3 |
 | text, muted, accent on accent-soft | 14.1, 5.8, 5.9 | 11.7, 5.8, 7.5 |
 
-Page styles refer to the tokens, never to raw colour values.
+Page styles refer to the tokens, never to raw color values.

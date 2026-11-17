@@ -12,7 +12,7 @@ rules:
     check: dead-button
     severity: blocker
     support: practice-consensus
-    sources: ["catalogue:B5.6", "sm86:3.2/10", "sm86:3.1.3/18"]
+    sources: ["catalog:B5.6", "sm86:3.2/10", "sm86:3.1.3/18"]
     counters: [B5.6]
     exceptions: ["A control for a feature that is not available to this user may be shown disabled with the reason in text beside it (see ACT-010)."]
     examples:
@@ -29,9 +29,9 @@ rules:
     check: leftover-text
     severity: blocker
     support: practice-consensus
-    sources: ["catalogue:B5.7", "catalogue:B3.6", "sm86:2.0/1"]
+    sources: ["catalog:B5.7", "catalog:B3.6", "sm86:2.0/1"]
     counters: [B5.7, B3.6, B5.6]
-    exceptions: ["A prototype the user asked to be filled with sample data, where the sample data is labelled as such once, outside the product UI."]
+    exceptions: ["A prototype the user asked to be filled with sample data, where the sample data is labeled as such once, outside the product UI."]
     examples:
       pass: "The revenue tile reads from the orders query and shows 'No orders yet' when the query is empty."
       fail: "A tile shows '+12% this month' from a hardcoded string; a footer says 'Coming soon'."
@@ -89,7 +89,7 @@ rules:
     why: "Most people keep the default, so a good default finishes the task for them."
     applies_when: "A field or choice has a value that is common, known from context, or was the user's last choice."
     pass_when: "That value is shown in the control when the form opens and can be changed like any other entry."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: well-replicated
     sources: ["sm86:1.8/1", "sm86:1.8/4", "hhs:13:18", "johnson2003"]
@@ -142,7 +142,7 @@ rules:
     sources: ["sm86:3.3/5", "sm86:3.5/13", "sm86:1.4/2", "govuk:patterns/question-pages", "nng:wizards"]
     counters: [B11.1]
     examples:
-      pass: "A review step lists every answer with a Change link that returns to the review afterwards."
+      pass: "A review step lists every answer with a Change link that returns to the review afterward."
       fail: "A wizard with Next only; the only way to fix step 1 is to reload."
       na: "A single-step form."
 
@@ -151,7 +151,7 @@ rules:
     why: "Asking users to calculate, look up or convert what the system already knows adds work and errors."
     applies_when: "A value can be derived from data already entered or already held."
     pass_when: "The value is computed and shown, not requested."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["sm86:1.8/8", "sm86:1.8/7", "hhs:2:4"]
@@ -166,7 +166,7 @@ rules:
     why: "What users learn on one screen should transfer to the next."
     applies_when: "Two or more screens support the same kind of task, such as create, edit, delete or filter."
     pass_when: "Those screens use the same sequence, the same control types and the same labels for the shared steps."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: well-replicated
     sources: ["hhs:2:3", "sm86:3.0/6", "polson1986"]
@@ -180,11 +180,11 @@ rules:
     rule: "Every section, feature and piece of content on the screen serves a task the brief or the user named."
     why: "Unrequested extras crowd the real task and have to be maintained."
     applies_when: "A screen is being built or changed from a stated request."
-    pass_when: "Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honouring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra."
-    evidence: judgement
+    pass_when: "Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honoring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra."
+    evidence: judgment
     severity: major
     support: practice-consensus
-    sources: ["catalogue:B9.4", "sm86:2.0/2", "hhs:16:7"]
+    sources: ["catalog:B9.4", "sm86:2.0/2", "hhs:16:7"]
     counters: [B9.4, B4.4, B9.5]
     examples:
       pass: "Asked for a table of invoices with a status filter, the screen has the table and the filter."

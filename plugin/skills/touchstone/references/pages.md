@@ -22,14 +22,14 @@ Read this while building. The records below are for judging.
 ### PAGE-001 The first view says what this is and who it is for, in plain words.
 
 - Why: Visitors decide in seconds whether to stay, and a slogan gives them nothing to decide on.
-- Applies when: The page introduces a product, service, project or organisation.
+- Applies when: The page introduces a product, service, project or organization.
 - Passes when: A person who reads only the top heading and the line under it could say what the thing is and who would use it.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: blocker. Support: some research support.
 - Passing example: 'Invoicing for small building firms. Send an invoice from site in two minutes.'
 - Failing example: 'Scale without limits. The future of work, reimagined.'
 - Not applicable: A page inside a product whose visitor already knows what it is.
-- Sources: catalogue:B4.3; hallmark:macrostructures/03-marquee-hero.md#Avoid; hallmark:genres/modern-minimal.md#Voice; pirolli1999; morkes1997
+- Sources: catalog:B4.3; hallmark:macrostructures/03-marquee-hero.md#Avoid; hallmark:genres/modern-minimal.md#Voice; pirolli1999; morkes1997
 
 ### PAGE-002 The first view holds the heading, one supporting line and the main action.
 
@@ -48,7 +48,7 @@ Read this while building. The records below are for judging.
 - Why: Decorative pictures cost loading time and attention and tell the visitor nothing.
 - Applies when: The page includes photographs, illustrations, video or generated graphics.
 - Passes when: Each image shows the product, the result or a fact; removing any one would lose information. No stock or abstract decoration.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: some research support.
 - Passing example: A screenshot of the invoice the product produces.
 - Failing example: An abstract gradient mesh; a stock photo of people at a laptop.
@@ -66,14 +66,14 @@ Read this while building. The records below are for judging.
 - Passing example: No testimonial section, because the brief supplied none.
 - Failing example: 'Loved by 10,000+ teams' and a quote from 'Sarah K., Head of Ops at Acme', neither supplied.
 - Not applicable: A page with no testimonials, figures or prices.
-- Sources: catalogue:B5.7; catalogue:B3.6; sm86:2.0/1
+- Sources: catalog:B5.7; catalog:B3.6; sm86:2.0/1
 
 ### PAGE-005 A page about price shows the price.
 
 - Why: Hiding the number behind 'Contact us' or a toggle sends visitors away to find it elsewhere.
 - Applies when: The page has a pricing section and the price is known.
 - Passes when: The actual figure, its unit and its period are visible without interaction.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: house preference, not evidence.
 - Exceptions: Products priced by quotation, which say so plainly.
 - Passing example: '12 GBP per user per month, billed yearly.'
@@ -97,7 +97,7 @@ Read this while building. The records below are for judging.
 
 - Why: A strip that wraps, stacks or cannot be closed takes the first view away from the page.
 - Applies when: The page has an announcement or promotional strip.
-- Passes when: It is a single line at every width, has at most one link, has a labelled dismiss control, and leaves no gap when dismissed.
+- Passes when: It is a single line at every width, has at most one link, has a labeled dismiss control, and leaves no gap when dismissed.
 - Evidence: do the step in the running UI and observe
 - Severity: minor. Support: house preference, not evidence.
 - Passing example: 'Version 4 is out. Read the notes' with a close button.
@@ -109,7 +109,7 @@ Read this while building. The records below are for judging.
 
 - Why: Selecting a multi-line command by hand picks up prompts and line breaks.
 - Applies when: The page shows commands or code a reader is expected to use.
-- Passes when: Each such block has a labelled button that copies its text and says that it did.
+- Passes when: Each such block has a labeled button that copies its text and says that it did.
 - Evidence: inspect the running page
 - Severity: minor. Support: house preference, not evidence.
 - Passing example: A 'Copy' button on the install command that changes to 'Copied'.

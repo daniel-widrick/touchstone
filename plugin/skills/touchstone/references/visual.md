@@ -1,4 +1,4 @@
-# Type, colour, spacing and motion rules
+# Type, color, spacing and motion rules
 
 Generated from `rules/visual.yaml`. Edit the rule file, not this one.
 
@@ -17,17 +17,17 @@ Read this while building. The records below are for judging.
 - **VIS-007** Running text is set in ordinary sentence case, aligned to one edge.
 - **VIS-008** Images reserve their space before they load.
 - **VIS-009** The top heading fits its space at every width.
-- **VIS-010** Text is a solid colour.
+- **VIS-010** Text is a solid color.
 - **VIS-011** The screen follows the system's light or dark setting.
 - **VIS-012** Spacing comes from a short scale.
-- **VIS-013** One accent colour, used for the same kinds of thing throughout.
+- **VIS-013** One accent color, used for the same kinds of thing throughout.
 - **VIS-014** Animation changes position and opacity, not layout.
 - **VIS-015** Transitions are short.
 - **VIS-016** Nothing moves continuously except an indicator that work is in progress.
 - **VIS-017** Everything meant to be read is visible when the screen has loaded.
 - **VIS-018** A control's label stays on one line.
-- **VIS-019** A change of state does not change an element's size or move its neighbours.
-- **VIS-020** A screen added to an existing product uses that product's fonts, colours, spacing and components.
+- **VIS-019** A change of state does not change an element's size or move its neighbors.
+- **VIS-020** A screen added to an existing product uses that product's fonts, colors, spacing and components.
 
 ## Records
 
@@ -35,11 +35,11 @@ Read this while building. The records below are for judging.
 
 - Why: Small text is slow to read and is the first thing people with weaker eyesight lose.
 - Applies when: The screen shows text.
-- Passes when: Paragraphs and other running prose compute to at least 16px; table cells, captions and secondary labels to at least 13px; no visible text is under 12px.
+- Passes when: Paragraphs and other running prose compute to at least 16px, and no other visible text is under 12px. Text hidden for screen readers only is exempt.
 - Evidence: measure a value on the running page; scripted check `text-size`
 - Severity: major. Support: some research support.
 - Exceptions: Legal small print that the product is required to show at a set size.
-- Passing example: Body copy at 16px, table cells at 14px, timestamps at 13px.
+- Passing example: Body copy at 16px, table cells at 14px, timestamps at 12px.
 - Failing example: Paragraphs at 13px and helper text at 11px.
 - Not applicable: A screen with no text.
 - Sources: hhs:11:8; hallmark:typography.md#Body text rules; hallmark:custom-theme.md#C.3
@@ -144,7 +144,7 @@ Read this while building. The records below are for judging.
 - Not applicable: No top heading; see ACC-009.
 - Sources: hallmark:typography.md#Scale; hallmark:hero-enrichment.md#Hero space discipline
 
-### VIS-010 Text is a solid colour.
+### VIS-010 Text is a solid color.
 
 - Why: Gradient-filled and glowing text has no single contrast ratio and often fails where the gradient is lightest.
 - Applies when: The screen shows text.
@@ -160,11 +160,11 @@ Read this while building. The records below are for judging.
 
 - Why: Someone who has set their device to dark is handed a bright white screen, often at night, and the other way round.
 - Applies when: Always, unless the product has one deliberate theme of its own.
-- Passes when: The page declares both colour schemes and restyles under prefers-color-scheme, and text contrast holds in both.
+- Passes when: The page declares both color schemes and restyles under prefers-color-scheme, and text contrast holds in both. A product that deliberately has one theme declares it, with color-scheme set to that one scheme (for example <meta name="color-scheme" content="dark">), and the checker then reports it for review instead of failing it.
 - Evidence: inspect the running page; scripted check `system-theme`
 - Severity: major. Support: house preference, not evidence.
 - Exceptions: A screen added to an existing product that has a single theme.; A brief that asks for one theme.
-- Passing example: Colours defined as variables, redefined under @media (prefers-color-scheme: dark).
+- Passing example: Colors defined as variables, redefined under @media (prefers-color-scheme: dark).
 - Failing example: Hardcoded white background and dark text with no dark rules.
 - Not applicable: Never, apart from the stated exceptions.
 - Sources: hallmark:responsive.md#Bans; hallmark:color.md#Dark mode recipe
@@ -181,16 +181,16 @@ Read this while building. The records below are for judging.
 - Not applicable: A screen with one or two elements.
 - Sources: hallmark:layout-and-space.md#Spacing scale; tullis1983; sm86:2.5/3
 
-### VIS-013 One accent colour, used for the same kinds of thing throughout.
+### VIS-013 One accent color, used for the same kinds of thing throughout.
 
-- Why: Colour used everywhere signals nothing; colour used consistently can be learned.
-- Applies when: The screen uses colour beyond neutrals and status colours.
+- Why: Color used everywhere signals nothing; color used consistently can be learned.
+- Applies when: The screen uses color beyond neutrals and status colors.
 - Passes when: There is one accent hue, it marks the same roles on every screen (for example the primary action, links and the current item), and it covers a small share of the view.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: some research support.
 - Passing example: Blue on the primary button, links and the active navigation item; everything else neutral.
 - Failing example: Purple headings, a teal button, orange links and a pink badge.
-- Not applicable: A screen in neutrals and status colours only.
+- Not applicable: A screen in neutrals and status colors only.
 - Sources: sm86:2.6/28; sm86:2.6/7; hallmark:color.md#Accent discipline
 
 ### VIS-014 Animation changes position and opacity, not layout.
@@ -240,7 +240,7 @@ Read this while building. The records below are for judging.
 - Passing example: All sections rendered at full opacity on load.
 - Failing example: Sections with opacity: 0 that fade in when an IntersectionObserver fires.
 - Not applicable: Never; this rule always applies.
-- Sources: catalogue:B2.6; hallmark:hero-enrichment.md#Animation discipline; hhs:6:9
+- Sources: catalog:B2.6; hallmark:hero-enrichment.md#Animation discipline; hhs:6:9
 
 ### VIS-018 A control's label stays on one line.
 
@@ -255,7 +255,7 @@ Read this while building. The records below are for judging.
 - Not applicable: No buttons, tabs or navigation links.
 - Sources: hallmark:slop-test.md#49; hallmark:responsive.md#Clickable text
 
-### VIS-019 A change of state does not change an element's size or move its neighbours.
+### VIS-019 A change of state does not change an element's size or move its neighbors.
 
 - Why: A field that grows when its error appears, or a button that widens while loading, makes the layout jump under the pointer.
 - Applies when: The screen has controls with hover, focus, error or busy states.
@@ -267,14 +267,14 @@ Read this while building. The records below are for judging.
 - Not applicable: No stateful controls.
 - Sources: hallmark:interaction-and-states.md#State-by-state recipe; webdev:cls
 
-### VIS-020 A screen added to an existing product uses that product's fonts, colours, spacing and components.
+### VIS-020 A screen added to an existing product uses that product's fonts, colors, spacing and components.
 
 - Why: A screen that looks like it came from somewhere else breaks what users have learned and what the team maintains.
 - Applies when: The project already has screens, a stylesheet, tokens or a component library.
 - Passes when: The new screen reuses the existing tokens and components; anything new is listed and justified.
 - Evidence: read the code
 - Severity: major. Support: well replicated.
-- Passing example: A new settings page built from the project's Button and Field components and its colour variables.
+- Passing example: A new settings page built from the project's Button and Field components and its color variables.
 - Failing example: A new page with its own palette, font and button styles in a project that has a design system.
 - Not applicable: A new project with nothing to match.
 - Sources: hhs:11:4; polson1986; hallmark:SKILL.md#Step 0; hallmark:export-formats.md#Output rule

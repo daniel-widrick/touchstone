@@ -12,7 +12,7 @@ What goes in the first view, and in what order the rest follows, by kind of cont
 | Product or landing page | decide whether this is for them | see below | see below | see below |
 | Pricing | learn the cost and choose a plan | the price of each plan with unit and period; what differs between plans; one action per plan | a full comparison table; billing questions answered directly | prices behind a toggle or a contact form |
 | Documentation or long article | answer a question, or read through | title; one line on what the page covers; the start of the content; contents for a long page | body at 70ch under headings that name their content; next and previous | a hero image, a sign-up block before the content |
-| Sign-in or other single action | get through | product name; labelled fields; one button; the route for a forgotten password or a new account | nothing | marketing panels, a competing second button |
+| Sign-in or other single action | get through | product name; labeled fields; one button; the route for a forgotten password or a new account | nothing | marketing panels, a competing second button |
 | Empty first run | start | one sentence saying what will appear here; the one action that creates the first item | an import or sample-data option, if one really exists | an illustration, a tour, sample rows that look like data |
 
 ## Product or landing page

@@ -8,10 +8,10 @@ rules:
     why: "When everything is the same size, or decoration outranks the task, people must search for the point of the screen."
     applies_when: "A screen has more than one section or block."
     pass_when: "The primary content or task is the first block in reading order and the most prominent; secondary material is smaller or lower."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: some-support
-    sources: ["hhs:6:5", "hhs:6:3", "sm86:2.5/16", "hhs:12:2", "catalogue:B6.2"]
+    sources: ["hhs:6:5", "hhs:6:3", "sm86:2.5/16", "hhs:12:2", "catalog:B6.2"]
     counters: [B6.1, B6.2, B6.8, B6.4]
     examples:
       pass: "An invoices screen that opens on the invoice table with its filter."
@@ -23,10 +23,10 @@ rules:
     why: "A welcome banner or decorative opening pushes the point of the screen down and says nothing."
     applies_when: "Always."
     pass_when: "On a working screen there is no hero section, greeting banner or introductory panel above the working content. On a page that presents something, the opening is the statement of what it is and the next step (see PAGE-001 and PAGE-002), sized to its content and not to the height of the window."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
-    sources: ["catalogue:B4.2", "hhs:6:3", "msux:top-violations#Wizard pages"]
+    sources: ["catalog:B4.2", "hhs:6:3", "msux:top-violations#Wizard pages"]
     counters: [B4.2, B6.8, A6]
     examples:
       pass: "Heading 'Orders', then the orders."
@@ -38,10 +38,10 @@ rules:
     why: "Decorative metrics take the most space and deliver the least."
     applies_when: "The screen shows summary numbers, stat cards or charts."
     pass_when: "For each one, the decision or action it informs can be named; the rest are removed."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
-    sources: ["sm86:2.0/2", "hhs:16:7", "hhs:6:1", "catalogue:B6.3"]
+    sources: ["sm86:2.0/2", "hhs:16:7", "hhs:6:1", "catalog:B6.3"]
     counters: [B6.3, B5.7, B6.7]
     examples:
       pass: "'3 invoices overdue' linking to the overdue list."
@@ -53,7 +53,7 @@ rules:
     why: "Grouping and alignment are the strongest measured predictors of how fast people find things on a screen."
     applies_when: "A screen has more than a handful of elements."
     pass_when: "Items that belong together are nearer each other than to other groups; left edges and baselines fall on a small number of lines."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: well-replicated
     sources: ["tullis1983", "parush1998", "hhs:16:4", "hhs:6:7", "sm86:2.5/3", "sm86:2.5/12"]
@@ -83,7 +83,7 @@ rules:
     rule: "Tabular data is a table with header cells."
     why: "Without headers neither sighted nor screen reader users know what a column means."
     applies_when: "The screen shows rows of records with the same attributes."
-    pass_when: "It uses a table with th cells for columns (and rows where they are labelled), each with a short descriptive heading."
+    pass_when: "It uses a table with th cells for columns (and rows where they are labeled), each with a short descriptive heading."
     evidence: dom
     check: table-headers
     severity: major
@@ -115,7 +115,7 @@ rules:
     why: "People should not convert, decode or guess."
     applies_when: "The screen shows dates, times, money, quantities or codes."
     pass_when: "Dates, numbers and currency are formatted for the user's locale, units are shown, relative times offer the exact time, and the same item is formatted identically across screens."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["sm86:2.0/3", "sm86:2.2/10", "hhs:2:8", "hhs:11:2", "sm86:1.0/16"]
@@ -156,10 +156,10 @@ rules:
       na: "Views with no filtering."
 
   - id: DATA-011
-    rule: "Each row shows its one or two most used actions directly; the rest sit in one labelled menu."
+    rule: "Each row shows its one or two most used actions directly; the rest sit in one labeled menu."
     why: "Row actions hidden in a hover state or a generic menu are slow to find and unusable on touch."
     applies_when: "Table or list rows have actions."
-    pass_when: "At most two actions are visible per row as labelled controls; further actions are in a single menu button with an accessible name; none appear only on hover."
+    pass_when: "At most two actions are visible per row as labeled controls; further actions are in a single menu button with an accessible name; none appear only on hover."
     evidence: dom
     check: hover-only
     severity: minor
@@ -191,37 +191,37 @@ rules:
     rule: "A chart labels its axes and units and makes the exact values available."
     why: "A chart without labels or values is a decoration."
     applies_when: "The screen shows a chart."
-    pass_when: "Axes or series are labelled with what they measure and the unit, and values can be read from labels, a table or a focusable tooltip."
+    pass_when: "Axes or series are labeled with what they measure and the unit, and values can be read from labels, a table or a focusable tooltip."
     evidence: dom
     severity: minor
     support: some-support
     sources: ["hhs:14:10", "sm86:2.4.1/3", "hhs:16:6"]
     counters: [B5.7]
     examples:
-      pass: "A bar chart titled 'Invoices paid per month' with labelled axes and a 'View as table' link."
-      fail: "An unlabelled sparkline beside a number."
+      pass: "A bar chart titled 'Invoices paid per month' with labeled axes and a 'View as table' link."
+      fail: "An unlabeled sparkline beside a number."
       na: "No charts."
 
   - id: DATA-014
     rule: "Emphasis is rare and means one thing."
     why: "Highlighting many things highlights none, and mixed codes cannot be learned."
-    applies_when: "The screen uses colour, bold, badges or icons to mark some items."
-    pass_when: "Only items needing attention are emphasised, each kind of emphasis has one meaning across screens, and every badge reflects real state."
-    evidence: judgement
+    applies_when: "The screen uses color, bold, badges or icons to mark some items."
+    pass_when: "Only items needing attention are emphasized, each kind of emphasis has one meaning across screens, and every badge reflects real state."
+    evidence: judgment
     severity: minor
     support: some-support
     sources: ["hhs:11:5", "hhs:11:11", "sm86:2.6/1", "sm86:2.6/7", "sm86:2.6/28", "hhs:9:5"]
     counters: [A8, A9, B6.1]
     examples:
       pass: "Only overdue invoices carry a badge."
-      fail: "Every row has a coloured status pill, a bold amount and an icon."
+      fail: "Every row has a colored status pill, a bold amount and an icon."
       na: "No emphasis used."
 
   - id: DATA-015
     rule: "A mark the product uses in its own sense is explained where it is used, and means one thing everywhere."
-    why: "A symbol or colour code people have not met is a puzzle until it is defined, and one that changes meaning between screens is worse than none."
-    applies_when: "The screen uses symbols, shapes or colours whose meaning is specific to this product: category marks on a map, status colours, badges."
-    pass_when: "Each such mark is labelled directly beside the thing it marks where space allows; otherwise a legend showing the mark itself sits in the same view, next to the display it explains. The same mark carries the same meaning on every screen."
+    why: "A symbol or color code people have not met is a puzzle until it is defined, and one that changes meaning between screens is worse than none."
+    applies_when: "The screen uses symbols, shapes or colors whose meaning is specific to this product: category marks on a map, status colors, badges."
+    pass_when: "Each such mark is labeled directly beside the thing it marks where space allows; otherwise a legend showing the mark itself sits in the same view, next to the display it explains. The same mark carries the same meaning on every screen."
     evidence: dom
     severity: major
     support: some-support
@@ -229,5 +229,5 @@ rules:
     counters: [B1.2, A8]
     examples:
       pass: "Filter chips reading 'Police', 'Fire' and 'Medical', each with its mark, directly above the map and the list that use those marks."
-      fail: "Coloured dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another."
-      na: "No product-specific marks or colour codes."
+      fail: "Colored dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another."
+      na: "No product-specific marks or color codes."

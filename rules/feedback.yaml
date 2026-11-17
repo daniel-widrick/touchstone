@@ -38,7 +38,7 @@ rules:
     why: "Confirming what the user can see adds noise and trains them to ignore messages."
     applies_when: "A screen shows a success toast, banner or dialog."
     pass_when: "Each success message reports something the user could not otherwise see, such as a background send or an off-screen change."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["msux:mess-notif#What to notify", "msux:mess-notif#Is this the right user interface?", "apple:feedback", "primer:ui-patterns/notification-messaging"]
@@ -69,7 +69,7 @@ rules:
     why: "A modal for something that needs no decision interrupts; a toast for a field error is too far from the fix."
     applies_when: "The screen shows any message."
     pass_when: "Field problems are inline; page-level status is a banner in the page; a dialog is used only when the user must choose before continuing."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
     sources: ["carbon:patterns/notification-pattern", "primer:ui-patterns/notification-messaging", "msux:mess-error#Design concepts > Error message presentation", "msux:mess-warn#Presentation", "msux:top-violations#Dialog boxes"]
@@ -115,7 +115,7 @@ rules:
     why: "A confirmation nearly everyone answers the same way is noise, and it wears down attention for the ones that matter."
     applies_when: "The screen uses a confirmation dialog."
     pass_when: "Each confirmation guards an action that is both uncommon and costly to get wrong; none guards cancel, close, save or a frequent action."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: well-replicated
     sources: ["msux:mess-confirm#Unnecessary confirmations are annoying", "msux:mess-confirm#How to determine if a confirmation is necessary", "msux:win-dialog-box#Commit buttons", "anderson2015", "akhawe2013", "nng:confirmation-dialog"]
@@ -145,7 +145,7 @@ rules:
     why: "Messages that change nothing for the user are interruptions."
     applies_when: "The screen shows notifications, toasts or status messages."
     pass_when: "Each message corresponds to one event and to something the user may now do or avoid; routine internal events produce none."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["msux:mess-notif#Is this the right user interface?", "msux:mess-notif#What to notify", "msux:mess-error#Is this the right user interface?", "msux:progress-bars#Guidelines > General", "mswin:design/basics/commanding-basics"]

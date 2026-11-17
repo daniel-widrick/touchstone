@@ -1,7 +1,7 @@
 ---
 name: touchstone
 description: "Rules for how a web interface looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page. Use when building, changing, redesigning or reviewing any web screen: forms, tables, lists, dashboards, settings, dialogs, multi-step flows, landing and product pages, pricing, documentation. Use when asked to design a page, to audit or improve the UX, usability or visual design of an interface, or to check a UI before calling it done."
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Touchstone
@@ -15,7 +15,7 @@ These are rules for how a screen looks and how it works, and a way to check
 both that does not rest on anyone's overall impression.
 
 Appearance is in scope wherever it helps or hinders reading and use: type
-size, line length, hierarchy, spacing, colour, theme, motion. Whether a
+size, line length, hierarchy, spacing, color, theme, motion. Whether a
 screen is beautiful or on-brand is a matter of taste and is not judged here.
 Looking finished is not evidence of being usable, and looking plain is not a
 virtue: a screen still has to be legible, ordered and at home on the user's
@@ -30,7 +30,7 @@ recurring causes are:
 
 - The screen was built, not the task. Each view exists alone; the path through
   them was never walked.
-- A control's look was copied without its behaviour: no loading, error or
+- A control's look was copied without its behavior: no loading, error or
   empty state, no keyboard, no response to a click.
 - The builder's knowledge ended up on screen: notes about how it was made,
   caveats, explanations of the layout.
@@ -51,7 +51,7 @@ check.
    too long, too many. A screen that only works with tidy data on a fast
    connection is half built.
 3. **Controls are visible and named.** Nothing needed for the task hides
-   behind hover, an unlabelled icon, a tooltip or a menu. Anything clickable
+   behind hover, an unlabeled icon, a tooltip or a menu. Anything clickable
    is a real button or link.
 4. **The interface does not talk about itself.** No notes on how it was
    built, no explanation of the layout, no caveat unless a decision depends
@@ -84,7 +84,7 @@ check.
    one accent used consistently, motion that is brief or absent. Follow the
    system's light or dark setting and its request for less motion; these are
    expected without being asked for. In an existing product, use its fonts,
-   colours and components before anything of your own.
+   colors and components before anything of your own.
 
 ## The rule files
 
@@ -104,7 +104,7 @@ applies, what passes, how to gather evidence, examples and sources.
 | `references/data.md` | tables, lists, metrics, charts, dashboards |
 | `references/access.md` | anything interactive (keyboard, focus, contrast, targets) |
 | `references/responsive.md` | use on phones or narrow windows |
-| `references/visual.md` | any text, colour or motion (type, spacing, theme, animation) |
+| `references/visual.md` | any text, color or motion (type, spacing, theme, animation) |
 | `references/pages.md` | a page that presents: landing, product, pricing, documentation |
 
 ## The kit
@@ -125,7 +125,7 @@ attention; do a second pass instead.
 
 ## When building or changing a UI
 
-1. Look at what is already there: the project's fonts, colours, spacing,
+1. Look at what is already there: the project's fonts, colors, spacing,
    components and any design file. Say in a line what you will reuse and
    what you will introduce. Add to an existing stylesheet; do not replace it.
 2. Write down, in a line each: who uses this screen, the one to three things
@@ -135,13 +135,15 @@ attention; do a second pass instead.
 3. Read `references/brief.md`, the sections for this kind of screen, and
    `kit/page-shapes.md`. In a new project, also the palette and type files.
 4. Build. Implement the states and the feedback as you go; they are not
-   polish to add later. Define colours as named values and give them a light
+   polish to add later. Define colors as named values and give them a light
    and a dark set that follow the system setting.
 5. Run the page and run the checker (below) at 1280 and at 375 wide, once in
-   each colour scheme. Fix every `fail`. Look at every `review` item and
+   each color scheme. Fix every `fail`. Look at every `review` item and
    decide.
 6. Use the thing: complete each task with the keyboard only, then with a
-   forced failure and with no data. Fix what you find.
+   forced failure and with no data. Fake the failures in the browser rather
+   than breaking the server (see "Walking a UI safely" below). Fix what you
+   find.
 7. List every place your script puts text on the page after it has loaded:
    errors under fields, counts, loading, saved and failed notes, undo
    notices. Each one must sit inside a live region that is in the page from
@@ -162,7 +164,7 @@ hover-only controls, dead links, target sizes, focus visibility, labels,
 input types, headings, landmarks, contrast, sideways scroll, dialogs,
 leftover and raw error text, vague and promotional wording, text size, line
 length and spacing, typefaces and sizes in use, whether the page follows the
-system colour scheme, what its transitions animate and for how long, content
+system color scheme, what its transitions animate and for how long, content
 hidden until scrolled to, and counts of callouts, words and primary buttons.
 Its output lists each check with `fail`, `pass`, `review` or `na`, the rule
 ids it gives evidence for, and where the problem is.
@@ -170,7 +172,7 @@ ids it gives evidence for, and where the problem is.
 - With a browser tool connected: run the text of `scripts/ux-check.js` in the
   page (the tool's evaluate or run-JavaScript action) and read the returned
   JSON. Resize to 375 wide and run it again. Repeat with the system set to
-  the other colour scheme if the tool can emulate it.
+  the other color scheme if the tool can emulate it.
 - With no browser tool: `python3 scripts/run.py -s --scheme light <url or
   file>`, then `--scheme dark`, then both again with `--width 375`. The path
   is relative to this skill's folder. It needs Python 3 (`python` on some
@@ -178,9 +180,47 @@ ids it gives evidence for, and where the problem is.
   to the browser's path if it is not found. If neither is available, skip
   the checker, judge the rules from the code, and say so in your reply.
 
+Measure the page at rest. The checker waits for loading indicators and
+requests to stop (up to 10 seconds in the page, 15 with `run.py`) and puts a
+`warning` in its result if they never did. A result with that warning
+describes a loading state: wait, or fix whatever never finishes loading,
+and measure again before using it as evidence.
+
+If the product deliberately has one theme, declare it in the page with
+`<meta name="color-scheme" content="dark">` (or `light`); the theme check then
+asks for review instead of failing. In an audit where you cannot change the
+page, pass `{ singleTheme: true }` to `uxCheck`, or `--single-theme` to
+`run.py`.
+
 A clean run is evidence for the rules it lists and nothing more. It cannot
 see handlers added with addEventListener, and it does not click, type or
 press keys. Rules whose evidence is `walk` need you to do the step.
+
+## Walking a UI safely
+
+Walking tasks through their failure, slow and empty states finds the
+problems that matter most, and it must not touch real data. Fake the network
+in the browser instead of breaking the server:
+
+- `scripts/fake-network.js` wraps the page's own `fetch`, `XMLHttpRequest`
+  and `sendBeacon`. Set `window.__uxNet` first, then run the file in the
+  page. `{ blockWrites: true }` makes every POST, PUT, PATCH and DELETE fail
+  without leaving the browser, so you can press Save, Delete and Send on
+  live data. `fail`, `status`, `delayMs` and `empty` force failures, slow
+  responses and empty lists for URLs matching a pattern. What the page tried
+  to send is recorded in `window.__uxNet.log`.
+- To affect requests made while the page loads, the script must run before
+  the page's own: `page.addInitScript` in Playwright, or
+  `Page.addScriptToEvaluateOnNewDocument` in Chrome DevTools. `run.py` does
+  this with `--block-writes`, `--fail`, `--status`, `--delay` and `--empty`.
+- Turn on `blockWrites` before any walk of a product whose data matters, and
+  report what the log shows the page tried to write.
+
+When several auditors walk the same product at once, each needs its own
+browser (its own Playwright context or profile), with write-blocking on.
+Never share one browser between agents: they move each other's focus,
+scroll and open dialogs, and their findings stop meaning anything. `run.py`
+starts a fresh browser profile on every run, so its runs can go in parallel.
 
 ## When auditing a UI
 
@@ -190,8 +230,9 @@ A single pass finds a minority of problems, and coverage rises when
 independent passes are merged. If you can start subagents, give each relevant
 domain to a separate one (the `touchstone:ux-auditor` agent where it is
 installed, or any fresh agent told to
-follow this section for one domain file) and merge their reports. Otherwise
-take the domains one at a time yourself.
+follow this section for one domain file) and merge their reports. Give each
+its own browser with write-blocking on, as in "Walking a UI safely".
+Otherwise take the domains one at a time yourself.
 
 For each domain:
 
@@ -204,13 +245,14 @@ For each domain:
    (a line of code with its location, a measured value, what you did and what
    happened), then give `pass`, `fail` or `cannot tell`. No evidence means
    `cannot tell`, never `pass`. Take severity from the rule record; do not
-   re-rate it. For rules whose evidence is judgement, decide twice, the second
+   re-rate it. For rules whose evidence is judgment, decide twice, the second
    time starting from the last rule; keep the verdict only if both agree,
    otherwise `cannot tell`.
 5. **Walk.** For each task, go through it in the running UI. At every step
-   ask: is the control I need visible, would I recognise it as the right one,
-   and did the screen show that my action worked? Record failures against the
-   matching rule.
+   ask: is the control I need visible, would I recognize it as the right one,
+   and did the screen show that my action worked? Then walk it again with
+   its requests failing, slow and empty, using the fake network with writes
+   blocked. Record failures against the matching rule.
 6. **Open pass.** Separately, note anything that hurt the task and matched no
    rule. Mark these as lower confidence. Do not aim for a number of findings.
 
@@ -220,9 +262,9 @@ Report in this order:
    evidence, and the smallest fix.
 2. Cannot tell: rule id and what would be needed to decide.
 3. Counts: rules applicable, passed, failed, cannot tell, not applicable.
-4. Open-pass notes, labelled as such.
+4. Open-pass notes, labeled as such.
 
-Give no overall score and no summary judgement of quality.
+Give no overall score and no summary judgment of quality.
 
 ## Applying rules with sense
 

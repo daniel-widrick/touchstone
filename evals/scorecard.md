@@ -19,7 +19,7 @@
 - Applies when: The screen displays records, counts, metrics or charts.
 - Passes when: Each value comes from the application's data source, and no sample, placeholder or leftover text is visible.
 - Severity: blocker. Support: consensus of published practice.
-- Exceptions: A prototype the user asked to be filled with sample data, where the sample data is labelled as such once, outside the product UI.
+- Exceptions: A prototype the user asked to be filled with sample data, where the sample data is labeled as such once, outside the product UI.
 - Passing example: The revenue tile reads from the orders query and shows 'No orders yet' when the query is empty.
 - Failing example: A tile shows '+12% this month' from a hardcoded string; a footer says 'Coming soon'.
 - Not applicable: A static settings form with no displayed data.
@@ -70,7 +70,7 @@
 
 - Why: Unrequested extras crowd the real task and have to be maintained.
 - Applies when: A screen is being built or changed from a stated request.
-- Passes when: Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honouring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra.
+- Passes when: Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honoring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra.
 - Severity: major. Support: consensus of published practice.
 - Passing example: Asked for a table of invoices with a status filter, the screen has the table and the filter.
 - Failing example: The same request also produces stat cards, an activity feed and a 'Quick tips' panel. (Leaving out a dark theme is not a pass on this rule; see VIS-011.)
@@ -95,18 +95,18 @@
 - Passes when: That action is not the primary-styled button, is not triggered by Enter, and is set apart from frequent actions.
 - Severity: major. Support: consensus of published practice.
 - Passing example: In a delete confirmation, 'Cancel' has focus and 'Delete project' is a separate red-outlined button.
-- Failing example: 'Delete account' is the filled blue default next to a grey 'Keep account'.
+- Failing example: 'Delete account' is the filled blue default next to a gray 'Keep account'.
 - Not applicable: A view with no destructive action.
 
 ### ACT-010 A control that cannot be used right now says why in text beside it, or is absent.
 
-- Why: A greyed-out control with no reason leaves people guessing what they did wrong.
+- Why: A grayed-out control with no reason leaves people guessing what they did wrong.
 - Applies when: A control is disabled, or would be unusable in the current state.
 - Passes when: The reason is visible as text near the control, or the control is not shown.
 - Severity: major. Support: consensus of published practice.
 - Exceptions: A button disabled only while its own request is in progress.
 - Passing example: 'Publish' is disabled with 'Add a title to publish' beside it.
-- Failing example: 'Publish' is grey with no explanation; a tooltip on the disabled button is the only hint.
+- Failing example: 'Publish' is gray with no explanation; a tooltip on the disabled button is the only hint.
 - Not applicable: No disabled controls.
 
 ### ACT-011 Everything a task needs is on the screen, with tooltips used only for extra detail.
@@ -148,7 +148,7 @@
 - Applies when: The screen has sentences that describe the screen itself, how to use its controls, or what a section is for.
 - Passes when: No text narrates the interface ('Use the form below to', 'This page lets you', 'Click the button to'). Guidance that remains is one short line at the control it concerns.
 - Severity: major. Support: well replicated.
-- Passing example: A heading 'Invite a member' above two labelled fields and a 'Send invite' button.
+- Passing example: A heading 'Invite a member' above two labeled fields and a 'Send invite' button.
 - Failing example: 'Welcome to the team page. Below you will find a list of members. Use the form at the bottom to invite someone by entering their email.'
 - Not applicable: A screen with no prose.
 
@@ -156,7 +156,7 @@
 
 - Why: Repeated titles, subtitles and helper lines add reading and bury the one line that matters.
 - Applies when: A heading has a subtitle, a field has helper text, or a section has an introduction.
-- Passes when: No subtitle, description, helper text or tooltip restates its heading, label or neighbour in other words.
+- Passes when: No subtitle, description, helper text or tooltip restates its heading, label or neighbor in other words.
 - Severity: minor. Support: consensus of published practice.
 - Passing example: Label 'Email address', no helper text.
 - Failing example: Heading 'Settings', subtitle 'Manage your settings and preferences'; label 'Email' with helper 'Enter your email'.
@@ -245,7 +245,7 @@
 - Failing example: The table stays empty for ever, or the spinner never stops.
 - Not applicable: A fully static page.
 
-### STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled.
+### STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be canceled.
 
 - Why: With no signal people assume the action failed and repeat it or leave.
 - Applies when: An action or load can take longer than one second.
@@ -303,7 +303,7 @@
 - Passes when: The status of every field is knowable from text such as '(optional)' or 'required', and the required attribute matches.
 - Severity: major. Support: some research support.
 - Sources disagree: GOV.UK marks only optional fields and uses no asterisks; Baymard marks both; USWDS uses a red asterisk with a legend. This rule requires words, whichever group is marked.
-- Passing example: Most fields required and unmarked, the two optional ones labelled 'Phone (optional)'.
+- Passing example: Most fields required and unmarked, the two optional ones labeled 'Phone (optional)'.
 - Failing example: Red asterisks on some fields with no legend, or nothing marked at all.
 - Not applicable: Every field is required, or every field is optional.
 
@@ -322,7 +322,7 @@
 
 - Why: A list of errors far from the fields makes people hunt for what to fix.
 - Applies when: A form can reject input.
-- Passes when: After a failed submit, every invalid field has its message adjacent to it and is marked by more than colour.
+- Passes when: After a failed submit, every invalid field has its message adjacent to it and is marked by more than color.
 - Severity: major. Support: some research support.
 - Exceptions: Errors that belong to no single field, shown at the top of the form.
 - Passing example: A red-bordered field with an icon and 'Enter the invoice number' beneath its label.
@@ -358,7 +358,7 @@
 - Severity: major. Support: consensus of published practice.
 - Sources disagree: IBM Carbon disables the primary button until requirements are met on short, server-validated forms.
 - Passing example: Pressing 'Create account' with an empty email focuses the email field and shows 'Enter your email address'.
-- Failing example: 'Create account' is grey until every field validates, with no indication why.
+- Failing example: 'Create account' is gray until every field validates, with no indication why.
 - Not applicable: A screen with no form.
 
 ### FORM-014 Pressing submit twice sends the request once.
@@ -523,15 +523,15 @@
 - Failing example: A date picker or row menu that only responds to clicks.
 - Not applicable: A page with nothing interactive.
 
-### ACC-008 Anything shown by colour is also shown another way.
+### ACC-008 Anything shown by color is also shown another way.
 
-- Why: Colour alone is invisible to people with colour vision deficiency and to screen readers.
-- Applies when: The screen uses colour to show status, errors, required fields, selection or series in a chart.
+- Why: Color alone is invisible to people with color vision deficiency and to screen readers.
+- Applies when: The screen uses color to show status, errors, required fields, selection or series in a chart.
 - Passes when: Each such distinction also has text, an icon or a shape.
 - Severity: major. Support: consensus of published practice.
 - Passing example: A status column reading 'Overdue' with an icon, in red.
 - Failing example: A red dot or green dot with no text.
-- Not applicable: Colour carries no meaning on the screen.
+- Not applicable: Color carries no meaning on the screen.
 
 ### ACC-013 Changes that happen without a page load are announced to assistive technology.
 

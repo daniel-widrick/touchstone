@@ -20,8 +20,8 @@ Read this while building. The records below are for judging.
 - **NAV-010** A dialog is marked up as a dialog and has a name.
 - **NAV-011** A dialog takes focus when it opens, keeps it while open, closes on Escape and returns focus to what opened it.
 - **NAV-012** A step-by-step flow is used only when the steps must happen in order; otherwise the fields are on one page.
-- **NAV-013** The structure is broad and shallow: few levels, with each level's items grouped and labelled.
-- **NAV-014** When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labelled More button.
+- **NAV-013** The structure is broad and shallow: few levels, with each level's items grouped and labeled.
+- **NAV-014** When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labeled More button.
 
 ## Records
 
@@ -41,7 +41,7 @@ Read this while building. The records below are for judging.
 
 - Why: Without a you-are-here cue people lose track of which section they are acting in.
 - Applies when: The product has persistent navigation.
-- Passes when: The current section is marked in the navigation by more than colour and carries aria-current.
+- Passes when: The current section is marked in the navigation by more than color and carries aria-current.
 - Evidence: inspect the running page
 - Severity: major. Support: consensus of published practice.
 - Passing example: The 'Invoices' item is bold with a side bar and aria-current="page".
@@ -66,7 +66,7 @@ Read this while building. The records below are for judging.
 - Why: People choose a path by the words on it; generic labels give no scent.
 - Applies when: The product has navigation.
 - Passes when: Each label names an object or task of this product; generic catch-alls are not the main items.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: well replicated.
 - Passing example: 'Invoices', 'Customers', 'Payments'.
 - Failing example: 'Dashboard', 'Overview', 'Manage', 'General', 'Advanced'.
@@ -114,7 +114,7 @@ Read this while building. The records below are for judging.
 - Why: Modals hide the context people need and trap long tasks in a small box.
 - Applies when: The screen opens a modal dialog.
 - Passes when: Each modal holds a single decision or a form of a few fields; multi-step flows, long forms and anything needing the page behind it are not modal. No modal opens without the user asking.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: A two-field 'Rename project' dialog; editing a record opens a side panel beside the table.
 - Failing example: A four-step onboarding wizard inside a modal; a promotional modal on page load.
@@ -162,14 +162,14 @@ Read this while building. The records below are for judging.
 - Why: Splitting a simple form into steps adds clicks and hides what is coming.
 - Applies when: A task is presented as a sequence of steps.
 - Passes when: Later steps depend on earlier answers or the task is long and unfamiliar; the flow starts on a working step, not a welcome screen, and its last button names the final action.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: A four-field 'New customer' form on one page.
 - Failing example: The same four fields over four steps, after a 'Welcome' step, ending with 'Finish'.
 - Not applicable: No stepped flows.
 - Sources: nng:wizards; msux:top-violations#Wizard pages; msux:top-violations#Wizards; hhs:7:9
 
-### NAV-013 The structure is broad and shallow: few levels, with each level's items grouped and labelled.
+### NAV-013 The structure is broad and shallow: few levels, with each level's items grouped and labeled.
 
 - Why: Deep hierarchies hide things and cost navigation time.
 - Applies when: The product has nested navigation.
@@ -181,11 +181,11 @@ Read this while building. The records below are for judging.
 - Not applicable: Flat navigation.
 - Sources: larson1998; sm86:3.1.3/22; sm86:3.1.3/24
 
-### NAV-014 When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labelled More button.
+### NAV-014 When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labeled More button.
 
 - Why: Navigation hidden entirely behind a menu is used less and makes tasks slower; navigation shown in full on a phone takes the first view away from the content.
 - Applies when: At any width, the product's top-level sections do not fit in a single row at full size.
-- Passes when: The header is one row at every width from 320px up, and it never scrolls sideways or wraps. As many sections as fit are visible as text links, in order of how often they are used, and the count follows the width; where the product has no usage figures, order by the tasks the brief names and say that the order is a default. The others are in a list of links shown and hidden by a button with a text label (a disclosure with aria-expanded, not an application menu with arrow-key handling). Every item, and the button, is at least 44px tall. The current section is marked with aria-current and by more than colour, including when it is inside the list. Where the row has no room for the product's full name, its mark alone is shown and the name stays in the link's accessible name. With four sections or fewer, all are visible and there is no button.
+- Passes when: The header is one row at every width from 320px up, and it never scrolls sideways or wraps. As many sections as fit are visible as text links, in order of how often they are used, and the count follows the width; where the product has no usage figures, order by the tasks the brief names and say that the order is a default. The others are in a list of links shown and hidden by a button with a text label (a disclosure with aria-expanded, not an application menu with arrow-key handling). Every item, and the button, is at least 44px tall. The current section is marked with aria-current and by more than color, including when it is inside the list. Where the row has no room for the product's full name, its mark alone is shown and the name stays in the link's accessible name. With four sections or fewer, all are visible and there is no button.
 - Evidence: measure a value on the running page
 - Severity: major. Support: some research support.
 - Exceptions: A product whose sections all fit one row at every width it supports.

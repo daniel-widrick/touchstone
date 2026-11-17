@@ -1,0 +1,46 @@
+# Changelog
+
+## 0.2.0
+
+From feedback after use on a large production application.
+
+Checker (`ux-check.js`)
+- Transition and motion checks count only style rules that match something on
+  the screen, not every rule in every stylesheet.
+- Fake-control no longer flags the inner parts of a control whose host, or a
+  web component's shadow host, already carries the role and key handling.
+- Text hidden for screen readers only (`.sr-only` and similar, clipped 1px
+  text) is left out of the text-size, contrast and typeface checks. It is
+  still read by the copy checks.
+- Contrast skips disabled controls, which WCAG exempts.
+- Dialog-semantics no longer reports a full-screen page layout, such as a
+  sign-in screen with a centered card, as an overlay. It reports a layer only
+  when it covers other content.
+- Image checks count only `img` and `role=img` elements; `role=img` without a
+  name is now reported.
+- Text-size uses one floor: 12px for any text, 16px for running prose
+  (VIS-001 now says the same).
+- A deliberate single theme can be declared with `color-scheme` set to one
+  scheme, or with the `singleTheme` option; the theme check then asks for
+  review instead of failing.
+- The checker waits for loading indicators to clear and resource loads to stop
+  before measuring, and warns when the page never settled.
+- Shadow-root text counts toward a control's accessible name.
+
+Runner (`run.py`)
+- Waits for network requests to stop as well as for the load event.
+- New options: `--single-theme`, `--settle-timeout`, and a fake network:
+  `--block-writes`, `--fail`, `--status`, `--delay`, `--empty`.
+
+Skill
+- New section, "Walking a UI safely": fake failures, slow responses and empty
+  lists in the browser with `scripts/fake-network.js`, block writes on real
+  data, and give each parallel auditor its own browser.
+- Says to measure only a settled page, and how to declare a single theme.
+
+Other
+- American English spelling throughout the published files.
+
+## 0.1.0
+
+First release.

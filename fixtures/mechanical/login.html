@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in - Northwind</title>
+<style>
+  /* A sign-in page built as a full-screen fixed layer with a centered card. It is the page,
+     not an overlay, so dialog-semantics should not flag it. ux-check should report no failures. */
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #1f2937; background: #eef2f7; }
+  .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; }
+  .card { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 24px; width: min(360px, 100%); }
+  label { display: block; margin: 12px 0 4px; }
+  input { font: inherit; width: 100%; box-sizing: border-box; min-height: 36px; padding: 4px 8px; border: 1px solid #6b7280; border-radius: 6px; }
+  button { font: inherit; margin-top: 16px; min-height: 40px; padding: 6px 16px; border: 0; border-radius: 6px; background: #3730a3; color: #fff; }
+  :focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #111318; color: #e5e7eb; }
+    .card { background: #1b1e24; border-color: #3a3f48; }
+    input { background: #111318; color: #e5e7eb; border-color: #8a909c; }
+    button { background: #a5b4fc; color: #111318; }
+  }
+</style>
+</head>
+<body>
+<div class="screen">
+  <main class="card">
+    <h1>Sign in to Northwind</h1>
+    <form onsubmit="return false">
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign in</button>
+    </form>
+  </main>
+</div>
+</body>
+</html>

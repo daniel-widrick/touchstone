@@ -81,7 +81,7 @@ rules:
     counters: [B7.2]
     dissent: "GOV.UK marks only optional fields and uses no asterisks; Baymard marks both; USWDS uses a red asterisk with a legend. This rule requires words, whichever group is marked."
     examples:
-      pass: "Most fields required and unmarked, the two optional ones labelled 'Phone (optional)'."
+      pass: "Most fields required and unmarked, the two optional ones labeled 'Phone (optional)'."
       fail: "Red asterisks on some fields with no legend, or nothing marked at all."
       na: "Every field is required, or every field is optional."
 
@@ -105,7 +105,7 @@ rules:
     rule: "Each error message appears next to the field it concerns."
     why: "A list of errors far from the fields makes people hunt for what to fix."
     applies_when: "A form can reject input."
-    pass_when: "After a failed submit, every invalid field has its message adjacent to it and is marked by more than colour."
+    pass_when: "After a failed submit, every invalid field has its message adjacent to it and is marked by more than color."
     evidence: walk
     severity: major
     support: some-support
@@ -167,7 +167,7 @@ rules:
   - id: FORM-011
     rule: "Fields for personal details declare what they are so the browser can fill them."
     why: "Autofill removes typing and typing errors."
-    applies_when: "A field collects a name, email, phone, address, organisation, username, password or card detail."
+    applies_when: "A field collects a name, email, phone, address, organization, username, password or card detail."
     pass_when: "The field has an autocomplete attribute with the matching token."
     evidence: dom
     check: autocomplete
@@ -210,7 +210,7 @@ rules:
     dissent: "IBM Carbon disables the primary button until requirements are met on short, server-validated forms."
     examples:
       pass: "Pressing 'Create account' with an empty email focuses the email field and shows 'Enter your email address'."
-      fail: "'Create account' is grey until every field validates, with no indication why."
+      fail: "'Create account' is gray until every field validates, with no indication why."
       na: "A screen with no form."
 
   - id: FORM-014
@@ -263,7 +263,7 @@ rules:
     why: "Every extra field costs completion."
     applies_when: "A form is being designed or reviewed against a known purpose."
     pass_when: "Each field is needed for the task; optional extras are behind a link or left out."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["bargas2010:3", "baymard:checkout-flow-average-form-fields", "govuk:service-manual/design/form-structure", "msux:mess-confirm#Consider the design alternatives"]

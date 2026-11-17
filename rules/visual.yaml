@@ -1,13 +1,13 @@
 domain: visual
 prefix: VIS
-title: Type, colour, spacing and motion
+title: Type, color, spacing and motion
 load_when: "Any screen. These rules cover how appearance helps or hinders reading and use. Most are measured by the checker. Many rest on hallmark's stated preferences and say so; where the product already has a design system, that system's values win."
 rules:
   - id: VIS-001
     rule: "Text is large enough to read: running text at 16 pixels or more, and nothing below 12."
     why: "Small text is slow to read and is the first thing people with weaker eyesight lose."
     applies_when: "The screen shows text."
-    pass_when: "Paragraphs and other running prose compute to at least 16px; table cells, captions and secondary labels to at least 13px; no visible text is under 12px."
+    pass_when: "Paragraphs and other running prose compute to at least 16px, and no other visible text is under 12px. Text hidden for screen readers only is exempt."
     evidence: measured
     check: text-size
     severity: major
@@ -16,7 +16,7 @@ rules:
     counters: [B10.3]
     exceptions: ["Legal small print that the product is required to show at a set size."]
     examples:
-      pass: "Body copy at 16px, table cells at 14px, timestamps at 13px."
+      pass: "Body copy at 16px, table cells at 14px, timestamps at 12px."
       fail: "Paragraphs at 13px and helper text at 11px."
       na: "A screen with no text."
 
@@ -153,7 +153,7 @@ rules:
       na: "No top heading; see ACC-009."
 
   - id: VIS-010
-    rule: "Text is a solid colour."
+    rule: "Text is a solid color."
     why: "Gradient-filled and glowing text has no single contrast ratio and often fails where the gradient is lightest."
     applies_when: "The screen shows text."
     pass_when: "No text uses a gradient or image fill clipped to the letters."
@@ -172,7 +172,7 @@ rules:
     rule: "The screen follows the system's light or dark setting."
     why: "Someone who has set their device to dark is handed a bright white screen, often at night, and the other way round."
     applies_when: "Always, unless the product has one deliberate theme of its own."
-    pass_when: "The page declares both colour schemes and restyles under prefers-color-scheme, and text contrast holds in both."
+    pass_when: "The page declares both color schemes and restyles under prefers-color-scheme, and text contrast holds in both. A product that deliberately has one theme declares it, with color-scheme set to that one scheme (for example <meta name=\"color-scheme\" content=\"dark\">), and the checker then reports it for review instead of failing it."
     evidence: dom
     check: system-theme
     severity: major
@@ -181,7 +181,7 @@ rules:
     counters: [B10.3]
     exceptions: ["A screen added to an existing product that has a single theme.", "A brief that asks for one theme."]
     examples:
-      pass: "Colours defined as variables, redefined under @media (prefers-color-scheme: dark)."
+      pass: "Colors defined as variables, redefined under @media (prefers-color-scheme: dark)."
       fail: "Hardcoded white background and dark text with no dark rules."
       na: "Never, apart from the stated exceptions."
 
@@ -202,11 +202,11 @@ rules:
       na: "A screen with one or two elements."
 
   - id: VIS-013
-    rule: "One accent colour, used for the same kinds of thing throughout."
-    why: "Colour used everywhere signals nothing; colour used consistently can be learned."
-    applies_when: "The screen uses colour beyond neutrals and status colours."
+    rule: "One accent color, used for the same kinds of thing throughout."
+    why: "Color used everywhere signals nothing; color used consistently can be learned."
+    applies_when: "The screen uses color beyond neutrals and status colors."
     pass_when: "There is one accent hue, it marks the same roles on every screen (for example the primary action, links and the current item), and it covers a small share of the view."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: some-support
     sources: ["sm86:2.6/28", "sm86:2.6/7", "hallmark:color.md#Accent discipline"]
@@ -214,7 +214,7 @@ rules:
     examples:
       pass: "Blue on the primary button, links and the active navigation item; everything else neutral."
       fail: "Purple headings, a teal button, orange links and a pink badge."
-      na: "A screen in neutrals and status colours only."
+      na: "A screen in neutrals and status colors only."
 
   - id: VIS-014
     rule: "Animation changes position and opacity, not layout."
@@ -273,7 +273,7 @@ rules:
     check: scroll-hidden
     severity: major
     support: practice-consensus
-    sources: ["catalogue:B2.6", "hallmark:hero-enrichment.md#Animation discipline", "hhs:6:9"]
+    sources: ["catalog:B2.6", "hallmark:hero-enrichment.md#Animation discipline", "hhs:6:9"]
     counters: [B2.6]
     exceptions: ["Menus, dialogs and tooltips that open on a deliberate action."]
     examples:
@@ -299,7 +299,7 @@ rules:
       na: "No buttons, tabs or navigation links."
 
   - id: VIS-019
-    rule: "A change of state does not change an element's size or move its neighbours."
+    rule: "A change of state does not change an element's size or move its neighbors."
     why: "A field that grows when its error appears, or a button that widens while loading, makes the layout jump under the pointer."
     applies_when: "The screen has controls with hover, focus, error or busy states."
     pass_when: "A control's box is the same at rest, focused, in error and busy; space for an error line is reserved or its arrival does not move the controls after it out from under the pointer."
@@ -314,7 +314,7 @@ rules:
       na: "No stateful controls."
 
   - id: VIS-020
-    rule: "A screen added to an existing product uses that product's fonts, colours, spacing and components."
+    rule: "A screen added to an existing product uses that product's fonts, colors, spacing and components."
     why: "A screen that looks like it came from somewhere else breaks what users have learned and what the team maintains."
     applies_when: "The project already has screens, a stylesheet, tokens or a component library."
     pass_when: "The new screen reuses the existing tokens and components; anything new is listed and justified."
@@ -324,6 +324,6 @@ rules:
     sources: ["hhs:11:4", "polson1986", "hallmark:SKILL.md#Step 0", "hallmark:export-formats.md#Output rule"]
     counters: [B9.1, B9.5]
     examples:
-      pass: "A new settings page built from the project's Button and Field components and its colour variables."
+      pass: "A new settings page built from the project's Button and Field components and its color variables."
       fail: "A new page with its own palette, font and button styles in a project that has a design system."
       na: "A new project with nothing to match."

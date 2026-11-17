@@ -41,3 +41,8 @@ jobs:
           echo "bad.html: $bad failing checks; good.html: $good failing checks"
           test "$bad" -ge 40
           test "$good" -eq 0
+          for f in framework login; do
+            n=$(python3 plugin/skills/touchstone/scripts/run.py -s fixtures/mechanical/$f.html | grep -c '^fail' || true)
+            echo "$f.html: $n failing checks"
+            test "$n" -eq 0
+          done

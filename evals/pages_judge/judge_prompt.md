@@ -31,7 +31,7 @@ For each rule on the scorecard, in order:
    "Passes when" as the test, and respect its exceptions.
 
 When you have been through every rule once, go through the rules whose
-verdict rested on your judgement (not on a plain fact in the code) a second
+verdict rested on your judgment (not on a plain fact in the code) a second
 time, starting from the last. If your second verdict differs, record
 `cannot_tell`.
 

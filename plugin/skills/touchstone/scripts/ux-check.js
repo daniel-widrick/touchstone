@@ -8,6 +8,14 @@
  *   await window.uxCheck()                 run every check
  *   await window.uxCheck({ focus: false }) skip the check that moves focus
  *
+ * Options: focus (false skips the focus check), singleTheme (true when the
+ * product deliberately has one theme), settleMs (how long to wait for loading
+ * indicators to clear before measuring; default 10000, 0 to skip).
+ *
+ * Before measuring it waits for the page to settle: no visible loading
+ * indicator and no resource finishing for half a second. If the page never
+ * settles, the result carries a warning.
+ *
  * Each check reports one of:
  *   fail    the page breaks the rule; items say where
  *   pass    the check ran and found nothing
@@ -21,7 +29,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.2.0';
   const MAX_ITEMS = 12;
   // Which rules each check gives evidence for. The build tool writes this from rules/.
   const RULE_MAP = /* RULE_MAP:begin */ {"accessible-name":["ACT-001"],"autocomplete":["FORM-011"],"callout-count":["COPY-002"],"contrast":["ACC-005"],"dead-button":["TASK-001"],"dead-link":["ACT-005"],"dialog-semantics":["NAV-010"],"disabled-submit":["FORM-013"],"fake-control":["ACT-004"],"focus-visible":["ACC-002"],"font-families":["VIS-004"],"font-sizes":["VIS-005"],"gradient-text":["VIS-010"],"heading-contrast":["VIS-006"],"heading-order":["ACC-009"],"headline-fit":["VIS-009"],"horizontal-scroll":["RESP-001"],"hover-only":["ACT-003","DATA-011"],"hype-words":["COPY-006"],"icon-only-control":["ACT-002"],"image-alt":["ACC-011"],"img-dimensions":["VIS-008"],"infinite-animation":["VIS-016"],"input-label":["FORM-001"],"input-type":["FORM-010"],"label-wrap":["VIS-018"],"landmarks":["ACC-010"],"leftover-text":["COPY-001","PAGE-004","STATE-007","TASK-002"],"line-height":["VIS-003"],"line-length":["VIS-002"],"nested-dialog":["NAV-009"],"page-lang":["ACC-012"],"page-title":["NAV-001"],"paste-blocked":["FORM-012"],"primary-button-count":["ACT-007"],"raw-error-text":["COPY-011"],"reduced-motion":["ACC-015"],"required-attr":["FORM-005"],"scroll-hidden":["VIS-017"],"small-input-font":["RESP-003"],"spacing-scale":["VIS-012"],"system-theme":["VIS-011"],"tabindex-positive":["ACC-003"],"table-headers":["DATA-006"],"target-size":["ACC-007"],"text-size":["VIS-001"],"text-style":["VIS-007"],"text-volume":["COPY-003","COPY-014"],"transition-duration":["VIS-015"],"transition-props":["VIS-014"],"vague-label":["COPY-007","COPY-008"],"visible-label":["FORM-002"],"zoom-disabled":["RESP-002"]} /* RULE_MAP:end */;
@@ -33,7 +41,9 @@
 
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const style = (el) => getComputedStyle(el);
-  const text = (el) => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+  // Visible text, including text rendered from an open shadow root (a web component's label).
+  const text = (el) => ((el.innerText || el.textContent || '') + (el.shadowRoot ? ' ' + el.shadowRoot.textContent : ''))
+    .replace(/\s+/g, ' ').trim();
 
   function visible(el) {
     if (!el || !el.isConnected) return false;
@@ -46,6 +56,70 @@
       if (parseFloat(s.opacity) === 0) return false;
     }
     return true;
+  }
+
+  // Text hidden from sight but kept for screen readers (.sr-only and its relatives).
+  // It is exempt from visual checks such as size and contrast, but still read by copy checks.
+  const SR_CLASSES = '.sr-only, .visually-hidden, .cdk-visually-hidden, .screen-reader-text, .clr-sr-only, .a11y-hidden, .u-visually-hidden';
+  function srOnly(el) {
+    if (el.closest(SR_CLASSES)) return true;
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      const s = style(n);
+      if (s.position === 'absolute' || s.position === 'fixed') {
+        if (/^rect\((0(px)?[ ,]+){3}0(px)?\)$/.test(s.clip.replace(/\s+/g, ' ')) || /^rect\(/.test(s.clip) && n.getBoundingClientRect().width <= 1) return true;
+        if (/inset\(\s*(50|100)%/.test(s.clipPath)) return true;
+        const r = n.getBoundingClientRect();
+        if (r.width <= 1 && r.height <= 1 && s.overflow !== 'visible') return true;
+      }
+    }
+    return false;
+  }
+
+  // The nearest ancestor, crossing shadow roots, that is already a working control:
+  // a native control, or an element with a control role that takes focus.
+  function controlHost(el) {
+    for (let n = el.parentElement || (el.getRootNode && el.getRootNode().host); n;
+      n = n.parentElement || (n.getRootNode && n.getRootNode() !== document ? n.getRootNode().host : null)) {
+      if (n.matches(NATIVE)) return n;
+      if (n.matches(ROLE_CONTROL) && n.tabIndex >= 0) return n;
+    }
+    return null;
+  }
+
+  // Whether a style rule's selector matches anything rendered now. Pseudo-classes and
+  // pseudo-elements are stripped first, so ".x:hover::after" counts if ".x" is on screen.
+  const usedCache = new Map();
+  function ruleInUse(sel) {
+    if (usedCache.has(sel)) return usedCache.get(sel);
+    let used = false;
+    for (const part of sel.split(',')) {
+      const base = part.replace(/::?[a-zA-Z-]+(\((?:[^()]|\([^()]*\))*\))?/g, '').trim() || '*';
+      let els = [];
+      try { els = Array.from(document.querySelectorAll(base)); } catch (e) { continue; }
+      if (els.some(visible)) { used = true; break; }
+    }
+    usedCache.set(sel, used);
+    return used;
+  }
+
+  // Loading indicators still on screen: a page measured mid-load reports the spinner, not the page.
+  function busyIndicators() {
+    return $$('[aria-busy="true"], [role=progressbar], [class*=spinner i], [class*=loading i], [class*=skeleton i]')
+      .filter((el) => visible(el) && !srOnly(el) && el.getBoundingClientRect().width > 4);
+  }
+
+  // Wait until no loading indicator is visible and no resource has finished loading for a
+  // short quiet period, or until the timeout. Returns what was still busy, if anything.
+  async function settle(timeoutMs, quietMs) {
+    const start = Date.now();
+    let lastCount = -1, lastChange = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const count = performance.getEntriesByType('resource').length;
+      if (count !== lastCount) { lastCount = count; lastChange = Date.now(); }
+      if (Date.now() - lastChange >= quietMs && !busyIndicators().length) return { settled: true, waitedMs: Date.now() - start };
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return { settled: false, waitedMs: Date.now() - start, busy: busyIndicators().slice(0, 5).map((el) => where(el)) };
   }
 
   function where(el) {
@@ -136,7 +210,7 @@
     b: top.b * top.a + under.b * (1 - top.a), a: 1,
   });
 
-  // Solid colour behind an element, or null when an image or gradient makes it unknowable.
+  // Solid color behind an element, or null when an image or gradient makes it unknowable.
   function backdrop(el) {
     const layers = [];
     for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
@@ -175,7 +249,7 @@
   check('fake-control', () => {
     const bad = [];
     for (const el of $$('body *')) {
-      if (el.matches(NATIVE) || el.closest('a[href], button, label, summary')) continue;
+      if (el.matches(NATIVE) || controlHost(el)) continue; // part of a control that already works
       const role = el.getAttribute('role');
       const clickable = hasHandler(el, 'click') ||
         (style(el).cursor === 'pointer' && (!el.parentElement || style(el.parentElement).cursor !== 'pointer'));
@@ -225,14 +299,14 @@
     const boxes = els.map((el) => [el, el.getBoundingClientRect()]);
     const small = boxes.filter(([, r]) => r.width < 24 || r.height < 24);
     // WCAG 2.5.8 spacing exception: an undersized target passes when a 24px circle
-    // on its centre touches no other target and no other undersized target's circle.
-    const centre = (r) => [r.left + r.width / 2, r.top + r.height / 2];
+    // on its center touches no other target and no other undersized target's circle.
+    const center = (r) => [r.left + r.width / 2, r.top + r.height / 2];
     const crowded = small.filter(([el, r]) => {
-      const [cx, cy] = centre(r);
+      const [cx, cy] = center(r);
       return boxes.some(([o, b]) => {
         if (o === el || o.contains(el) || el.contains(o)) return false;
         if (b.width < 24 || b.height < 24) {
-          const [ox, oy] = centre(b);
+          const [ox, oy] = center(b);
           if (Math.hypot(cx - ox, cy - oy) < 24) return true;
         }
         const dx = Math.max(b.left - cx, 0, cx - b.right), dy = Math.max(b.top - cy, 0, cy - b.bottom);
@@ -440,9 +514,14 @@
   });
 
   check('image-alt', () => {
-    const imgs = $$('img').filter(visible);
-    const bad = imgs.filter((i) => !i.hasAttribute('alt') && !i.getAttribute('aria-label') && i.getAttribute('role') !== 'presentation');
-    return verdict(bad.map((i) => item(i, 'no alt attribute')), imgs.length);
+    // Only real images: <img> and elements that declare role=img. Icon-font elements such as
+    // <i> or <span> are not images; a control that holds one is judged by accessible-name.
+    const imgs = $$('img').filter((i) => i.tagName === 'IMG').filter(visible);
+    const roleImgs = $$('[role=img]').filter((i) => i.tagName !== 'IMG').filter(visible);
+    const bad = imgs.filter((i) => !i.hasAttribute('alt') && !i.getAttribute('aria-label') && !labelledByText(i) && !['presentation', 'none'].includes(i.getAttribute('role')))
+      .map((i) => item(i, 'img with no alt attribute'))
+      .concat(roleImgs.filter((i) => !(i.getAttribute('aria-label') || '').trim() && !labelledByText(i)).map((i) => item(i, 'role=img with no accessible name')));
+    return verdict(bad, imgs.length + roleImgs.length);
   });
 
   check('table-headers', () => {
@@ -469,7 +548,12 @@
       if (r.width < vw * 0.9 || r.height < vh * 0.9) continue; // not a full-screen overlay
       if (el.matches('dialog, [role=dialog], [role=alertdialog]') || el.querySelector('dialog[open], [role=dialog], [role=alertdialog]') || el.closest('dialog, [role=dialog], [role=alertdialog]')) continue;
       if (!$$(CONTROLS, el).some(visible)) continue;
-      bad.push(item(el, 'full-screen overlay with controls but no dialog role'));
+      // An overlay covers something. A full-screen layer with nothing visible outside it is the
+      // page itself, such as a sign-in screen with a centered card, not a dialog.
+      const covered = $$('body *').some((o) => !el.contains(o) && !o.contains(el) && visible(o) && !srOnly(o) &&
+        o.getBoundingClientRect().bottom > 0 && o.getBoundingClientRect().top < vh && (text(o) || o.matches(CONTROLS) || o.matches('img, svg, canvas, video')));
+      if (!covered) continue;
+      bad.push(item(el, 'full-screen overlay over other content, with controls but no dialog role'));
     }
     return result(bad.length ? 'fail' : marked.length ? 'pass' : 'na', bad);
   });
@@ -481,14 +565,16 @@
 
   // ---------- checks: text ----------
 
-  function textNodes() {
+  // Text on the page. Copy checks read everything a person or a screen reader meets;
+  // visual checks (size, contrast, typefaces) pass seen=true to leave out screen-reader-only text.
+  function textNodes(seen) {
     const out = [];
     const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let n = w.nextNode(); n; n = w.nextNode()) {
       const p = n.parentElement;
       if (!p || p.closest('script, style, noscript, template, code, pre, textarea')) continue;
       const t = n.nodeValue.replace(/\s+/g, ' ').trim();
-      if (t && visible(p)) out.push([p, t]);
+      if (t && visible(p) && !(seen && srOnly(p))) out.push([p, t]);
     }
     return out;
   }
@@ -530,9 +616,11 @@
     const seen = new Set();
     const bad = [];
     let n = 0;
-    for (const [el, t] of textNodes()) {
+    for (const [el, t] of textNodes(true)) {
       if (seen.has(el) || t.length < 2) continue;
       seen.add(el);
+      // WCAG 1.4.3 exempts text in inactive (disabled) controls.
+      if (el.closest(':disabled, [aria-disabled="true"]')) continue;
       const s = style(el);
       const fg = parseColor(s.color);
       const bg = backdrop(el);
@@ -550,7 +638,7 @@
     return verdict(bad, n, 'Text over images and gradients is not measured.');
   });
 
-  // ---------- checks: type, colour, motion ----------
+  // ---------- checks: type, color, motion ----------
 
   // Every style rule the page can read, with the media condition it sits under.
   function styleRules() {
@@ -580,12 +668,12 @@
     const blocks = new Set(prose());
     const seen = new Set();
     const bad = [];
-    for (const [el] of textNodes()) {
+    for (const [el] of textNodes(true)) {
       if (seen.has(el)) continue;
       seen.add(el);
       const size = px(style(el).fontSize);
       const block = el.closest(PROSE);
-      if (size < 13) bad.push(item(el, size + 'px text; nothing should be under 13px, and never under 12'));
+      if (size < 11.5) bad.push(item(el, size + 'px text; nothing should be under 12px'));
       else if (block && blocks.has(block) && size < 15.5) bad.push(item(el, size + 'px running text; use 16px or more'));
     }
     return verdict(bad, seen.size);
@@ -613,14 +701,14 @@
 
   check('font-families', () => {
     const fams = new Set();
-    for (const [el] of textNodes()) fams.add(style(el).fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '').toLowerCase());
+    for (const [el] of textNodes(true)) fams.add(style(el).fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '').toLowerCase());
     const list = Array.from(fams);
     return result(list.length > 3 ? 'fail' : list.length ? 'pass' : 'na', list.length > 3 ? [{ at: 'page', note: list.join(', ') }] : [], list.length + ' typefaces in use: ' + list.join(', '));
   });
 
   check('font-sizes', () => {
     const sizes = new Set();
-    for (const [el] of textNodes()) sizes.add(Math.round(px(style(el).fontSize)));
+    for (const [el] of textNodes(true)) sizes.add(Math.round(px(style(el).fontSize)));
     const list = Array.from(sizes).sort((a, b) => a - b);
     return result(list.length > 7 ? 'fail' : list.length ? 'pass' : 'na', list.length > 7 ? [{ at: 'page', note: list.join(', ') + 'px' }] : [], list.length + ' text sizes in use: ' + list.join(', ') + 'px');
   });
@@ -629,7 +717,7 @@
     const heads = $$('h1, h2, h3, h4').filter(visible).filter((h) => text(h));
     if (!heads.length) return result('na', []);
     const tally = {};
-    for (const [el, t] of textNodes()) {
+    for (const [el, t] of textNodes(true)) {
       if (el.closest('h1, h2, h3, h4, h5, h6, button, a, label, th')) continue;
       const k = Math.round(px(style(el).fontSize)) + '|' + (parseInt(style(el).fontWeight, 10) || 400);
       tally[k] = (tally[k] || 0) + t.length;
@@ -671,7 +759,7 @@
   check('gradient-text', () => {
     const seen = new Set();
     const bad = [];
-    for (const [el] of textNodes()) {
+    for (const [el] of textNodes(true)) {
       if (seen.has(el)) continue;
       seen.add(el);
       const s = style(el);
@@ -680,15 +768,21 @@
     return verdict(bad, seen.size);
   });
 
-  check('system-theme', () => {
+  check('system-theme', (opts) => {
     const themed = styleRules().some((r) => /prefers-color-scheme/.test(r.media));
     if (themed) return result('pass', []);
-    const scheme = style(document.documentElement).colorScheme || '';
-    const meta = (document.querySelector('meta[name=color-scheme]') || { content: '' }).content || '';
-    if (/light/.test(scheme + meta) && /dark/.test(scheme + meta)) {
-      return result('review', [{ at: 'html', note: 'declares both colour schemes but has no rules under prefers-color-scheme' }], 'Check the page in dark mode: explicit colours may not adapt.');
+    if (opts.singleTheme) return result('na', [], 'single theme declared by the singleTheme option');
+    const scheme = (style(document.documentElement).colorScheme || '') + ' ' + ((document.querySelector('meta[name=color-scheme]') || { content: '' }).content || '');
+    const light = /\blight\b/.test(scheme), dark = /\bdark\b/.test(scheme);
+    if (light && dark) {
+      return result('review', [{ at: 'html', note: 'declares both color schemes but has no rules under prefers-color-scheme' }], 'Check the page in dark mode: explicit colors may not adapt.');
     }
-    return result('fail', [{ at: 'page', note: 'no styles under prefers-color-scheme and no light dark colour scheme declared' }], 'Acceptable only where the product has one deliberate theme.');
+    if (light !== dark) {
+      // A product that commits to one theme says so with color-scheme: "dark" or "light" alone.
+      return result('review', [{ at: 'html', note: 'declares a single color scheme (' + (dark ? 'dark' : 'light') + ')' }], 'Acceptable if the single theme is deliberate (VIS-011 exception).');
+    }
+    return result('fail', [{ at: 'page', note: 'no styles under prefers-color-scheme and no color-scheme declared' }],
+      'If one theme is deliberate, declare it: <meta name="color-scheme" content="dark">, or pass the singleTheme option.');
   });
 
   check('transition-props', () => {
@@ -698,6 +792,7 @@
       const prop = r.style.transitionProperty, dur = r.style.transitionDuration;
       if (!prop && !dur) continue;
       if (prop === 'none' || (dur && seconds(dur) === 0)) continue;
+      if (!ruleInUse(r.sel)) continue; // only rules that style something on this screen
       n++;
       const p = prop || 'all';
       if (/(^|,\s*)all(,|$)/.test(p)) bad.push({ at: r.sel, note: 'transitions every property; name the ones that change' });
@@ -711,7 +806,7 @@
     let n = 0;
     for (const r of styleRules()) {
       const dur = r.style.transitionDuration;
-      if (!dur) continue;
+      if (!dur || !ruleInUse(r.sel)) continue;
       n++;
       if (seconds(dur) > 0.5) bad.push({ at: r.sel, note: 'transition lasts ' + seconds(dur) + 's' });
     }
@@ -728,10 +823,10 @@
 
   check('reduced-motion', () => {
     const rules = styleRules();
-    const moves = rules.some((r) => (r.style.transitionDuration && seconds(r.style.transitionDuration) > 0) || (r.style.animationName && r.style.animationName !== 'none'));
-    if (!moves) return result('na', [], 'no transitions or animations in the stylesheets');
-    const honoured = rules.some((r) => /prefers-reduced-motion/.test(r.media));
-    return result(honoured ? 'pass' : 'fail', honoured ? [] : [{ at: 'stylesheets', note: 'motion is defined but nothing changes under prefers-reduced-motion' }]);
+    const moves = rules.some((r) => ((r.style.transitionDuration && seconds(r.style.transitionDuration) > 0) || (r.style.animationName && r.style.animationName !== 'none')) && !/prefers-reduced-motion/.test(r.media) && ruleInUse(r.sel));
+    if (!moves) return result('na', [], 'nothing on this screen has a transition or animation');
+    const honored = rules.some((r) => /prefers-reduced-motion/.test(r.media));
+    return result(honored ? 'pass' : 'fail', honored ? [] : [{ at: 'stylesheets', note: 'motion is defined but nothing changes under prefers-reduced-motion' }]);
   });
 
   check('scroll-hidden', () => {
@@ -821,7 +916,7 @@
       const max = Math.max(c.r, c.g, c.b), min = Math.min(c.r, c.g, c.b);
       const page = backdrop(b.parentElement || document.body);
       const neutral = max - min < 30;
-      // Count a button as primary-styled when it is filled with a colour, or filled with a neutral that stands out strongly.
+      // Count a button as primary-styled when it is filled with a color, or filled with a neutral that stands out strongly.
       return !neutral || (page && ratio(c, page) > 7);
     });
     const dialog = $$('dialog[open], [role=dialog], [role=alertdialog]').filter(visible)[0];
@@ -833,9 +928,15 @@
   // ---------- run ----------
 
   async function uxCheck(opts = {}) {
+    // Measure the page at rest. Waits for loading indicators to clear and resource loads to
+    // stop, up to settleMs (default 10 s; 0 skips the wait).
+    const settled = opts.settleMs === 0 ? { settled: true, waitedMs: 0, skipped: true }
+      : await settle(opts.settleMs || 10000, opts.quietMs || 500);
     const out = {
       tool: 'ux-check', version: VERSION, url: location.href,
       viewport: { width: window.innerWidth, height: window.innerHeight },
+      settled,
+      warning: settled.settled ? undefined : 'The page was still loading when measured; results may describe a loading state.',
       summary: { fail: [], review: [], pass: [], na: [], error: [] },
       checks: {}, rules: {},
     };

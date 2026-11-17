@@ -18,7 +18,7 @@ Read this while building. The records below are for judging.
 - **DATA-008** Values are shown ready to use: formatted, with units, the same way everywhere.
 - **DATA-009** Column headings stay in view while a long table scrolls.
 - **DATA-010** When a view is filtered, sorted or has columns hidden, it says so and offers one action to clear it.
-- **DATA-011** Each row shows its one or two most used actions directly; the rest sit in one labelled menu.
+- **DATA-011** Each row shows its one or two most used actions directly; the rest sit in one labeled menu.
 - **DATA-012** Lists that people search, compare or return to are paged or loaded on request, not by endless scroll.
 - **DATA-013** A chart labels its axes and units and makes the exact values available.
 - **DATA-014** Emphasis is rare and means one thing.
@@ -31,43 +31,43 @@ Read this while building. The records below are for judging.
 - Why: When everything is the same size, or decoration outranks the task, people must search for the point of the screen.
 - Applies when: A screen has more than one section or block.
 - Passes when: The primary content or task is the first block in reading order and the most prominent; secondary material is smaller or lower.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: some research support.
 - Passing example: An invoices screen that opens on the invoice table with its filter.
 - Failing example: A large ring chart and four stat cards above a table that starts below the fold.
 - Not applicable: A screen with a single block.
-- Sources: hhs:6:5; hhs:6:3; sm86:2.5/16; hhs:12:2; catalogue:B6.2
+- Sources: hhs:6:5; hhs:6:3; sm86:2.5/16; hhs:12:2; catalog:B6.2
 
 ### DATA-002 A screen opens on what the user came for.
 
 - Why: A welcome banner or decorative opening pushes the point of the screen down and says nothing.
 - Applies when: Always.
 - Passes when: On a working screen there is no hero section, greeting banner or introductory panel above the working content. On a page that presents something, the opening is the statement of what it is and the next step (see PAGE-001 and PAGE-002), sized to its content and not to the height of the window.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: Heading 'Orders', then the orders.
 - Failing example: A gradient panel reading 'Welcome to your dashboard' with a subtitle and two buttons; a landing page whose opening fills the window with a slogan.
 - Not applicable: Never; this rule always applies.
-- Sources: catalogue:B4.2; hhs:6:3; msux:top-violations#Wizard pages
+- Sources: catalog:B4.2; hhs:6:3; msux:top-violations#Wizard pages
 
 ### DATA-003 Each number, card or chart on the screen answers a question the user has for the task.
 
 - Why: Decorative metrics take the most space and deliver the least.
 - Applies when: The screen shows summary numbers, stat cards or charts.
 - Passes when: For each one, the decision or action it informs can be named; the rest are removed.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: '3 invoices overdue' linking to the overdue list.
 - Failing example: Four equal cards: Total Users, Total Revenue, Active Sessions, Growth, each with a sparkline.
 - Not applicable: No summary numbers or charts.
-- Sources: sm86:2.0/2; hhs:16:7; hhs:6:1; catalogue:B6.3
+- Sources: sm86:2.0/2; hhs:16:7; hhs:6:1; catalog:B6.3
 
 ### DATA-004 Related items are grouped, groups are separated by space, and elements line up on a few shared edges.
 
 - Why: Grouping and alignment are the strongest measured predictors of how fast people find things on a screen.
 - Applies when: A screen has more than a handful of elements.
 - Passes when: Items that belong together are nearer each other than to other groups; left edges and baselines fall on a small number of lines.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: well replicated.
 - Passing example: Billing fields in one block, contact fields in another, with a clear gap between and one left edge.
 - Failing example: Even 16px gaps between every element so nothing reads as a group.
@@ -91,7 +91,7 @@ Read this while building. The records below are for judging.
 
 - Why: Without headers neither sighted nor screen reader users know what a column means.
 - Applies when: The screen shows rows of records with the same attributes.
-- Passes when: It uses a table with th cells for columns (and rows where they are labelled), each with a short descriptive heading.
+- Passes when: It uses a table with th cells for columns (and rows where they are labeled), each with a short descriptive heading.
 - Evidence: inspect the running page; scripted check `table-headers`
 - Severity: major. Support: consensus of published practice.
 - Passing example: <th scope="col">Due date</th>
@@ -116,7 +116,7 @@ Read this while building. The records below are for judging.
 - Why: People should not convert, decode or guess.
 - Applies when: The screen shows dates, times, money, quantities or codes.
 - Passes when: Dates, numbers and currency are formatted for the user's locale, units are shown, relative times offer the exact time, and the same item is formatted identically across screens.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: '12 Mar 2026', '1,204.50 GBP', '3 hours ago' with the exact time on hover and focus.
 - Failing example: '2026-03-12T09:14:22.000Z', '1204.5', a bare '42' with no unit.
@@ -147,11 +147,11 @@ Read this while building. The records below are for judging.
 - Not applicable: Views with no filtering.
 - Sources: sm86:2.7.4/2; sm86:2.7.4/4; nng:data-tables; hhs:9:8
 
-### DATA-011 Each row shows its one or two most used actions directly; the rest sit in one labelled menu.
+### DATA-011 Each row shows its one or two most used actions directly; the rest sit in one labeled menu.
 
 - Why: Row actions hidden in a hover state or a generic menu are slow to find and unusable on touch.
 - Applies when: Table or list rows have actions.
-- Passes when: At most two actions are visible per row as labelled controls; further actions are in a single menu button with an accessible name; none appear only on hover.
+- Passes when: At most two actions are visible per row as labeled controls; further actions are in a single menu button with an accessible name; none appear only on hover.
 - Evidence: inspect the running page; scripted check `hover-only`
 - Severity: minor. Support: consensus of published practice.
 - Passing example: 'Edit' and a 'More actions' menu on each row.
@@ -176,34 +176,34 @@ Read this while building. The records below are for judging.
 
 - Why: A chart without labels or values is a decoration.
 - Applies when: The screen shows a chart.
-- Passes when: Axes or series are labelled with what they measure and the unit, and values can be read from labels, a table or a focusable tooltip.
+- Passes when: Axes or series are labeled with what they measure and the unit, and values can be read from labels, a table or a focusable tooltip.
 - Evidence: inspect the running page
 - Severity: minor. Support: some research support.
-- Passing example: A bar chart titled 'Invoices paid per month' with labelled axes and a 'View as table' link.
-- Failing example: An unlabelled sparkline beside a number.
+- Passing example: A bar chart titled 'Invoices paid per month' with labeled axes and a 'View as table' link.
+- Failing example: An unlabeled sparkline beside a number.
 - Not applicable: No charts.
 - Sources: hhs:14:10; sm86:2.4.1/3; hhs:16:6
 
 ### DATA-014 Emphasis is rare and means one thing.
 
 - Why: Highlighting many things highlights none, and mixed codes cannot be learned.
-- Applies when: The screen uses colour, bold, badges or icons to mark some items.
-- Passes when: Only items needing attention are emphasised, each kind of emphasis has one meaning across screens, and every badge reflects real state.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Applies when: The screen uses color, bold, badges or icons to mark some items.
+- Passes when: Only items needing attention are emphasized, each kind of emphasis has one meaning across screens, and every badge reflects real state.
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: some research support.
 - Passing example: Only overdue invoices carry a badge.
-- Failing example: Every row has a coloured status pill, a bold amount and an icon.
+- Failing example: Every row has a colored status pill, a bold amount and an icon.
 - Not applicable: No emphasis used.
 - Sources: hhs:11:5; hhs:11:11; sm86:2.6/1; sm86:2.6/7; sm86:2.6/28; hhs:9:5
 
 ### DATA-015 A mark the product uses in its own sense is explained where it is used, and means one thing everywhere.
 
-- Why: A symbol or colour code people have not met is a puzzle until it is defined, and one that changes meaning between screens is worse than none.
-- Applies when: The screen uses symbols, shapes or colours whose meaning is specific to this product: category marks on a map, status colours, badges.
-- Passes when: Each such mark is labelled directly beside the thing it marks where space allows; otherwise a legend showing the mark itself sits in the same view, next to the display it explains. The same mark carries the same meaning on every screen.
+- Why: A symbol or color code people have not met is a puzzle until it is defined, and one that changes meaning between screens is worse than none.
+- Applies when: The screen uses symbols, shapes or colors whose meaning is specific to this product: category marks on a map, status colors, badges.
+- Passes when: Each such mark is labeled directly beside the thing it marks where space allows; otherwise a legend showing the mark itself sits in the same view, next to the display it explains. The same mark carries the same meaning on every screen.
 - Evidence: inspect the running page
 - Severity: major. Support: some research support.
 - Passing example: Filter chips reading 'Police', 'Fire' and 'Medical', each with its mark, directly above the map and the list that use those marks.
-- Failing example: Coloured dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another.
-- Not applicable: No product-specific marks or colour codes.
+- Failing example: Colored dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another.
+- Not applicable: No product-specific marks or color codes.
 - Sources: sm86:2.6/6; sm86:2.4/12; sm86:2.6/7; sm86:2.4.3/3; sm86:2.4.4/8; sm86:2.4.8/4; hhs:11:9

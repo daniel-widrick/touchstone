@@ -15,7 +15,7 @@ Read this while building. The records below are for judging.
 - **ACC-005** Text has a contrast ratio of at least 4.5 to 1 against its background, or 3 to 1 for large text.
 - **ACC-006** The outlines and states of controls have a contrast of at least 3 to 1 against what is next to them.
 - **ACC-007** Pointer targets are at least 24 by 24 CSS pixels, or spaced so that a 24 pixel circle on each touches no other target.
-- **ACC-008** Anything shown by colour is also shown another way.
+- **ACC-008** Anything shown by color is also shown another way.
 - **ACC-009** Headings form an outline: one top heading, then levels in order.
 - **ACC-010** The page has one main landmark holding its primary content.
 - **ACC-011** Every image has an alt attribute: a description when it informs, empty when it decorates.
@@ -92,7 +92,7 @@ Read this while building. The records below are for judging.
 
 - Why: A field or toggle whose edge cannot be seen cannot be found.
 - Applies when: The screen has form fields, toggles, checkboxes, icons that carry meaning, or focus indicators.
-- Passes when: The boundary or fill that identifies each control, and each state of it, meets 3:1 against adjacent colours.
+- Passes when: The boundary or fill that identifies each control, and each state of it, meets 3:1 against adjacent colors.
 - Evidence: measure a value on the running page
 - Severity: minor. Support: consensus of published practice.
 - Passing example: Input border #767676 on white.
@@ -112,16 +112,16 @@ Read this while building. The records below are for judging.
 - Not applicable: No controls.
 - Sources: wcag22:2.5.8; mackenzie1992; parhi2006; sm86:1.1/13
 
-### ACC-008 Anything shown by colour is also shown another way.
+### ACC-008 Anything shown by color is also shown another way.
 
-- Why: Colour alone is invisible to people with colour vision deficiency and to screen readers.
-- Applies when: The screen uses colour to show status, errors, required fields, selection or series in a chart.
+- Why: Color alone is invisible to people with color vision deficiency and to screen readers.
+- Applies when: The screen uses color to show status, errors, required fields, selection or series in a chart.
 - Passes when: Each such distinction also has text, an icon or a shape.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: A status column reading 'Overdue' with an icon, in red.
 - Failing example: A red dot or green dot with no text.
-- Not applicable: Colour carries no meaning on the screen.
+- Not applicable: Color carries no meaning on the screen.
 - Sources: wcag22:1.4.1; hhs:3:3; sm86:2.6/30
 
 ### ACC-009 Headings form an outline: one top heading, then levels in order.

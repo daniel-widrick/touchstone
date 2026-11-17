@@ -27,7 +27,7 @@ and deferred until results have been compared against real examples.
 | Path | What it is |
 |---|---|
 | `rules/*.yaml` | The rules, one file per domain. The source of truth. |
-| `sources/registry.yaml` | Every source a rule may cite, with its licence and whether we hold notes on it. |
+| `sources/registry.yaml` | Every source a rule may cite, with its license and whether we hold notes on it. |
 | `sources/notes/` | What was taken from each guideline collection, in our own words, with locators. |
 | `research/` | The research reports the first rule set was written from. |
 | `plugin/` | The installable plugin: the skill, its generated reference files, a four-file design kit, the checker and the auditor agent. |
@@ -44,7 +44,7 @@ navigation, data, access, responsive, visual, pages. Every rule record has:
 - `why`, the harm to the user
 - `applies_when` and `pass_when`, both observable
 - `evidence`: read the code, inspect the page, measure a value, do the step,
-  or judgement
+  or judgment
 - `check`, the scripted check that gives evidence for it, if there is one
 - `severity`, fixed by the rule and not by whoever is judging
 - `support`: well replicated, some research support, consensus of published
@@ -101,6 +101,14 @@ python3 plugin/skills/touchstone/scripts/run.py -s --width 375 path/to/page.html
 `run.py` needs only python3 and an installed Chrome. It was written in Python
 because Node is not required anywhere in this project.
 
+Both wait for the page to settle (no loading indicator, no requests running)
+before measuring, and warn when it never does. `run.py` can also fake the
+page's network without touching the server: `--block-writes`, `--fail
+REGEX`, `--status`, `--delay MS` and `--empty REGEX`. The same faking is
+available to any browser tool as `scripts/fake-network.js`. A product with
+one deliberate theme declares it with `<meta name="color-scheme"
+content="dark">`, or passes `--single-theme`.
+
 The checker cannot see handlers added with `addEventListener`, and it does not
 click, type or press keys. A clean run is evidence for the rules it names and
 nothing more.
@@ -132,7 +140,7 @@ In a session:
 /plugin install touchstone@touchstone
 ```
 
-### An organisation, Claude Code
+### An organization, Claude Code
 
 An administrator adds this to managed settings (the claude.ai admin console
 under Claude Code > Managed settings, an MDM profile, or

@@ -51,7 +51,7 @@ Read this while building. The records below are for judging.
 - Why: Confirming what the user can see adds noise and trains them to ignore messages.
 - Applies when: A screen shows a success toast, banner or dialog.
 - Passes when: Each success message reports something the user could not otherwise see, such as a background send or an off-screen change.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: 'Invite sent to sam@example.org', because nothing else on screen shows it.
 - Failing example: A 'Row added successfully!' toast while the row appears in the table.
@@ -76,7 +76,7 @@ Read this while building. The records below are for judging.
 - Why: A modal for something that needs no decision interrupts; a toast for a field error is too far from the fix.
 - Applies when: The screen shows any message.
 - Passes when: Field problems are inline; page-level status is a banner in the page; a dialog is used only when the user must choose before continuing.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: A failed upload shows its message on the upload row.
 - Failing example: A modal dialog announcing 'Settings saved' with an OK button.
@@ -113,7 +113,7 @@ Read this while building. The records below are for judging.
 - Why: A confirmation nearly everyone answers the same way is noise, and it wears down attention for the ones that matter.
 - Applies when: The screen uses a confirmation dialog.
 - Passes when: Each confirmation guards an action that is both uncommon and costly to get wrong; none guards cancel, close, save or a frequent action.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: well replicated.
 - Passing example: The only confirmation in the product is on permanently deleting a workspace.
 - Failing example: Confirmations on 'Save', 'Cancel', 'Log out' and 'Remove filter'.
@@ -137,7 +137,7 @@ Read this while building. The records below are for judging.
 - Why: Messages that change nothing for the user are interruptions.
 - Applies when: The screen shows notifications, toasts or status messages.
 - Passes when: Each message corresponds to one event and to something the user may now do or avoid; routine internal events produce none.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: One message when an export is ready to download.
 - Failing example: Toasts for 'Loading data', 'Data loaded', 'Cache refreshed' and 'Connected'.

@@ -52,7 +52,7 @@ small enough to make a phone zoom the page and none with the skill did.
 
 The gains are uneven. Forms moved least (87 to 91 percent), and inside it one
 rule got worse: FORM-005 failed in 3 of 4 with-skill builds against 0 of 2
-without. Those builds labelled optional fields in words, as the rule asks,
+without. Those builds labeled optional fields in words, as the rule asks,
 but left the `required` attribute off the required ones. Controls and actions
 still fails in 3 of 28: on three with-skill builds an irreversible action was
 styled as the main button.

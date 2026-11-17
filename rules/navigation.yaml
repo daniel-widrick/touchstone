@@ -23,7 +23,7 @@ rules:
     rule: "Navigation shows where the user currently is."
     why: "Without a you-are-here cue people lose track of which section they are acting in."
     applies_when: "The product has persistent navigation."
-    pass_when: "The current section is marked in the navigation by more than colour and carries aria-current."
+    pass_when: "The current section is marked in the navigation by more than color and carries aria-current."
     evidence: dom
     severity: major
     support: practice-consensus
@@ -54,7 +54,7 @@ rules:
     why: "People choose a path by the words on it; generic labels give no scent."
     applies_when: "The product has navigation."
     pass_when: "Each label names an object or task of this product; generic catch-alls are not the main items."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: well-replicated
     sources: ["hhs:9:1", "pirolli1999", "sm86:2.0/12", "msux:top-violations#Property Sheets", "hhs:7:6"]
@@ -114,7 +114,7 @@ rules:
     why: "Modals hide the context people need and trap long tasks in a small box."
     applies_when: "The screen opens a modal dialog."
     pass_when: "Each modal holds a single decision or a form of a few fields; multi-step flows, long forms and anything needing the page behind it are not modal. No modal opens without the user asking."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
     sources: ["uswds:components/modal", "nng:modal-nonmodal-dialog", "carbon:patterns/dialog-pattern", "msux:top-violations#Dialog boxes", "hhs:2:1", "nng:data-tables"]
@@ -176,7 +176,7 @@ rules:
     why: "Splitting a simple form into steps adds clicks and hides what is coming."
     applies_when: "A task is presented as a sequence of steps."
     pass_when: "Later steps depend on earlier answers or the task is long and unfamiliar; the flow starts on a working step, not a welcome screen, and its last button names the final action."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["nng:wizards", "msux:top-violations#Wizard pages", "msux:top-violations#Wizards", "hhs:7:9"]
@@ -187,7 +187,7 @@ rules:
       na: "No stepped flows."
 
   - id: NAV-013
-    rule: "The structure is broad and shallow: few levels, with each level's items grouped and labelled."
+    rule: "The structure is broad and shallow: few levels, with each level's items grouped and labeled."
     why: "Deep hierarchies hide things and cost navigation time."
     applies_when: "The product has nested navigation."
     pass_when: "Any screen is reachable in at most three levels, and groups of items have headings."
@@ -202,10 +202,10 @@ rules:
       na: "Flat navigation."
 
   - id: NAV-014
-    rule: "When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labelled More button."
+    rule: "When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labeled More button."
     why: "Navigation hidden entirely behind a menu is used less and makes tasks slower; navigation shown in full on a phone takes the first view away from the content."
     applies_when: "At any width, the product's top-level sections do not fit in a single row at full size."
-    pass_when: "The header is one row at every width from 320px up, and it never scrolls sideways or wraps. As many sections as fit are visible as text links, in order of how often they are used, and the count follows the width; where the product has no usage figures, order by the tasks the brief names and say that the order is a default. The others are in a list of links shown and hidden by a button with a text label (a disclosure with aria-expanded, not an application menu with arrow-key handling). Every item, and the button, is at least 44px tall. The current section is marked with aria-current and by more than colour, including when it is inside the list. Where the row has no room for the product's full name, its mark alone is shown and the name stays in the link's accessible name. With four sections or fewer, all are visible and there is no button."
+    pass_when: "The header is one row at every width from 320px up, and it never scrolls sideways or wraps. As many sections as fit are visible as text links, in order of how often they are used, and the count follows the width; where the product has no usage figures, order by the tasks the brief names and say that the order is a default. The others are in a list of links shown and hidden by a button with a text label (a disclosure with aria-expanded, not an application menu with arrow-key handling). Every item, and the button, is at least 44px tall. The current section is marked with aria-current and by more than color, including when it is inside the list. Where the row has no room for the product's full name, its mark alone is shown and the name stays in the link's accessible name. With four sections or fewer, all are visible and there is no button."
     evidence: measured
     severity: major
     support: some-support

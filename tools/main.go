@@ -65,11 +65,11 @@ type Domain struct {
 
 var (
 	evidenceKinds = map[string]string{
-		"static":    "read the code",
-		"dom":       "inspect the running page",
-		"measured":  "measure a value on the running page",
-		"walk":      "do the step in the running UI and observe",
-		"judgement": "judgement; judge twice, keep only agreeing verdicts",
+		"static":   "read the code",
+		"dom":      "inspect the running page",
+		"measured": "measure a value on the running page",
+		"walk":     "do the step in the running UI and observe",
+		"judgment": "judgment; judge twice, keep only agreeing verdicts",
 	}
 	severities = map[string]bool{"blocker": true, "major": true, "minor": true}
 	supports   = map[string]string{
@@ -188,7 +188,7 @@ func load(root string) ([]Domain, map[string]Source, map[string]bool, problems) 
 				p.add("%s: state the rule as what to do, not what to avoid", at)
 			}
 			if _, ok := evidenceKinds[r.Evidence]; !ok {
-				p.add("%s: evidence=%q; want static, dom, measured, walk or judgement", at, r.Evidence)
+				p.add("%s: evidence=%q; want static, dom, measured, walk or judgment", at, r.Evidence)
 			}
 			if !severities[r.Severity] {
 				p.add("%s: severity=%q; want blocker, major or minor", at, r.Severity)
@@ -255,8 +255,8 @@ func summary(domains []Domain) string {
 		}
 	}
 	fmt.Fprintf(&b, "  %-11s %3d rules\n", "total", total)
-	fmt.Fprintf(&b, "  by evidence: static %d, dom %d, measured %d, walk %d, judgement %d; %d have a scripted check\n",
-		byEvidence["static"], byEvidence["dom"], byEvidence["measured"], byEvidence["walk"], byEvidence["judgement"], scripted)
+	fmt.Fprintf(&b, "  by evidence: static %d, dom %d, measured %d, walk %d, judgment %d; %d have a scripted check\n",
+		byEvidence["static"], byEvidence["dom"], byEvidence["measured"], byEvidence["walk"], byEvidence["judgment"], scripted)
 	return b.String()
 }
 
@@ -384,6 +384,7 @@ func stampVersion(root, skill string) error {
 	}{
 		{filepath.Join(root, "plugin", ".claude-plugin", "plugin.json"), regexp.MustCompile(`"version":\s*"[^"]*"`), `"version": "` + v + `"`},
 		{filepath.Join(skill, "SKILL.md"), regexp.MustCompile(`(?m)^version:.*$`), "version: " + v},
+		{filepath.Join(skill, "scripts", "ux-check.js"), regexp.MustCompile(`const VERSION = '[^']*';`), "const VERSION = '" + v + "';"},
 	}
 	for _, e := range edits {
 		b, err := os.ReadFile(e.path)

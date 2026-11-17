@@ -1,7 +1,7 @@
 # House rules
 
 Decisions made while reviewing what the skill produced on real pages. They
-are judgement, not evidence. Rules that rest on them cite `house:<date> <words>`
+are judgment, not evidence. Rules that rest on them cite `house:<date> <words>`
 and carry the support level `house-preference` unless research was found to
 back them, in which case the research is cited first and the house decision
 is kept for the part the research does not cover.
@@ -30,7 +30,7 @@ Reviewing the same product's header at tablet widths, where the tab row
 scrolled sideways with several tabs cut off.
 
 - A row of navigation or controls that does not fit shows as many items as fit
-  and puts the rest behind a labelled More button.
+  and puts the rest behind a labeled More button.
 - A row that scrolls sideways is not an acceptable control.
 - Reason: hidden items behind a sideways scroll are not discoverable, and no
   source supports the pattern.

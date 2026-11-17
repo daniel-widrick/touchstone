@@ -12,7 +12,7 @@ rules:
     check: leftover-text
     severity: blocker
     support: practice-consensus
-    sources: ["catalogue:B3.1", "catalogue:B3.3", "msux:mess-error#Design concepts > The characteristics of poor error messages", "sm86:2.0/12"]
+    sources: ["catalog:B3.1", "catalog:B3.3", "msux:mess-error#Design concepts > The characteristics of poor error messages", "sm86:2.0/12"]
     counters: [B3.1, B3.2, B3.3]
     exceptions: ["An 'About' or credits page the user asked for."]
     examples:
@@ -25,7 +25,7 @@ rules:
     why: "Each extra notice lowers attention to all the others, and warnings people see routinely stop being read."
     applies_when: "The screen shows a note, callout, banner, disclaimer, hint or warning."
     pass_when: "For each one, a specific action the user would take or avoid because of it can be named, and it sits next to that action. Others are removed."
-    evidence: judgement
+    evidence: judgment
     check: callout-count
     severity: major
     support: well-replicated
@@ -42,14 +42,14 @@ rules:
     why: "People start acting without reading, so text that explains the layout or the controls goes unread."
     applies_when: "The screen has sentences that describe the screen itself, how to use its controls, or what a section is for."
     pass_when: "No text narrates the interface ('Use the form below to', 'This page lets you', 'Click the button to'). Guidance that remains is one short line at the control it concerns."
-    evidence: judgement
+    evidence: judgment
     check: text-volume
     severity: major
     support: well-replicated
     sources: ["carroll1987", "govuk:service-manual/design/writing-for-user-interfaces", "msux:text-ui#Eliminate redundancy", "msux:text-ui#Main instructions", "msux:text-ui#Control labels", "weinreich2008"]
     counters: [B3.2, B3.4, B3.7]
     examples:
-      pass: "A heading 'Invite a member' above two labelled fields and a 'Send invite' button."
+      pass: "A heading 'Invite a member' above two labeled fields and a 'Send invite' button."
       fail: "'Welcome to the team page. Below you will find a list of members. Use the form at the bottom to invite someone by entering their email.'"
       na: "A screen with no prose."
 
@@ -57,11 +57,11 @@ rules:
     rule: "Each thing is said once."
     why: "Repeated titles, subtitles and helper lines add reading and bury the one line that matters."
     applies_when: "A heading has a subtitle, a field has helper text, or a section has an introduction."
-    pass_when: "No subtitle, description, helper text or tooltip restates its heading, label or neighbour in other words."
-    evidence: judgement
+    pass_when: "No subtitle, description, helper text or tooltip restates its heading, label or neighbor in other words."
+    evidence: judgment
     severity: minor
     support: practice-consensus
-    sources: ["msux:text-ui#Eliminate redundancy", "msux:text-ui#Supplemental instructions", "msux:mess-warn#Text > Supplemental instructions", "primer:ui-patterns/forms", "sm86:4.4/11", "catalogue:B4.4"]
+    sources: ["msux:text-ui#Eliminate redundancy", "msux:text-ui#Supplemental instructions", "msux:mess-warn#Text > Supplemental instructions", "primer:ui-patterns/forms", "sm86:4.4/11", "catalog:B4.4"]
     counters: [B4.4, B3.4]
     examples:
       pass: "Label 'Email address', no helper text."
@@ -73,7 +73,7 @@ rules:
     why: "A word or two more in the label is read; a paragraph beside it is not."
     applies_when: "A control has helper, hint or description text."
     pass_when: "The text gives something needed to answer correctly that the label could not hold, such as a required format or a consequence."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["msux:text-ui#Control labels", "msux:text-ui#Supplemental explanations", "govuk:patterns/question-pages", "carbon:patterns/forms-pattern"]
@@ -88,11 +88,11 @@ rules:
     why: "Promotional and cheerful wording slows reading and tells the reader nothing they can check or act on."
     applies_when: "Always. A page that sells is held to the same test: it may persuade, with specifics."
     pass_when: "No greeting banners, slogans, superlatives, exclamation marks or congratulations, and no stock promotional words; each claim names something concrete."
-    evidence: judgement
+    evidence: judgment
     check: hype-words
     severity: major
     support: some-support
-    sources: ["morkes1997", "msux:text-style-tone#The Windows tone", "msux:text-style-tone#Use the Windows tone", "msux:text-ui#Punctuation", "fluent:content-design", "catalogue:B4.1"]
+    sources: ["morkes1997", "msux:text-style-tone#The Windows tone", "msux:text-style-tone#Use the Windows tone", "msux:text-ui#Punctuation", "fluent:content-design", "catalog:B4.1"]
     counters: [B4.1, B4.3, A6]
     examples:
       pass: "Page heading 'Invoices'."
@@ -137,7 +137,7 @@ rules:
     why: "Internal names, codes and jargon force users to translate."
     applies_when: "Always."
     pass_when: "No database field names, enum values, IDs, status codes or developer terms appear as labels or values; terms match what users of this product call things."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: some-support
     sources: ["hhs:15:2", "hhs:15:3", "sm86:2.0/12", "sm86:1.4/19", "intuit:product-and-ui/writing-about-ui"]
@@ -152,14 +152,14 @@ rules:
     why: "Two names suggest two things."
     applies_when: "The same object or action is named in more than one place."
     pass_when: "The same word is used each time, on every screen."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: practice-consensus
     sources: ["sm86:2.0/13", "sm86:2.2/5", "hhs:13:3", "msux:text-style-tone#Be consistent"]
     counters: [B4.6, B9.1]
     examples:
       pass: "'Workspace' in the navigation, headings and dialogs."
-      fail: "'Workspace', 'Team', 'Organisation' and 'Account' used for the same thing."
+      fail: "'Workspace', 'Team', 'Organization' and 'Account' used for the same thing."
       na: "Nothing is named twice."
 
   - id: COPY-011
@@ -200,10 +200,10 @@ rules:
     why: "Headings are what people read while scanning; a vague one hides the content under it."
     applies_when: "The screen has section headings."
     pass_when: "Each heading names its content or task in the user's terms and differs from the others."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: well-replicated
-    sources: ["hhs:9:3", "hhs:9:4", "hhs:16:2", "catalogue:B4.5"]
+    sources: ["hhs:9:3", "hhs:9:4", "hhs:16:2", "catalog:B4.5"]
     counters: [B4.5]
     examples:
       pass: "'Members', 'Pending invites', 'Billing contact'."
@@ -230,9 +230,9 @@ rules:
   - id: COPY-015
     rule: "Information the user must see is presented as part of the content, not in a box styled like a banner or promotion."
     why: "People skip anything that looks like an advertisement, even when it holds what they need."
-    applies_when: "The screen presents required information in a coloured box, banner or side panel."
+    applies_when: "The screen presents required information in a colored box, banner or side panel."
     pass_when: "Required information sits in the normal content flow at the point of use; banner styling is kept for system status."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: some-support
     sources: ["owens2011", "hhs:14:6"]
@@ -246,17 +246,17 @@ rules:
     rule: "A familiar thing is shown by its picture: where a symbol depicts the thing itself and its audience already knows it, the symbol is used in place of the word."
     why: "A known symbol is found faster when scanning and remembered better than its name. Models that generate interfaces reach for words even where a clearer depiction exists, so this has to be chosen on purpose."
     applies_when: "The screen shows data, status or categories for which a symbol exists that depicts the thing directly or is a settled convention: sun, cloud, rain, snow, a phone, a clock, a printer, a house, a tick and a cross, plus and minus, arrows for direction of travel."
-    pass_when: "Such things are shown by their symbol, not by a word that replaces it. Each symbol has a text alternative that assistive technology reads and that can be reached without a pointer; hover text alone is not enough. Meaning does not rest on the symbol's colour. A symbol names the kind of thing, so a number beside it still says what it measures wherever the domain's convention does not settle that."
-    evidence: judgement
+    pass_when: "Such things are shown by their symbol, not by a word that replaces it. Each symbol has a text alternative that assistive technology reads and that can be reached without a pointer; hover text alone is not enough. Meaning does not rest on the symbol's color. A symbol names the kind of thing, so a number beside it still says what it measures wherever the domain's convention does not settle that."
+    evidence: judgment
     severity: major
     support: some-support
     sources: ["sm86:2.4/13", "sm86:2.4/12", "sm86:2.6/3", "sm86:2.6/5", "sm86:2.6/16", "hhs:14:15", "hhs:14:8", "ells1979", "wcag22:1.1.1", "wcag22:1.4.1", "house:2026-11-16 depiction over words"]
     counters: [B3.4, B4.4]
     exceptions: ["Controls: a button or link whose action is not obvious from its icon keeps a visible label (ACT-002).", "A symbol the audience may not know, an abstract concept, or a mark this product uses in its own sense: label it, or give a legend beside it (DATA-015). Label sooner for older or infrequent users.", "An arrow showing that a figure rose or fell, where falling may be good or bad: say it in words."]
-    dissent: "Tested alone, icons are understood less reliably than words (45 percent against 79 percent in one study of phone icons, with older adults doing worse), safety symbols often fall below acceptable comprehension, and icon plus label performs as well as label alone. The HHS guidelines ask for clickable images to be labelled. The gain from a symbol is in finding and remembering, and it holds only for symbols the audience already knows."
+    dissent: "Tested alone, icons are understood less reliably than words (45 percent against 79 percent in one study of phone icons, with older adults doing worse), safety symbols often fall below acceptable comprehension, and icon plus label performs as well as label alone. The HHS guidelines ask for clickable images to be labeled. The gain from a symbol is in finding and remembering, and it holds only for symbols the audience already knows."
     examples:
       pass: "An hourly forecast with a cloud icon beside the cloud percentage and a raindrop beside the precipitation percentage, each named for screen readers."
-      fail: "The same forecast with the icons removed and rows labelled 'Cloud' and 'Precip' in words. Or: 'Unemployment 4.0%' with a bare down arrow."
+      fail: "The same forecast with the icons removed and rows labeled 'Cloud' and 'Precip' in words. Or: 'Unemployment 4.0%' with a bare down arrow."
       na: "Nothing on screen has a symbol its audience already knows."
 
   - id: COPY-017
@@ -264,14 +264,14 @@ rules:
     why: "A label repeated on every item, or restating what the unit already says, is clutter between the reader and the figures."
     applies_when: "The screen shows values with units or formats that identify them, or a series of items sharing one label or unit."
     pass_when: "A shared unit or label is stated once for the group, not on every item. A value whose unit or format, together with where it sits, admits only one reading (a temperature in a forecast, a price in a price list, a time in a schedule) carries no visible label restating it; its name is still available to assistive technology. Where two readings are possible, the label stays. Labels that remain are visually quieter than the values. Where a label worth keeping does not fit at a narrow width, the unit moves in beside the value."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: house-preference
     sources: ["house:2026-11-16 depiction over words", "sm86:2.3/11", "sm86:2.0/2", "hhs:6:1", "hhs:16:7"]
     counters: [B3.4, B4.4]
     exceptions: ["Forms: every field keeps its visible label (FORM-002).", "A bare figure in a place where the reader cannot tell what it measures, such as '79%' among weather readings: keep the word."]
-    dissent: "Smith and Mosier say every data field and every table row and column is labelled, and warn against assuming a field will be recognised from familiarity (2.2/3, 2.3/6). No study tests leaving labels off self-identifying values. The evidenced forms of label reduction are stating a unit once, removing data nobody needs, and quiet labels; leaving a label off altogether rests on a house decision."
+    dissent: "Smith and Mosier say every data field and every table row and column is labeled, and warn against assuming a field will be recognized from familiarity (2.2/3, 2.3/6). No study tests leaving labels off self-identifying values. The evidenced forms of label reduction are stating a unit once, removing data nobody needs, and quiet labels; leaving a label off altogether rests on a house decision."
     examples:
       pass: "'45 degrees' under '1 PM' with no 'Temp' label; one 'Wind, mph' label for the row, or 'mph' under each value on a phone."
-      fail: "Rows labelled 'Temp', 'Cloud', 'Precip' beside values that already carry a degree sign and symbols. Or the opposite: '79%' alone, with nothing to say it is humidity."
+      fail: "Rows labeled 'Temp', 'Cloud', 'Precip' beside values that already carry a degree sign and symbols. Or the opposite: '79%' alone, with nothing to say it is humidity."
       na: "No values with identifying units or formats, and no grouped items."

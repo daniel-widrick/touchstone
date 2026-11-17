@@ -28,7 +28,7 @@ Read this while building. The records below are for judging.
 
 - Why: A control with no name is announced as just 'button' and cannot be found by voice or screen reader.
 - Applies when: The screen has buttons, links or elements with a control role.
-- Passes when: Each one has non-empty text, an aria-label, an aria-labelledby target or a labelled image.
+- Passes when: Each one has non-empty text, an aria-label, an aria-labelledby target or a labeled image.
 - Evidence: inspect the running page; scripted check `accessible-name`
 - Severity: blocker. Support: consensus of published practice.
 - Passing example: <button aria-label="Close dialog"><svg aria-hidden="true">...</svg></button>
@@ -46,7 +46,7 @@ Read this while building. The records below are for judging.
 - Exceptions: Dense toolbars of standard formatting icons, when each also shows its name on hover and on keyboard focus.
 - Sources disagree: GitHub Primer accepts icon-only buttons whose label appears in a tooltip on hover and focus.
 - Passing example: A row shows 'Edit' and 'Archive' as words; the dialog close button is an X.
-- Failing example: A row of five unlabelled glyphs for archive, snooze, assign, pin and share.
+- Failing example: A row of five unlabeled glyphs for archive, snooze, assign, pin and share.
 - Not applicable: Every control has visible text.
 - Sources: nng:icon-usability; wiedenbeck1999; hhs:14:2; sm86:3.1.8/4
 
@@ -67,7 +67,7 @@ Read this while building. The records below are for judging.
 
 - Why: A clickable div cannot be reached or operated from the keyboard and is not announced as a control.
 - Applies when: An element responds to click.
-- Passes when: It is a button, a, input, select, summary or label, or it has a control role, tabindex 0 and Enter or Space handling.
+- Passes when: It is a button, a, input, select, summary or label, or it has a control role, tabindex 0 and Enter or Space handling, or it sits inside an element (including a web component's shadow host) that is such a control.
 - Evidence: inspect the running page; scripted check `fake-control`
 - Severity: blocker. Support: consensus of published practice.
 - Passing example: <button type="button" onClick={save}>Save</button>
@@ -91,10 +91,10 @@ Read this while building. The records below are for judging.
 
 - Why: Weak or misleading cues make people hesitate, miss controls and click things that do nothing.
 - Applies when: The screen mixes controls with static text, headings or badges.
-- Passes when: Controls are distinguishable at rest by shape, fill, underline or colour, and no static element shares that treatment or a pointer cursor.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Passes when: Controls are distinguishable at rest by shape, fill, underline or color, and no static element shares that treatment or a pointer cursor.
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: some research support.
-- Passing example: Links are underlined blue; status badges are flat grey text with no hover effect.
+- Passing example: Links are underlined blue; status badges are flat gray text with no hover effect.
 - Failing example: Section headings are blue and bold like links; real links are plain black text.
 - Not applicable: A screen with no controls.
 - Sources: nng:flat-ui-less-attention-cause-uncertainty; hhs:10:4; hhs:10:8; hhs:14:13
@@ -121,7 +121,7 @@ Read this while building. The records below are for judging.
 - Evidence: inspect the running page
 - Severity: major. Support: consensus of published practice.
 - Passing example: In a delete confirmation, 'Cancel' has focus and 'Delete project' is a separate red-outlined button.
-- Failing example: 'Delete account' is the filled blue default next to a grey 'Keep account'.
+- Failing example: 'Delete account' is the filled blue default next to a gray 'Keep account'.
 - Not applicable: A view with no destructive action.
 - Sources: apple:buttons; sm86:6.0/13; sm86:6.0/8; govuk:components/button
 
@@ -140,14 +140,14 @@ Read this while building. The records below are for judging.
 
 ### ACT-010 A control that cannot be used right now says why in text beside it, or is absent.
 
-- Why: A greyed-out control with no reason leaves people guessing what they did wrong.
+- Why: A grayed-out control with no reason leaves people guessing what they did wrong.
 - Applies when: A control is disabled, or would be unusable in the current state.
 - Passes when: The reason is visible as text near the control, or the control is not shown.
 - Evidence: inspect the running page
 - Severity: major. Support: consensus of published practice.
 - Exceptions: A button disabled only while its own request is in progress.
 - Passing example: 'Publish' is disabled with 'Add a title to publish' beside it.
-- Failing example: 'Publish' is grey with no explanation; a tooltip on the disabled button is the only hint.
+- Failing example: 'Publish' is gray with no explanation; a tooltip on the disabled button is the only hint.
 - Not applicable: No disabled controls.
 - Sources: uswds:components/form; atlassian:components/button/usage; primer:components/button; sm86:3.2/10; sm86:6.0/11
 
@@ -156,7 +156,7 @@ Read this while building. The records below are for judging.
 - Why: Tooltips are missed, vanish on touch and cannot be read at leisure.
 - Applies when: The screen uses tooltips or hover cards.
 - Passes when: Removing every tooltip would leave the task completable and every control identifiable.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Exceptions: Hover text that names a symbol whose meaning is already clear, such as a raindrop or a cloud in a forecast, is the right place for that name (COPY-016). Do not replace such a symbol with a visible word.
 - Passing example: The password rules are listed under the field; a tooltip adds an example.
@@ -169,7 +169,7 @@ Read this while building. The records below are for judging.
 - Why: Consistency lets users reuse what they learned; drift makes them relearn each screen.
 - Applies when: An action such as save, cancel, delete, create or search appears on more than one screen.
 - Passes when: Its wording, style and position match across those screens.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: well replicated.
 - Passing example: Every edit screen ends with 'Save changes' then 'Cancel', left aligned.
 - Failing example: 'Save', 'Update', 'Apply' and 'Done' are used for the same action on four screens.

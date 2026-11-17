@@ -8,6 +8,12 @@ python3 and an installed Chrome or Chromium; nothing is downloaded.
     run.py -s http://localhost:5173/settings         one line per check
     run.py -s --width 375 path/to/page.html          a local file at phone width
     run.py --axe URL                                 also run axe-core if axe.min.js is beside this file
+    run.py -s --fail 'api/' URL                      the page as it looks when its requests fail
+    run.py -s --block-writes --delay 3000 URL        slow network, nothing written to the server
+
+It waits until network requests and loading indicators have stopped before
+measuring, and warns if they never did. Every run uses a fresh browser
+profile, so several runs can go at once.
 
 Exit status is 0 when the checks ran, whatever they found.
 """
@@ -61,25 +67,37 @@ class WebSocket:
         mask = os.urandom(4)
         self.sock.sendall(head + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(data)))
 
-    def _read(self, n):
-        while len(self.buf) < n:
-            chunk = self.sock.recv(65536)
-            if not chunk:
-                raise RuntimeError("connection closed")
-            self.buf += chunk
-        out, self.buf = self.buf[:n], self.buf[n:]
-        return out
+    def _frame(self):
+        """Take one complete frame off the buffer, or return None without consuming anything."""
+        b = self.buf
+        if len(b) < 2:
+            return None
+        n, i = b[1] & 0x7F, 2
+        if n == 126:
+            if len(b) < 4:
+                return None
+            n, i = struct.unpack(">H", b[2:4])[0], 4
+        elif n == 127:
+            if len(b) < 10:
+                return None
+            n, i = struct.unpack(">Q", b[2:10])[0], 10
+        if len(b) < i + n:
+            return None
+        self.buf = b[i + n:]
+        return b[0], b[i:i + n]
 
     def recv(self):
+        """Read one message. A socket timeout leaves partly received data in the buffer."""
         message = b""
         while True:
-            b0, b1 = self._read(2)
-            n = b1 & 0x7F
-            if n == 126:
-                n = struct.unpack(">H", self._read(2))[0]
-            elif n == 127:
-                n = struct.unpack(">Q", self._read(8))[0]
-            payload = self._read(n)
+            f = self._frame()
+            if f is None:
+                chunk = self.sock.recv(65536)
+                if not chunk:
+                    raise RuntimeError("connection closed")
+                self.buf += chunk
+                continue
+            b0, payload = f
             op = b0 & 0x0F
             if op == 8:
                 raise RuntimeError("connection closed by browser")
@@ -93,10 +111,26 @@ class WebSocket:
 class Page:
     def __init__(self, ws):
         self.ws, self.n = ws, 0
+        self.inflight = set()      # network requests started and not yet finished
+        self.last_net = time.time()
+        self.seen = set()          # event names received, for wait_for
+
+    def _event(self, m):
+        method, p = m.get("method"), m.get("params", {})
+        if not method:
+            return
+        self.seen.add(method)
+        if method == "Network.requestWillBeSent" and p.get("type") not in ("WebSocket", "EventSource"):
+            self.inflight.add(p.get("requestId"))
+            self.last_net = time.time()
+        elif method in ("Network.loadingFinished", "Network.loadingFailed"):
+            self.inflight.discard(p.get("requestId"))
+            self.last_net = time.time()
 
     def call(self, method, **params):
         self.n += 1
         mine = self.n
+        self.ws.sock.settimeout(60)
         self.ws.send(json.dumps({"id": mine, "method": method, "params": params}))
         while True:
             m = json.loads(self.ws.recv())
@@ -104,16 +138,31 @@ class Page:
                 if "error" in m:
                     raise RuntimeError("%s: %s" % (method, m["error"].get("message")))
                 return m.get("result", {})
+            self._event(m)
+
+    def pump(self, seconds):
+        """Handle whatever events arrive within the given time."""
+        end = time.time() + seconds
+        while time.time() < end:
+            self.ws.sock.settimeout(max(0.01, end - time.time()))
+            try:
+                self._event(json.loads(self.ws.recv()))
+            except socket.timeout:
+                break
 
     def wait_for(self, event, seconds=30):
         end = time.time() + seconds
-        self.ws.sock.settimeout(seconds)
+        while time.time() < end and event not in self.seen:
+            self.pump(0.2)
+        return event in self.seen
+
+    def wait_idle(self, quiet=0.5, timeout=15.0):
+        """Wait until no request has been in flight for `quiet` seconds. True if it got there."""
+        end = time.time() + timeout
         while time.time() < end:
-            try:
-                if json.loads(self.ws.recv()).get("method") == event:
-                    return True
-            except socket.timeout:
-                break
+            self.pump(0.1)
+            if not self.inflight and time.time() - self.last_net >= quiet:
+                return True
         return False
 
     def evaluate(self, expression):
@@ -124,8 +173,14 @@ class Page:
         return r["result"].get("value")
 
 
-def check(url, width=1280, height=800, focus=True, axe=False, settle=0.6, scheme=None):
-    profile = tempfile.mkdtemp(prefix="ux-check-")
+def check(url, width=1280, height=800, focus=True, axe=False, settle=0.3, scheme=None,
+          single_theme=False, settle_timeout=15.0, net=None):
+    """Load url in headless Chrome, wait for it to settle, run ux-check.js and return its result.
+
+    net, if given, is the fake-network configuration (blockWrites, fail, status, delayMs, empty).
+    It is installed before the page's own scripts run, so load-time requests are covered.
+    """
+    profile = tempfile.mkdtemp(prefix="ux-check-")  # a fresh browser for every run, so runs can go in parallel
     proc = subprocess.Popen(
         [find_chrome(), "--headless=new", "--remote-debugging-port=0", "--user-data-dir=" + profile,
          "--no-first-run", "--no-default-browser-check", "--disable-gpu", "--disable-extensions", "about:blank"],
@@ -146,13 +201,25 @@ def check(url, width=1280, height=800, focus=True, axe=False, settle=0.6, scheme
         if scheme:
             page.call("Emulation.setEmulatedMedia", features=[{"name": "prefers-color-scheme", "value": scheme}])
         page.call("Page.enable")
+        page.call("Network.enable")
+        if net:
+            source = "window.__uxNet = %s;\n" % json.dumps(net) + open(os.path.join(HERE, "fake-network.js"), encoding="utf-8").read()
+            page.call("Page.addScriptToEvaluateOnNewDocument", source=source)
         page.call("Page.navigate", url=url)
         page.wait_for("Page.loadEventFired")
+        network_idle = page.wait_idle(timeout=settle_timeout)
         time.sleep(settle)
         if axe and os.path.isfile(os.path.join(HERE, "axe.min.js")):
             page.evaluate(open(os.path.join(HERE, "axe.min.js"), encoding="utf-8").read() + "\n;true")
-        page.evaluate("window.__uxCheckOptions = %s; true" % json.dumps({"focus": focus}))
-        return page.evaluate(open(os.path.join(HERE, "ux-check.js"), encoding="utf-8").read())
+        opts = {"focus": focus, "singleTheme": single_theme, "settleMs": int(settle_timeout * 1000)}
+        page.evaluate("window.__uxCheckOptions = %s; true" % json.dumps(opts))
+        result = page.evaluate(open(os.path.join(HERE, "ux-check.js"), encoding="utf-8").read())
+        result["networkIdle"] = network_idle
+        if not network_idle and result.get("settled", {}).get("settled", True):
+            result["warning"] = "Requests were still running when the page was measured."
+        if net:
+            result["network"] = page.evaluate("(window.__uxNet && window.__uxNet.log) || []")
+        return result
     finally:
         proc.terminate()
         try:
@@ -162,8 +229,10 @@ def check(url, width=1280, height=800, focus=True, axe=False, settle=0.6, scheme
         shutil.rmtree(profile, ignore_errors=True)
 
 
-def summarise(result):
+def summarize(result):
     lines = []
+    if result.get("warning"):
+        lines.append("WARNING " + result["warning"])
     for name, c in result["checks"].items():
         first = ""
         if c.get("items"):
@@ -184,11 +253,21 @@ def main():
     ap.add_argument("--height", type=int, default=800)
     ap.add_argument("--no-focus", action="store_true", help="skip the check that moves keyboard focus")
     ap.add_argument("--axe", action="store_true", help="also run axe-core if axe.min.js is present")
-    ap.add_argument("--scheme", choices=["light", "dark"], help="emulate the system colour scheme; run once with each to check contrast in both")
+    ap.add_argument("--scheme", choices=["light", "dark"], help="emulate the system color scheme; run once with each to check contrast in both")
+    ap.add_argument("--single-theme", action="store_true", help="the product deliberately has one theme; skip the system-theme check")
+    ap.add_argument("--settle-timeout", type=float, default=15.0, help="seconds to wait for requests and loading indicators to finish (default 15)")
+    g = ap.add_argument_group("fake network (requests are answered in the page; the server is not contacted)")
+    g.add_argument("--block-writes", action="store_true", help="POST, PUT, PATCH and DELETE fail without leaving the page")
+    g.add_argument("--fail", metavar="REGEX", help="requests whose URL matches fail")
+    g.add_argument("--status", type=int, help="with --fail, answer with this HTTP status instead of a network error")
+    g.add_argument("--delay", type=int, metavar="MS", help="delay every request by this many milliseconds")
+    g.add_argument("--empty", metavar="REGEX", help="GET requests whose URL matches return an empty list")
     a = ap.parse_args()
     url = a.url if re.match(r"^[a-z]+://", a.url) else "file://" + os.path.abspath(a.url)
-    result = check(url, a.width, a.height, focus=not a.no_focus, axe=a.axe, scheme=a.scheme)
-    print(summarise(result) if a.summary else json.dumps(result, indent=1))
+    net = {k: v for k, v in (("blockWrites", a.block_writes), ("fail", a.fail), ("status", a.status), ("delayMs", a.delay), ("empty", a.empty)) if v}
+    result = check(url, a.width, a.height, focus=not a.no_focus, axe=a.axe, scheme=a.scheme,
+                   single_theme=a.single_theme, settle_timeout=a.settle_timeout, net=net or None)
+    print(summarize(result) if a.summary else json.dumps(result, indent=1))
 
 
 if __name__ == "__main__":

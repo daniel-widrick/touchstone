@@ -11,7 +11,7 @@ Read this while building. The records below are for judging.
 - **STATE-001** A view with nothing to show says why it is empty and offers the next step.
 - **STATE-002** Empty because nothing exists, empty because a filter matched nothing, and failed to load look different and offer different next steps.
 - **STATE-003** A failed load or save says it failed, keeps what the user had, and offers a way to try again.
-- **STATE-004** A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled.
+- **STATE-004** A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be canceled.
 - **STATE-005** While data is loading the view shows a loading state, never the empty state.
 - **STATE-006** Content that arrives later takes the place reserved for it without moving what is already on screen.
 - **STATE-007** The layout holds with real-world content: long names, large numbers, many items and missing values.
@@ -57,7 +57,7 @@ Read this while building. The records below are for judging.
 - Not applicable: A fully static page.
 - Sources: sm86:5.4/7; sm86:5.4/2; sm86:6.0/3; primer:ui-patterns/empty-states; nng:error-message-guidelines
 
-### STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled.
+### STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be canceled.
 
 - Why: With no signal people assume the action failed and repeat it or leave.
 - Applies when: An action or load can take longer than one second.
@@ -103,7 +103,7 @@ Read this while building. The records below are for judging.
 - Passing example: Long names wrap or truncate with the full value available; a missing phone number shows as a dash with a label.
 - Failing example: 'undefined undefined' in the name column; a long project name pushes the action buttons off the card.
 - Not applicable: A screen with only fixed text.
-- Sources: catalogue:B5.5; primer:ui-patterns/degraded-experiences; wcag22:1.4.10; hhs:13:8
+- Sources: catalog:B5.5; primer:ui-patterns/degraded-experiences; wcag22:1.4.10; hhs:13:8
 
 ### STATE-008 When one part of a screen fails, the rest still works and the failed part says so.
 

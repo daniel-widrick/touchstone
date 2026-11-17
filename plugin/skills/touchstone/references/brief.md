@@ -15,7 +15,7 @@ Any screen. These are the accessibility requirements that shape interaction; mos
 - ACC-005 Text has a contrast ratio of at least 4.5 to 1 against its background, or 3 to 1 for large text.
 - ACC-006 The outlines and states of controls have a contrast of at least 3 to 1 against what is next to them.
 - ACC-007 Pointer targets are at least 24 by 24 CSS pixels, or spaced so that a 24 pixel circle on each touches no other target.
-- ACC-008 Anything shown by colour is also shown another way.
+- ACC-008 Anything shown by color is also shown another way.
 - ACC-009 Headings form an outline: one top heading, then levels in order.
 - ACC-010 The page has one main landmark holding its primary content.
 - ACC-011 Every image has an alt attribute: a description when it informs, empty when it decorates.
@@ -79,7 +79,7 @@ Any screen that shows records, tables, lists, metrics or charts, and any dashboa
 - DATA-008 Values are shown ready to use: formatted, with units, the same way everywhere.
 - DATA-009 Column headings stay in view while a long table scrolls.
 - DATA-010 When a view is filtered, sorted or has columns hidden, it says so and offers one action to clear it.
-- DATA-011 Each row shows its one or two most used actions directly; the rest sit in one labelled menu.
+- DATA-011 Each row shows its one or two most used actions directly; the rest sit in one labeled menu.
 - DATA-012 Lists that people search, compare or return to are paged or loaded on request, not by endless scroll.
 - DATA-013 A chart labels its axes and units and makes the exact values available.
 - DATA-014 Emphasis is rare and means one thing.
@@ -140,8 +140,8 @@ Any product with more than one screen, and any screen that uses dialogs, drawers
 - NAV-010 A dialog is marked up as a dialog and has a name.
 - NAV-011 A dialog takes focus when it opens, keeps it while open, closes on Escape and returns focus to what opened it.
 - NAV-012 A step-by-step flow is used only when the steps must happen in order; otherwise the fields are on one page.
-- NAV-013 The structure is broad and shallow: few levels, with each level's items grouped and labelled.
-- NAV-014 When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labelled More button.
+- NAV-013 The structure is broad and shallow: few levels, with each level's items grouped and labeled.
+- NAV-014 When the sections do not fit in one row, as many as fit stay visible as links and the rest sit behind one labeled More button.
 
 ## Pages that present (`pages.md`)
 
@@ -174,7 +174,7 @@ Any screen that loads, saves or lists data.
 - STATE-001 A view with nothing to show says why it is empty and offers the next step.
 - STATE-002 Empty because nothing exists, empty because a filter matched nothing, and failed to load look different and offer different next steps.
 - STATE-003 A failed load or save says it failed, keeps what the user had, and offers a way to try again. (blocker)
-- STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled.
+- STATE-004 A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be canceled.
 - STATE-005 While data is loading the view shows a loading state, never the empty state.
 - STATE-006 Content that arrives later takes the place reserved for it without moving what is already on screen.
 - STATE-007 The layout holds with real-world content: long names, large numbers, many items and missing values.
@@ -199,7 +199,7 @@ Any new screen or feature, and any task that takes more than one step or one scr
 - TASK-011 The same kind of task follows the same steps in the same order everywhere in the product.
 - TASK-012 Every section, feature and piece of content on the screen serves a task the brief or the user named.
 
-## Type, colour, spacing and motion (`visual.md`)
+## Type, color, spacing and motion (`visual.md`)
 
 Any screen. These rules cover how appearance helps or hinders reading and use. Most are measured by the checker. Many rest on hallmark's stated preferences and say so; where the product already has a design system, that system's values win.
 
@@ -212,14 +212,14 @@ Any screen. These rules cover how appearance helps or hinders reading and use. M
 - VIS-007 Running text is set in ordinary sentence case, aligned to one edge.
 - VIS-008 Images reserve their space before they load.
 - VIS-009 The top heading fits its space at every width.
-- VIS-010 Text is a solid colour.
+- VIS-010 Text is a solid color.
 - VIS-011 The screen follows the system's light or dark setting.
 - VIS-012 Spacing comes from a short scale.
-- VIS-013 One accent colour, used for the same kinds of thing throughout.
+- VIS-013 One accent color, used for the same kinds of thing throughout.
 - VIS-014 Animation changes position and opacity, not layout.
 - VIS-015 Transitions are short.
 - VIS-016 Nothing moves continuously except an indicator that work is in progress.
 - VIS-017 Everything meant to be read is visible when the screen has loaded.
 - VIS-018 A control's label stays on one line.
-- VIS-019 A change of state does not change an element's size or move its neighbours.
-- VIS-020 A screen added to an existing product uses that product's fonts, colours, spacing and components.
+- VIS-019 A change of state does not change an element's size or move its neighbors.
+- VIS-020 A screen added to an existing product uses that product's fonts, colors, spacing and components.

@@ -56,4 +56,4 @@ p, li { max-width: 70ch; }
 When loading a web font:
 
 - Load only the weights in use, with `font-display: swap`, and host the files with the product for production.
-- Name a font in CSS only if it is free to use or the user has confirmed a licence.
+- Name a font in CSS only if it is free to use or the user has confirmed a license.

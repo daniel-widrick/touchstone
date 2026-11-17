@@ -7,7 +7,7 @@ rules:
     rule: "Every control has a name that assistive technology can announce."
     why: "A control with no name is announced as just 'button' and cannot be found by voice or screen reader."
     applies_when: "The screen has buttons, links or elements with a control role."
-    pass_when: "Each one has non-empty text, an aria-label, an aria-labelledby target or a labelled image."
+    pass_when: "Each one has non-empty text, an aria-label, an aria-labelledby target or a labeled image."
     evidence: dom
     check: accessible-name
     severity: blocker
@@ -34,7 +34,7 @@ rules:
     dissent: "GitHub Primer accepts icon-only buttons whose label appears in a tooltip on hover and focus."
     examples:
       pass: "A row shows 'Edit' and 'Archive' as words; the dialog close button is an X."
-      fail: "A row of five unlabelled glyphs for archive, snooze, assign, pin and share."
+      fail: "A row of five unlabeled glyphs for archive, snooze, assign, pin and share."
       na: "Every control has visible text."
 
   - id: ACT-003
@@ -58,7 +58,7 @@ rules:
     rule: "Anything clickable is a native button or link, or carries the role, focusability and key handling of one."
     why: "A clickable div cannot be reached or operated from the keyboard and is not announced as a control."
     applies_when: "An element responds to click."
-    pass_when: "It is a button, a, input, select, summary or label, or it has a control role, tabindex 0 and Enter or Space handling."
+    pass_when: "It is a button, a, input, select, summary or label, or it has a control role, tabindex 0 and Enter or Space handling, or it sits inside an element (including a web component's shadow host) that is such a control."
     evidence: dom
     check: fake-control
     severity: blocker
@@ -90,14 +90,14 @@ rules:
     rule: "Interactive elements look interactive and static elements look static."
     why: "Weak or misleading cues make people hesitate, miss controls and click things that do nothing."
     applies_when: "The screen mixes controls with static text, headings or badges."
-    pass_when: "Controls are distinguishable at rest by shape, fill, underline or colour, and no static element shares that treatment or a pointer cursor."
-    evidence: judgement
+    pass_when: "Controls are distinguishable at rest by shape, fill, underline or color, and no static element shares that treatment or a pointer cursor."
+    evidence: judgment
     severity: major
     support: some-support
     sources: ["nng:flat-ui-less-attention-cause-uncertainty", "hhs:10:4", "hhs:10:8", "hhs:14:13"]
     counters: [B1.3, B1.4, A8]
     examples:
-      pass: "Links are underlined blue; status badges are flat grey text with no hover effect."
+      pass: "Links are underlined blue; status badges are flat gray text with no hover effect."
       fail: "Section headings are blue and bold like links; real links are plain black text."
       na: "A screen with no controls."
 
@@ -131,7 +131,7 @@ rules:
     counters: [B7.5]
     examples:
       pass: "In a delete confirmation, 'Cancel' has focus and 'Delete project' is a separate red-outlined button."
-      fail: "'Delete account' is the filled blue default next to a grey 'Keep account'."
+      fail: "'Delete account' is the filled blue default next to a gray 'Keep account'."
       na: "A view with no destructive action."
 
   - id: ACT-009
@@ -152,7 +152,7 @@ rules:
 
   - id: ACT-010
     rule: "A control that cannot be used right now says why in text beside it, or is absent."
-    why: "A greyed-out control with no reason leaves people guessing what they did wrong."
+    why: "A grayed-out control with no reason leaves people guessing what they did wrong."
     applies_when: "A control is disabled, or would be unusable in the current state."
     pass_when: "The reason is visible as text near the control, or the control is not shown."
     evidence: dom
@@ -163,7 +163,7 @@ rules:
     exceptions: ["A button disabled only while its own request is in progress."]
     examples:
       pass: "'Publish' is disabled with 'Add a title to publish' beside it."
-      fail: "'Publish' is grey with no explanation; a tooltip on the disabled button is the only hint."
+      fail: "'Publish' is gray with no explanation; a tooltip on the disabled button is the only hint."
       na: "No disabled controls."
 
   - id: ACT-011
@@ -171,7 +171,7 @@ rules:
     why: "Tooltips are missed, vanish on touch and cannot be read at leisure."
     applies_when: "The screen uses tooltips or hover cards."
     pass_when: "Removing every tooltip would leave the task completable and every control identifiable."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: practice-consensus
     sources: ["nng:tooltip-guidelines", "primer:components/tooltip/guidelines", "carbon:patterns/forms-pattern"]
@@ -187,7 +187,7 @@ rules:
     why: "Consistency lets users reuse what they learned; drift makes them relearn each screen."
     applies_when: "An action such as save, cancel, delete, create or search appears on more than one screen."
     pass_when: "Its wording, style and position match across those screens."
-    evidence: judgement
+    evidence: judgment
     severity: major
     support: well-replicated
     sources: ["hhs:6:2", "hhs:11:4", "sm86:3.0/6", "polson1986"]

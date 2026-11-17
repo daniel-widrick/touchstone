@@ -77,7 +77,7 @@ Read this while building. The records below are for judging.
 - Passing example: The sidebar becomes a menu button plus visible links to the two main sections; table rows become stacked label and value pairs.
 - Failing example: A dialog taller than the screen whose buttons cannot be reached.
 - Not applicable: A desktop-only tool whose brief excludes phones.
-- Sources: catalogue:B10.1; wcag22:1.4.10; nng:modal-nonmodal-dialog
+- Sources: catalog:B10.1; wcag22:1.4.10; nng:modal-nonmodal-dialog
 
 ### RESP-006 Fixed and sticky elements leave the content and controls beneath them reachable.
 
@@ -89,4 +89,4 @@ Read this while building. The records below are for judging.
 - Passing example: Bottom padding equal to the height of the sticky save bar.
 - Failing example: A chat bubble covering the 'Next' button on phones.
 - Not applicable: No fixed or sticky elements.
-- Sources: catalogue:B10.2; wcag22:2.4.11
+- Sources: catalog:B10.2; wcag22:2.4.11

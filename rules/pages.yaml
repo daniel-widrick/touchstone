@@ -6,12 +6,12 @@ rules:
   - id: PAGE-001
     rule: "The first view says what this is and who it is for, in plain words."
     why: "Visitors decide in seconds whether to stay, and a slogan gives them nothing to decide on."
-    applies_when: "The page introduces a product, service, project or organisation."
+    applies_when: "The page introduces a product, service, project or organization."
     pass_when: "A person who reads only the top heading and the line under it could say what the thing is and who would use it."
-    evidence: judgement
+    evidence: judgment
     severity: blocker
     support: some-support
-    sources: ["catalogue:B4.3", "hallmark:macrostructures/03-marquee-hero.md#Avoid", "hallmark:genres/modern-minimal.md#Voice", "pirolli1999", "morkes1997"]
+    sources: ["catalog:B4.3", "hallmark:macrostructures/03-marquee-hero.md#Avoid", "hallmark:genres/modern-minimal.md#Voice", "pirolli1999", "morkes1997"]
     counters: [B4.3, A6]
     examples:
       pass: "'Invoicing for small building firms. Send an invoice from site in two minutes.'"
@@ -38,7 +38,7 @@ rules:
     why: "Decorative pictures cost loading time and attention and tell the visitor nothing."
     applies_when: "The page includes photographs, illustrations, video or generated graphics."
     pass_when: "Each image shows the product, the result or a fact; removing any one would lose information. No stock or abstract decoration."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: some-support
     sources: ["hallmark:hero-enrichment.md#Quality bar", "hallmark:hero-enrichment.md#Image-need detection", "hhs:14:4", "owens2011"]
@@ -57,7 +57,7 @@ rules:
     check: leftover-text
     severity: blocker
     support: practice-consensus
-    sources: ["catalogue:B5.7", "catalogue:B3.6", "sm86:2.0/1"]
+    sources: ["catalog:B5.7", "catalog:B3.6", "sm86:2.0/1"]
     counters: [B5.7, B3.6]
     exceptions: ["A design mock the user asked to be filled with sample content, marked as sample outside the page."]
     examples:
@@ -70,7 +70,7 @@ rules:
     why: "Hiding the number behind 'Contact us' or a toggle sends visitors away to find it elsewhere."
     applies_when: "The page has a pricing section and the price is known."
     pass_when: "The actual figure, its unit and its period are visible without interaction."
-    evidence: judgement
+    evidence: judgment
     severity: minor
     support: house-preference
     sources: ["hallmark:macrostructures.md#SaaS page sequence"]
@@ -100,7 +100,7 @@ rules:
     rule: "An announcement strip is one line with one link and can be dismissed."
     why: "A strip that wraps, stacks or cannot be closed takes the first view away from the page."
     applies_when: "The page has an announcement or promotional strip."
-    pass_when: "It is a single line at every width, has at most one link, has a labelled dismiss control, and leaves no gap when dismissed."
+    pass_when: "It is a single line at every width, has at most one link, has a labeled dismiss control, and leaves no gap when dismissed."
     evidence: walk
     severity: minor
     support: house-preference
@@ -115,7 +115,7 @@ rules:
     rule: "Code shown for copying has a copy control."
     why: "Selecting a multi-line command by hand picks up prompts and line breaks."
     applies_when: "The page shows commands or code a reader is expected to use."
-    pass_when: "Each such block has a labelled button that copies its text and says that it did."
+    pass_when: "Each such block has a labeled button that copies its text and says that it did."
     evidence: dom
     severity: minor
     support: house-preference

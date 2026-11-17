@@ -34,7 +34,7 @@ Read this while building. The records below are for judging.
 - Passing example: Export downloads a CSV of the rows on screen.
 - Failing example: Export has no handler; clicking it does nothing.
 - Not applicable: A read-only report with no buttons.
-- Sources: catalogue:B5.6; sm86:3.2/10; sm86:3.1.3/18
+- Sources: catalog:B5.6; sm86:3.2/10; sm86:3.1.3/18
 
 ### TASK-002 Everything shown as data is real data, or the view says it has none.
 
@@ -43,11 +43,11 @@ Read this while building. The records below are for judging.
 - Passes when: Each value comes from the application's data source, and no sample, placeholder or leftover text is visible.
 - Evidence: read the code; scripted check `leftover-text`
 - Severity: blocker. Support: consensus of published practice.
-- Exceptions: A prototype the user asked to be filled with sample data, where the sample data is labelled as such once, outside the product UI.
+- Exceptions: A prototype the user asked to be filled with sample data, where the sample data is labeled as such once, outside the product UI.
 - Passing example: The revenue tile reads from the orders query and shows 'No orders yet' when the query is empty.
 - Failing example: A tile shows '+12% this month' from a hardcoded string; a footer says 'Coming soon'.
 - Not applicable: A static settings form with no displayed data.
-- Sources: catalogue:B5.7; catalogue:B3.6; sm86:2.0/1
+- Sources: catalog:B5.7; catalog:B3.6; sm86:2.0/1
 
 ### TASK-003 Ask for each piece of information once and reuse it wherever it is needed again.
 
@@ -92,7 +92,7 @@ Read this while building. The records below are for judging.
 - Why: Most people keep the default, so a good default finishes the task for them.
 - Applies when: A field or choice has a value that is common, known from context, or was the user's last choice.
 - Passes when: That value is shown in the control when the form opens and can be changed like any other entry.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: well replicated.
 - Exceptions: Choices where a default would be presumptuous or legally sensitive, such as consent.
 - Passing example: The date range opens on 'Last 30 days'; the country opens on the account's country.
@@ -132,7 +132,7 @@ Read this while building. The records below are for judging.
 - Passes when: The current step is indicated, earlier steps can be reopened, and changing one keeps the later answers that are still valid.
 - Evidence: do the step in the running UI and observe
 - Severity: major. Support: consensus of published practice.
-- Passing example: A review step lists every answer with a Change link that returns to the review afterwards.
+- Passing example: A review step lists every answer with a Change link that returns to the review afterward.
 - Failing example: A wizard with Next only; the only way to fix step 1 is to reload.
 - Not applicable: A single-step form.
 - Sources: sm86:3.3/5; sm86:3.5/13; sm86:1.4/2; govuk:patterns/question-pages; nng:wizards
@@ -142,7 +142,7 @@ Read this while building. The records below are for judging.
 - Why: Asking users to calculate, look up or convert what the system already knows adds work and errors.
 - Applies when: A value can be derived from data already entered or already held.
 - Passes when: The value is computed and shown, not requested.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: The total updates as line items change.
 - Failing example: The form asks for both date of birth and age.
@@ -154,7 +154,7 @@ Read this while building. The records below are for judging.
 - Why: What users learn on one screen should transfer to the next.
 - Applies when: Two or more screens support the same kind of task, such as create, edit, delete or filter.
 - Passes when: Those screens use the same sequence, the same control types and the same labels for the shared steps.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: well replicated.
 - Passing example: Projects and invoices are both created from a 'New' button top right that opens a page with Save at the bottom.
 - Failing example: Projects are created in a dialog, invoices on a page, tags inline, each with a differently named save button.
@@ -165,10 +165,10 @@ Read this while building. The records below are for judging.
 
 - Why: Unrequested extras crowd the real task and have to be maintained.
 - Applies when: A screen is being built or changed from a stated request.
-- Passes when: Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honouring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Passes when: Each section, widget, control and block of content can be matched to a task in the request; nothing else was added. This is about what the screen contains. Honoring what the device and browser ask for (the system light or dark setting, reduced motion, text size, Back, keyboard use) is expected without being requested and is never an extra.
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: major. Support: consensus of published practice.
 - Passing example: Asked for a table of invoices with a status filter, the screen has the table and the filter.
 - Failing example: The same request also produces stat cards, an activity feed and a 'Quick tips' panel. (Leaving out a dark theme is not a pass on this rule; see VIS-011.)
 - Not applicable: An audit of a screen with no known brief; report it as cannot tell.
-- Sources: catalogue:B9.4; sm86:2.0/2; hhs:16:7
+- Sources: catalog:B9.4; sm86:2.0/2; hhs:16:7

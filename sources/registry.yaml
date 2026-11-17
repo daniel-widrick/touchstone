@@ -6,7 +6,7 @@
 #   pending   free to use, not yet distilled
 #   not-held  commercial; we do not have it and rules may not cite it
 #
-# Licence statements marked "inferred" have not been confirmed. The repo keeps
+# License statements marked "inferred" have not been confirmed. The repo keeps
 # notes and citations, not copies of source texts.
 
 sources:
@@ -14,7 +14,7 @@ sources:
   - id: hhs
     title: Research-Based Web Design and Usability Guidelines
     cite: US Department of Health and Human Services and GSA, enlarged edition, 2006
-    licence: US government work, public domain
+    license: US government work, public domain
     held: notes
     locator: "chapter:number, for example 13:2"
     authority_for: [navigation, copy, data, forms]
@@ -23,7 +23,7 @@ sources:
     title: Guidelines for Designing User Interface Software
     cite: Smith and Mosier, ESD-TR-86-278, MITRE for the US Air Force, 1986
     url: https://hcibib.org/sam/
-    licence: approved for public release, distribution unlimited (public domain inferred)
+    license: approved for public release, distribution unlimited (public domain inferred)
     held: notes
     locator: "section.subsection/item, for example 1.4/12"
     authority_for: [forms, data, feedback, tasks]
@@ -32,7 +32,7 @@ sources:
     title: Web Content Accessibility Guidelines 2.2
     cite: W3C Recommendation, 2023, with the Understanding documents
     url: https://www.w3.org/TR/WCAG22/
-    licence: W3C document licence
+    license: W3C document license
     held: notes
     locator: "success criterion number, for example 3.3.1"
     authority_for: [access, forms, responsive]
@@ -40,7 +40,7 @@ sources:
     title: ACT Rules and the ACT Rules Format 1.1
     cite: W3C
     url: https://www.w3.org/WAI/standards-guidelines/act/rules/
-    licence: W3C document licence
+    license: W3C document license
     held: notes
     locator: "ACT rule id"
     authority_for: [access]
@@ -49,7 +49,7 @@ sources:
     title: WAI-ARIA Authoring Practices Guide
     cite: W3C
     url: https://www.w3.org/WAI/ARIA/apg/patterns/
-    licence: W3C document licence
+    license: W3C document license
     held: notes
     locator: "pattern name, for example dialog-modal"
     authority_for: [access, navigation]
@@ -57,7 +57,7 @@ sources:
     title: Windows User Experience Interaction Guidelines
     cite: Microsoft, Windows 7 era
     url: https://learn.microsoft.com/en-us/windows/win32/uxguide/guidelines
-    licence: see sources/notes/msux.md
+    license: see sources/notes/msux.md
     held: notes
     locator: "page slug#section"
     authority_for: [copy, feedback]
@@ -65,7 +65,7 @@ sources:
   - id: bargas2010
     title: Simple but Crucial User Interfaces in the World Wide Web - Introducing 20 Guidelines for Usable Web Form Design
     cite: Bargas-Avila et al., in User Interfaces, InTech, 2010
-    licence: see sources/notes/bargas2010.md
+    license: see sources/notes/bargas2010.md
     held: notes
     locator: "guideline number"
     authority_for: [forms]
@@ -73,7 +73,7 @@ sources:
   - id: hallmark
     title: Hallmark design skill
     cite: The owner's earlier design skill, version 1.1.0, read 2026-11-16
-    licence: MIT, as stated by its owner; the installed copy carries no licence file
+    license: MIT, as stated by its owner; the installed copy carries no license file
     held: notes
     locator: "file#heading or gate number, for example slop-test.md#49"
     authority_for: [visual, pages]
@@ -81,42 +81,42 @@ sources:
   - id: house
     title: House rules
     cite: Decisions made while reviewing real results, recorded with their date and reasoning in sources/notes/house.md
-    licence: not applicable
+    license: not applicable
     held: notes
     locator: "date and a few words, for example 2026-11-16 depiction over words"
     authority_for: [copy, visual, navigation]
-    note: Judgement, not evidence. Cited so that a rule resting on a house decision is not mistaken for one resting on research.
+    note: Judgment, not evidence. Cited so that a rule resting on a house decision is not mistaken for one resting on research.
   - id: faa
     title: Human Factors Design Standard HF-STD-001B
     cite: US Federal Aviation Administration, 2016
     url: https://hf.tc.faa.gov/hfds/
-    licence: approved for public release (public domain inferred)
+    license: approved for public release (public domain inferred)
     held: pending
     authority_for: [data, feedback]
 
   # Government and company design guidance, read during research (research/04-company-guidelines.md)
-  - {id: govuk, title: GOV.UK Design System and Service Manual, url: "https://design-system.service.gov.uk/", licence: Open Government Licence, held: cited, locator: "page path", authority_for: [forms, copy, navigation]}
-  - {id: uswds, title: US Web Design System, url: "https://designsystem.digital.gov/", licence: US government work, held: cited, locator: "page path", authority_for: [forms, navigation]}
-  - {id: apple, title: Apple Human Interface Guidelines, url: "https://developer.apple.com/design/human-interface-guidelines/", licence: copyright Apple, cited only, held: cited, locator: "page name", authority_for: [actions, feedback, navigation]}
-  - {id: carbon, title: IBM Carbon Design System, url: "https://carbondesignsystem.com/", licence: Apache-2.0, held: cited, locator: "page path", authority_for: [states, feedback, data]}
-  - {id: primer, title: GitHub Primer, url: "https://primer.style/", licence: MIT, held: cited, locator: "page path", authority_for: [states, forms, feedback]}
-  - {id: atlassian, title: Atlassian Design System, url: "https://atlassian.design/", licence: copyright Atlassian, cited only, held: cited, locator: "page path", authority_for: [copy, feedback]}
-  - {id: fluent, title: Microsoft Fluent 2, url: "https://fluent2.microsoft.design/", licence: copyright Microsoft, cited only, held: cited, locator: "page path", authority_for: [copy, feedback]}
-  - {id: mswin, title: Microsoft Windows app design guidance, url: "https://learn.microsoft.com/en-us/windows/apps/design/", licence: copyright Microsoft, cited only, held: cited, locator: "page path", authority_for: [feedback, responsive]}
-  - {id: shopify, title: Shopify app design guidelines, url: "https://shopify.dev/docs/apps/design", licence: copyright Shopify, cited only, held: cited, locator: "page path", authority_for: [feedback, data]}
-  - {id: vercel, title: Vercel Web Interface Guidelines, url: "https://vercel.com/design/guidelines", licence: MIT (repository), held: cited, locator: "section", authority_for: [actions, forms, navigation]}
-  - {id: android, title: Android and Material design guidance, url: "https://developer.android.com/design", licence: copyright Google, cited only, held: cited, locator: "page path", authority_for: [responsive, navigation]}
-  - {id: intuit, title: Intuit content design, url: "https://contentdesign.intuit.com/", licence: copyright Intuit, cited only, held: cited, locator: "page path", authority_for: [copy]}
-  - {id: webdev, title: web.dev Core Web Vitals, url: "https://web.dev/articles/vitals", licence: CC BY 4.0, held: cited, locator: "metric", authority_for: [feedback]}
+  - {id: govuk, title: GOV.UK Design System and Service Manual, url: "https://design-system.service.gov.uk/", license: Open Government Licence, held: cited, locator: "page path", authority_for: [forms, copy, navigation]}
+  - {id: uswds, title: US Web Design System, url: "https://designsystem.digital.gov/", license: US government work, held: cited, locator: "page path", authority_for: [forms, navigation]}
+  - {id: apple, title: Apple Human Interface Guidelines, url: "https://developer.apple.com/design/human-interface-guidelines/", license: copyright Apple, cited only, held: cited, locator: "page name", authority_for: [actions, feedback, navigation]}
+  - {id: carbon, title: IBM Carbon Design System, url: "https://carbondesignsystem.com/", license: Apache-2.0, held: cited, locator: "page path", authority_for: [states, feedback, data]}
+  - {id: primer, title: GitHub Primer, url: "https://primer.style/", license: MIT, held: cited, locator: "page path", authority_for: [states, forms, feedback]}
+  - {id: atlassian, title: Atlassian Design System, url: "https://atlassian.design/", license: copyright Atlassian, cited only, held: cited, locator: "page path", authority_for: [copy, feedback]}
+  - {id: fluent, title: Microsoft Fluent 2, url: "https://fluent2.microsoft.design/", license: copyright Microsoft, cited only, held: cited, locator: "page path", authority_for: [copy, feedback]}
+  - {id: mswin, title: Microsoft Windows app design guidance, url: "https://learn.microsoft.com/en-us/windows/apps/design/", license: copyright Microsoft, cited only, held: cited, locator: "page path", authority_for: [feedback, responsive]}
+  - {id: shopify, title: Shopify app design guidelines, url: "https://shopify.dev/docs/apps/design", license: copyright Shopify, cited only, held: cited, locator: "page path", authority_for: [feedback, data]}
+  - {id: vercel, title: Vercel Web Interface Guidelines, url: "https://vercel.com/design/guidelines", license: MIT (repository), held: cited, locator: "section", authority_for: [actions, forms, navigation]}
+  - {id: android, title: Android and Material design guidance, url: "https://developer.android.com/design", license: copyright Google, cited only, held: cited, locator: "page path", authority_for: [responsive, navigation]}
+  - {id: intuit, title: Intuit content design, url: "https://contentdesign.intuit.com/", license: copyright Intuit, cited only, held: cited, locator: "page path", authority_for: [copy]}
+  - {id: webdev, title: web.dev Core Web Vitals, url: "https://web.dev/articles/vitals", license: CC BY 4.0, held: cited, locator: "metric", authority_for: [feedback]}
 
-  # This project's own catalogue of complaints about AI-generated UIs (research/01-ai-ui-complaints.md).
+  # This project's own catalog of complaints about AI-generated UIs (research/01-ai-ui-complaints.md).
   # Cited where a rule exists because of a failure pattern that the guideline literature does not name.
-  - {id: catalogue, title: Catalogue of complaints about AI-generated interfaces, cite: "research/01-ai-ui-complaints.md, compiled 2026-11-16", held: cited, locator: "complaint id, for example B3.1"}
+  - {id: catalog, title: Catalog of complaints about AI-generated interfaces, cite: "research/01-ai-ui-complaints.md, compiled 2026-11-16", held: cited, locator: "complaint id, for example B3.1"}
 
   # Industry research publishers
-  - {id: nng, title: Nielsen Norman Group articles, url: "https://www.nngroup.com/articles/", licence: copyright NN/g, cited only, held: cited, locator: "article slug", authority_for: [actions, navigation, states, data]}
-  - {id: baymard, title: Baymard Institute articles, url: "https://baymard.com/blog", licence: copyright Baymard, cited only, held: cited, locator: "article slug", authority_for: [forms]}
-  - {id: webaim, title: The WebAIM Million, url: "https://webaim.org/projects/million/", licence: copyright WebAIM, cited only, held: cited, locator: "year", authority_for: [access]}
+  - {id: nng, title: Nielsen Norman Group articles, url: "https://www.nngroup.com/articles/", license: copyright NN/g, cited only, held: cited, locator: "article slug", authority_for: [actions, navigation, states, data]}
+  - {id: baymard, title: Baymard Institute articles, url: "https://baymard.com/blog", license: copyright Baymard, cited only, held: cited, locator: "article slug", authority_for: [forms]}
+  - {id: webaim, title: The WebAIM Million, url: "https://webaim.org/projects/million/", license: copyright WebAIM, cited only, held: cited, locator: "year", authority_for: [access]}
 
   # Papers, read at least in abstract during research (research/03-academic-literature.md)
   - {id: seckler2014, title: "Designing Usable Web Forms: Empirical Evaluation of Web Form Improvement Guidelines", cite: "Seckler, Heinz, Bargas-Avila, Opwis, Tuch, CHI 2014", held: cited}
@@ -128,7 +128,7 @@ sources:
   - {id: mackenzie1992, title: "Fitts' Law as a Research and Design Tool in Human-Computer Interaction", cite: "MacKenzie, Human-Computer Interaction 7, 1992", held: cited}
   - {id: parhi2006, title: Target size study for one-handed thumb use on small touchscreen devices, cite: "Parhi, Karlson, Bederson, MobileHCI 2006", held: cited}
   - {id: card1991, title: The Information Visualizer, cite: "Card, Robertson, Mackinlay, CHI 1991", held: cited}
-  - {id: nielsen1993, title: Response time limits, cite: "Nielsen, Usability Engineering, 1993, as summarised by NN/g", url: "https://www.nngroup.com/articles/response-times-3-important-limits/", held: cited}
+  - {id: nielsen1993, title: Response time limits, cite: "Nielsen, Usability Engineering, 1993, as summarized by NN/g", url: "https://www.nngroup.com/articles/response-times-3-important-limits/", held: cited}
   - {id: myers1985, title: The importance of percent-done progress indicators, cite: "Myers, CHI 1985", held: cited}
   - {id: pirolli1999, title: Information Foraging, cite: "Pirolli and Card, Psychological Review 106(4), 1999", held: cited}
   - {id: carroll1987, title: Paradox of the Active User, and The Minimal Manual, cite: "Carroll and Rosson 1987; Carroll et al., Human-Computer Interaction 3(2), 1987", held: cited}
@@ -155,8 +155,8 @@ sources:
   - {id: tractinsky2000, title: What is beautiful is usable, cite: "Tractinsky, Katz, Ikar, Interacting with Computers 13(2), 2000", held: cited}
 
   # Free books, not yet distilled
-  - {id: hearst2009, title: Search User Interfaces, cite: "Hearst, Cambridge University Press, 2009", url: "https://searchuserinterfaces.com", licence: free to read online, held: pending, authority_for: [navigation]}
-  - {id: wilke2019, title: Fundamentals of Data Visualization, cite: "Wilke, O'Reilly, 2019", url: "https://clauswilke.com/dataviz/", licence: CC BY-NC-ND 4.0, held: pending, authority_for: [data]}
+  - {id: hearst2009, title: Search User Interfaces, cite: "Hearst, Cambridge University Press, 2009", url: "https://searchuserinterfaces.com", license: free to read online, held: pending, authority_for: [navigation]}
+  - {id: wilke2019, title: Fundamentals of Data Visualization, cite: "Wilke, O'Reilly, 2019", url: "https://clauswilke.com/dataviz/", license: CC BY-NC-ND 4.0, held: pending, authority_for: [data]}
 
   # Commercial textbooks. Not held, nothing is bought, rules may not cite them.
   - {id: cooper2014, title: About Face 4th ed., cite: "Cooper, Reimann, Cronin, Noessel, Wiley, 2014", held: not-held, authority_for: [tasks, feedback]}

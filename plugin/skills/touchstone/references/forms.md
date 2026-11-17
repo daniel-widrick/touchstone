@@ -88,7 +88,7 @@ Read this while building. The records below are for judging.
 - Evidence: inspect the running page; scripted check `required-attr`
 - Severity: major. Support: some research support.
 - Sources disagree: GOV.UK marks only optional fields and uses no asterisks; Baymard marks both; USWDS uses a red asterisk with a legend. This rule requires words, whichever group is marked.
-- Passing example: Most fields required and unmarked, the two optional ones labelled 'Phone (optional)'.
+- Passing example: Most fields required and unmarked, the two optional ones labeled 'Phone (optional)'.
 - Failing example: Red asterisks on some fields with no legend, or nothing marked at all.
 - Not applicable: Every field is required, or every field is optional.
 - Sources: hhs:13:1; sm86:1.4/12; bargas2010:4; pauwels2009; baymard:required-optional-form-fields; wcag22:3.3.2
@@ -110,7 +110,7 @@ Read this while building. The records below are for judging.
 
 - Why: A list of errors far from the fields makes people hunt for what to fix.
 - Applies when: A form can reject input.
-- Passes when: After a failed submit, every invalid field has its message adjacent to it and is marked by more than colour.
+- Passes when: After a failed submit, every invalid field has its message adjacent to it and is marked by more than color.
 - Evidence: do the step in the running UI and observe
 - Severity: major. Support: some research support.
 - Exceptions: Errors that belong to no single field, shown at the top of the form.
@@ -159,7 +159,7 @@ Read this while building. The records below are for judging.
 ### FORM-011 Fields for personal details declare what they are so the browser can fill them.
 
 - Why: Autofill removes typing and typing errors.
-- Applies when: A field collects a name, email, phone, address, organisation, username, password or card detail.
+- Applies when: A field collects a name, email, phone, address, organization, username, password or card detail.
 - Passes when: The field has an autocomplete attribute with the matching token.
 - Evidence: inspect the running page; scripted check `autocomplete`
 - Severity: minor. Support: consensus of published practice.
@@ -189,7 +189,7 @@ Read this while building. The records below are for judging.
 - Severity: major. Support: consensus of published practice.
 - Sources disagree: IBM Carbon disables the primary button until requirements are met on short, server-validated forms.
 - Passing example: Pressing 'Create account' with an empty email focuses the email field and shows 'Enter your email address'.
-- Failing example: 'Create account' is grey until every field validates, with no indication why.
+- Failing example: 'Create account' is gray until every field validates, with no indication why.
 - Not applicable: A screen with no form.
 - Sources: govuk:components/button; uswds:components/form; atlassian:components/button/usage; msux:win-dialog-box#Commit buttons; msux:mess-error#Design concepts > Providing necessary error messages; sm86:1.7/5
 
@@ -234,7 +234,7 @@ Read this while building. The records below are for judging.
 - Why: Every extra field costs completion.
 - Applies when: A form is being designed or reviewed against a known purpose.
 - Passes when: Each field is needed for the task; optional extras are behind a link or left out.
-- Evidence: judgement; judge twice, keep only agreeing verdicts
+- Evidence: judgment; judge twice, keep only agreeing verdicts
 - Severity: minor. Support: consensus of published practice.
 - Passing example: Inviting a member asks for an email address and a role.
 - Failing example: Inviting a member also asks for phone, job title, department and a note.

@@ -49,7 +49,7 @@ rules:
       na: "A fully static page."
 
   - id: STATE-004
-    rule: "A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be cancelled."
+    rule: "A wait longer than about a second shows that work is in progress; longer than about ten seconds shows how far along it is and can be canceled."
     why: "With no signal people assume the action failed and repeat it or leave."
     applies_when: "An action or load can take longer than one second."
     pass_when: "With the response delayed, an indicator appears by one second; for operations that can exceed ten seconds there is progress or an estimate and a cancel control."
@@ -102,7 +102,7 @@ rules:
     check: leftover-text
     severity: major
     support: practice-consensus
-    sources: ["catalogue:B5.5", "primer:ui-patterns/degraded-experiences", "wcag22:1.4.10", "hhs:13:8"]
+    sources: ["catalog:B5.5", "primer:ui-patterns/degraded-experiences", "wcag22:1.4.10", "hhs:13:8"]
     counters: [B5.5]
     examples:
       pass: "Long names wrap or truncate with the full value available; a missing phone number shows as a dash with a label."
