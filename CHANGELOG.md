@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+Skill
+- New section, "Third-party markup": findings inside maps, charts and other
+  libraries are fixed from outside where the library allows, never by
+  patching its files, and otherwise listed as the library's with the upstream
+  fix. Audit reports list them separately, so "fix every fail" means the
+  product's own markup.
+
 ## 0.2.0
 
 From feedback after use on a large production application.

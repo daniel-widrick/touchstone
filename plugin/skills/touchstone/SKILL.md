@@ -1,7 +1,7 @@
 ---
 name: touchstone
 description: "Rules for how a web interface looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page. Use when building, changing, redesigning or reviewing any web screen: forms, tables, lists, dashboards, settings, dialogs, multi-step flows, landing and product pages, pricing, documentation. Use when asked to design a page, to audit or improve the UX, usability or visual design of an interface, or to check a UI before calling it done."
-version: 0.2.0
+version: 0.2.1
 ---
 
 # Touchstone
@@ -138,8 +138,9 @@ attention; do a second pass instead.
    polish to add later. Define colors as named values and give them a light
    and a dark set that follow the system setting.
 5. Run the page and run the checker (below) at 1280 and at 375 wide, once in
-   each color scheme. Fix every `fail`. Look at every `review` item and
-   decide.
+   each color scheme. Fix every `fail` in markup you own. Look at every
+   `review` item and decide. For failures inside a third-party library, see
+   "Third-party markup" below.
 6. Use the thing: complete each task with the keyboard only, then with a
    forced failure and with no data. Fake the failures in the browser rather
    than breaking the server (see "Walking a UI safely" below). Fix what you
@@ -260,9 +261,11 @@ Report in this order:
 
 1. Failures, most severe first: rule id, the rule in a few words, location,
    evidence, and the smallest fix.
-2. Cannot tell: rule id and what would be needed to decide.
-3. Counts: rules applicable, passed, failed, cannot tell, not applicable.
-4. Open-pass notes, labeled as such.
+2. Failures in third-party markup, listed separately by library, with what
+   the product can do about each (see "Third-party markup").
+3. Cannot tell: rule id and what would be needed to decide.
+4. Counts: rules applicable, passed, failed, cannot tell, not applicable.
+5. Open-pass notes, labeled as such.
 
 Give no overall score and no summary judgment of quality.
 
@@ -278,6 +281,25 @@ Give no overall score and no summary judgment of quality.
   does not outrank a blocker.
 - If the user's instruction conflicts with a rule, follow the user and name
   the rule once.
+
+## Third-party markup
+
+Maps, charts, editors, video players and component libraries render markup
+the product does not own, and the checker reports what it finds there as
+readily as in the product's own code. Those findings are real; users meet
+them. Do not hide them, and do not patch the library's files to make a check
+pass.
+
+- Fix it from outside where the library allows: an option or configuration
+  setting, an accessible name or label passed through its API, a theme
+  variable, a wrapper element, or a style rule in the product's own
+  stylesheet aimed at the library's classes.
+- Where nothing from outside fixes it, list it as the library's: the library
+  and version, the element, the rule, and what would fix it upstream (a newer
+  version, an issue to file, a different component). Keep these apart from
+  the product's own failures, so that "fix every `fail`" means the product's.
+- A finding in a library the product chose remains the product's problem to
+  weigh. If a library has many blockers, say so; replacing it may be the fix.
 
 ## Not rules
 
