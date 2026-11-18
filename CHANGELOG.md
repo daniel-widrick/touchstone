@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.3.0
+
+From two rounds of feedback after audits and pull-request reviews of
+production products.
+
+Skill
+- The audit procedure moved to `audit.md`, which now also covers:
+  - reviewing a change from its diff, with a generated list (end of
+    `references/brief.md`) of which rules code alone can settle;
+  - judging fixes again after making them;
+  - merging parallel reports by defect: one entry per defect, the highest
+    severity, every rule id, counts of defects as well as rule failures;
+  - a time budget per domain (about 15 minutes by default), with unjudged
+    rules reported as cannot tell;
+  - verdicts kept apart: `cannot tell: no evidence`, `cannot tell: split`
+    (the two judgment passes disagreed) and `not run`;
+  - signed-in screens, including two-factor test accounts, and the limits
+    of in-page write blocking.
+- Building now ends by judging the fixes again.
+- Scope declarations: desktop-only and dense operational tools, alongside
+  the single theme, declared in the project's agent instructions.
+- House conventions: never outrank a blocker; against a major rule they do
+  not win, and the failure is reported once as a finding about the
+  convention.
+- The `ux-auditor` agent works on source or a diff when no running UI is
+  given, instead of stopping.
+
+Rules
+- New: DATA-016 (values shown as current say when they were updated, or
+  stay up to date), ACC-017 (background work does not move focus), FORM-019
+  (hint text states the limits validation enforces).
+- FORM-002: compact filters above a list may go without a visible label when
+  their shown value names what they filter.
+- VIS-001 and RESP-001, 003, 004, 005: exceptions for declared dense and
+  desktop-only products.
+- RESP-006 now has a scripted check.
+
+Checker (`ux-check.js`)
+- New `fixed-overlap` check (review): controls that a fixed or sticky
+  element still covers when scrolled into the middle of the screen.
+- Warns when the page redirected away from `expectUrl`, or looks like a
+  sign-in page. Warnings are a list, `warnings`.
+- `leftover-text` asks for review, not a fail, on stock names such as "Jane
+  Doe", which are often real seed data; `ignoreText` skips known names.
+- Options `desktopOnly`, `dense`, `expectUrl`, `ignoreText`.
+
+Fake network and runner
+- `fake-network.js` blocks native form posts and `form.submit()`.
+- `run.py --block-writes` also fails non-GET page navigations in the browser.
+- `run.py` measures signed-in screens: `--storage-state` (a Playwright
+  storage state file), `--cookie`, `--header`; and takes `--desktop-only`,
+  `--dense` and `--ignore-text`. It passes the requested address so a
+  redirect is reported.
+
 ## 0.2.3
 
 Checker and runner

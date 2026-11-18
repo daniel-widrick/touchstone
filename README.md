@@ -37,7 +37,7 @@ and deferred until results have been compared against real examples.
 
 ## The rules
 
-156 rules in twelve domains: tasks, actions, copy, states, forms, feedback,
+163 rules in twelve domains: tasks, actions, copy, states, forms, feedback,
 navigation, data, access, responsive, visual, pages. Every rule record has:
 
 - `rule`, stated as what to do
@@ -102,12 +102,21 @@ python3 plugin/skills/touchstone/scripts/run.py -s --width 375 path/to/page.html
 because Node is not required anywhere in this project.
 
 Both wait for the page to settle (no loading indicator, no requests running)
-before measuring, and warn when it never does. `run.py` can also fake the
-page's network without touching the server: `--block-writes`, `--fail
-REGEX`, `--status`, `--delay MS` and `--empty REGEX`. The same faking is
-available to any browser tool as `scripts/fake-network.js`. A product with
-one deliberate theme declares it with `<meta name="color-scheme"
-content="dark">`, or passes `--single-theme`.
+before measuring, and warn when it never does, when the page redirected, or
+when it landed on a sign-in page. `run.py` measures signed-in screens with
+`--storage-state FILE` (a saved Playwright session), `--cookie` or
+`--header`. It can also fake the page's network without touching the
+server: `--block-writes` (including native form posts), `--fail REGEX`,
+`--status`, `--delay MS` and `--empty REGEX`. The same faking is available
+to any browser tool as `scripts/fake-network.js`.
+
+Some rules depend on the product. A product with one deliberate theme
+declares it with `<meta name="color-scheme" content="dark">`; desktop-only
+and dense operational tools declare it in their agent instructions and pass
+`--desktop-only` or `--dense`. See "Declaring scope" in the skill.
+
+Audits, code reviews, safe walks and merging parallel reports are described
+in `plugin/skills/touchstone/audit.md`.
 
 The checker cannot see handlers added with `addEventListener`, and it does not
 click, type or press keys. A clean run is evidence for the rules it names and
@@ -119,6 +128,10 @@ Test it against the fixtures:
 python3 plugin/skills/touchstone/scripts/run.py -s fixtures/mechanical/bad.html    # 41 checks fail
 python3 plugin/skills/touchstone/scripts/run.py -s fixtures/mechanical/good.html   # none fail
 ```
+
+`framework.html` and `login.html` hold patterns that once gave false
+alarms and must fail nothing; `overlap.html` must report its covered
+controls for review. CI runs all of them.
 
 ## Installing
 
@@ -162,7 +175,7 @@ keeps it updated, and turns the plugin on for everyone:
 ```
 
 To offer it without requiring it, leave out `enabledPlugins`; people then
-install it from `/plugin`. To pin a release, add `"ref": "v0.1.0"` to the
+install it from `/plugin`. To pin a release, add `"ref": "v0.3.0"` to the
 `source` object.
 
 ### Codex and other agents

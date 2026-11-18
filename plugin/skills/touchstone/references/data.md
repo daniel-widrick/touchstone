@@ -23,6 +23,7 @@ Read this while building. The records below are for judging.
 - **DATA-013** A chart labels its axes and units and makes the exact values available.
 - **DATA-014** Emphasis is rare and means one thing.
 - **DATA-015** A mark the product uses in its own sense is explained where it is used, and means one thing everywhere.
+- **DATA-016** A value shown as current says when it was last updated, or keeps itself up to date.
 
 ## Records
 
@@ -207,3 +208,15 @@ Read this while building. The records below are for judging.
 - Failing example: Colored dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another.
 - Not applicable: No product-specific marks or color codes.
 - Sources: sm86:2.6/6; sm86:2.4/12; sm86:2.6/7; sm86:2.4.3/3; sm86:2.4.4/8; sm86:2.4.8/4; hhs:11:9
+
+### DATA-016 A value shown as current says when it was last updated, or keeps itself up to date.
+
+- Why: A screen left open keeps showing 'On shift now' or a live count long after it stopped being true, and people act on it.
+- Applies when: The screen shows values that change while it is open: who is on shift, what is running, counts, statuses, anything labeled now, live or current.
+- Passes when: Each such value either refreshes on its own while the screen is open (and changed values are briefly marked), or shows the time it was last updated next to it; a value that has gone stale says so.
+- Evidence: do the step in the running UI and observe
+- Severity: major. Support: consensus of published practice.
+- Passing example: 'On shift now' with 'updated 2 min ago' beside it; a jobs list that refreshes every 30 seconds and flashes rows that changed.
+- Failing example: 'On shift now' that still names last night's crew on a page left open since then, with no time shown.
+- Not applicable: Values that do not change while the screen is open, such as a saved invoice.
+- Sources: sm86:4.1/9; sm86:2.7.3/2

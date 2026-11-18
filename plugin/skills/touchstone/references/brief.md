@@ -24,6 +24,7 @@ Any screen. These are the accessibility requirements that shape interaction; mos
 - ACC-014 A control that shows or hides content exposes whether it is open.
 - ACC-015 Movement is brief, can be stopped, and is reduced when the user asks for less motion.
 - ACC-016 Anything done by dragging or by a gesture can also be done with a click or a key.
+- ACC-017 Work that finishes in the background does not move focus.
 
 ## Controls and actions (`actions.md`)
 
@@ -84,6 +85,7 @@ Any screen that shows records, tables, lists, metrics or charts, and any dashboa
 - DATA-013 A chart labels its axes and units and makes the exact values available.
 - DATA-014 Emphasis is rare and means one thing.
 - DATA-015 A mark the product uses in its own sense is explained where it is used, and means one thing everywhere.
+- DATA-016 A value shown as current says when it was last updated, or keeps itself up to date.
 
 ## Feedback, messages and confirmations (`feedback.md`)
 
@@ -123,6 +125,7 @@ Any screen where the user types, picks or submits values.
 - FORM-016 Each form or panel uses one saving model, and its own controls show which one it is.
 - FORM-017 The form asks only for what will be used.
 - FORM-018 Field width reflects the expected length of the answer, and units and separators are supplied by the form.
+- FORM-019 Hint text states the same limits that validation enforces.
 
 ## Navigation and structure (`navigation.md`)
 
@@ -223,3 +226,12 @@ Any screen. These rules cover how appearance helps or hinders reading and use. M
 - VIS-018 A control's label stays on one line.
 - VIS-019 A change of state does not change an element's size or move its neighbors.
 - VIS-020 A screen added to an existing product uses that product's fonts, colors, spacing and components.
+
+## What a code review can settle
+
+For reviewing a change from its diff, without a running page.
+
+- From the code alone (read the source; judgment rules are judged twice): ACC-008, ACC-015, ACT-006, ACT-011, ACT-012, COPY-002, COPY-003, COPY-004, COPY-005, COPY-006, COPY-009, COPY-010, COPY-013, COPY-015, COPY-016, COPY-017, DATA-001, DATA-002, DATA-003, DATA-004, DATA-008, DATA-014, FB-003, FB-005, FB-008, FB-010, FORM-017, FORM-019, NAV-004, NAV-008, NAV-012, PAGE-001, PAGE-003, PAGE-004, PAGE-005, TASK-002, TASK-006, TASK-010, TASK-011, TASK-012, VIS-013, VIS-014, VIS-015, VIS-020.
+- From the markup, where the diff shows it plainly (a template or component, not markup built at run time); otherwise `not run`: ACC-003, ACC-009, ACC-010, ACC-011, ACC-012, ACC-013, ACC-014, ACT-001, ACT-002, ACT-003, ACT-004, ACT-005, ACT-007, ACT-008, ACT-010, COPY-001, COPY-007, COPY-008, DATA-006, DATA-007, DATA-011, DATA-013, DATA-015, FORM-001, FORM-002, FORM-003, FORM-004, FORM-005, FORM-010, FORM-011, FORM-015, FORM-018, NAV-001, NAV-002, NAV-009, NAV-010, PAGE-006, PAGE-008, RESP-002, STATE-009, TASK-007, VIS-008, VIS-010, VIS-011, VIS-016, VIS-017.
+- Need a running page and the checker; `not run` in a code review: ACC-002, ACC-005, ACC-006, ACC-007, ACT-009, COPY-014, DATA-005, NAV-003, NAV-013, NAV-014, PAGE-002, RESP-001, RESP-003, RESP-004, STATE-006, VIS-001, VIS-002, VIS-003, VIS-004, VIS-005, VIS-006, VIS-007, VIS-009, VIS-012, VIS-018.
+- Need the steps done in a running page; in a code review, trace them through the code where the handlers are plain to follow (what happens on submit, on failure, on leaving), otherwise `not run`: ACC-001, ACC-004, ACC-016, ACC-017, ACT-013, COPY-011, COPY-012, DATA-009, DATA-010, DATA-012, DATA-016, FB-001, FB-002, FB-004, FB-006, FB-007, FB-009, FB-011, FORM-006, FORM-007, FORM-008, FORM-009, FORM-012, FORM-013, FORM-014, FORM-016, NAV-005, NAV-006, NAV-007, NAV-011, PAGE-007, RESP-005, RESP-006, STATE-001, STATE-002, STATE-003, STATE-004, STATE-005, STATE-007, STATE-008, STATE-010, TASK-001, TASK-003, TASK-004, TASK-005, TASK-008, TASK-009, VIS-019.

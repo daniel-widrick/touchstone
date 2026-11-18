@@ -1,7 +1,7 @@
 ---
 name: touchstone
-description: "Rules for how a web interface looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page. Use when building, changing, redesigning or reviewing any web screen: forms, tables, lists, dashboards, settings, dialogs, multi-step flows, landing and product pages, pricing, documentation. Use when asked to design a page, to audit or improve the UX, usability or visual design of an interface, or to check a UI before calling it done."
-version: 0.2.3
+description: "Rules for how a web interface looks and works, each traced to a source and judged one at a time with evidence, plus a script that measures a running page. Use when building, changing, redesigning or reviewing any web screen: forms, tables, lists, dashboards, settings, dialogs, multi-step flows, landing and product pages, pricing, documentation. Use when asked to design a page, to audit or improve the UX, usability or visual design of an interface, to review a pull request that changes a UI, or to check a UI before calling it done."
+version: 0.3.0
 ---
 
 # Touchstone
@@ -143,8 +143,8 @@ attention; do a second pass instead.
    "Third-party markup" below.
 6. Use the thing: complete each task with the keyboard only, then with a
    forced failure and with no data. Fake the failures in the browser rather
-   than breaking the server (see "Walking a UI safely" below). Fix what you
-   find.
+   than breaking the server (see "Walking a UI safely" in `audit.md`). Fix
+   what you find.
 7. List every place your script puts text on the page after it has loaded:
    errors under fields, counts, loading, saved and failed notes, undo
    notices. Each one must sit inside a live region that is in the page from
@@ -155,7 +155,10 @@ attention; do a second pass instead.
    something that has a settled picture, use the picture. Never replace an
    existing clear symbol with a word. Cut content, not care: removing words
    is not a reason to remove the dark theme, the focus styles or the spacing.
-9. In your reply, say what you checked and what you could not check. Do not
+9. Judge your fixes again: re-run the checker and the rules of every domain
+   your fixes touched on the screens they changed. A fix that works can still
+   break a rule.
+10. In your reply, say what you checked and what you could not check. Do not
    describe the result as usable or verified; say which rules were checked.
 
 ## The checker
@@ -181,93 +184,51 @@ ids it gives evidence for, and where the problem is.
   to the browser's path if it is not found. If neither is available, skip
   the checker, judge the rules from the code, and say so in your reply.
 
-Measure the page at rest. The checker waits for loading indicators and
-requests to stop (up to 10 seconds in the page, 15 with `run.py`) and puts a
-`warning` in its result if they never did. A result with that warning
-describes a loading state: wait, or fix whatever never finishes loading,
-and measure again before using it as evidence.
+Measure the page at rest. The checker waits for loading indicators to clear
+(up to 10 seconds; requests alone hold it for at most 3) and puts `warnings`
+in its result if the page never settled, if it was redirected away from
+`expectUrl`, or if it looks like a sign-in page. A result with a warning
+describes the wrong page or a loading state: fix the cause and measure again
+before using it as evidence. Pass `{ expectUrl: '<the address you opened>' }`
+so a redirect is caught; `run.py` does this itself, and measures signed-in
+screens with `--storage-state` (see `audit.md`).
 
-If the product deliberately has one theme, declare it in the page with
-`<meta name="color-scheme" content="dark">` (or `light`); the theme check then
-asks for review instead of failing. In an audit where you cannot change the
-page, pass `{ singleTheme: true }` to `uxCheck`, or `--single-theme` to
-`run.py`.
+### Declaring scope
+
+Some rules depend on what the product is for. Declare it once, in the
+project's agent instructions (`CLAUDE.md` or `AGENTS.md`), for example
+"Touchstone scope: desktop-only, dense", and pass the same to the checker:
+
+| Declaration | Checker option | Effect |
+|---|---|---|
+| One deliberate theme | `<meta name="color-scheme" content="dark">` in the page, or `singleTheme: true` / `--single-theme` | The theme check asks for review instead of failing. |
+| Desktop-only | `desktopOnly: true` / `--desktop-only` | Phone-width rules (RESP-003, RESP-004, RESP-005) do not apply; judge layout at the narrowest supported width. Reflow at 400 percent zoom (RESP-001) still applies, with its two-dimensional exception. |
+| Dense operational tool | `dense: true` / `--dense` | Running text may be 14px (VIS-001); nothing under 12px still applies. |
+
+A declaration is a decision about the product, not a way to quiet findings:
+make it only when it is true of the product, and say in the report that it
+was applied. Real seed data that the leftover-text check asks about, such as
+a test user named "Jane Doe", can be skipped with `ignoreText` /
+`--ignore-text`.
 
 A clean run is evidence for the rules it lists and nothing more. It cannot
 see handlers added with addEventListener, and it does not click, type or
 press keys. Rules whose evidence is `walk` need you to do the step.
 
-## Walking a UI safely
+## Auditing and reviewing
 
-Walking tasks through their failure, slow and empty states finds the
-problems that matter most, and it must not touch real data. Fake the network
-in the browser instead of breaking the server:
+To judge a UI without changing it, read `audit.md` in this skill's folder
+and follow it. It covers:
 
-- `scripts/fake-network.js` wraps the page's own `fetch`, `XMLHttpRequest`
-  and `sendBeacon`. Set `window.__uxNet` first, then run the file in the
-  page. `{ blockWrites: true }` makes every POST, PUT, PATCH and DELETE fail
-  without leaving the browser, so you can press Save, Delete and Send on
-  live data. `fail`, `status`, `delayMs` and `empty` force failures, slow
-  responses and empty lists for URLs matching a pattern. What the page tried
-  to send is recorded in `window.__uxNet.log`.
-- To affect requests made while the page loads, the script must run before
-  the page's own: `page.addInitScript` in Playwright, or
-  `Page.addScriptToEvaluateOnNewDocument` in Chrome DevTools. `run.py` does
-  this with `--block-writes`, `--fail`, `--status`, `--delay` and `--empty`.
-- Turn on `blockWrites` before any walk of a product whose data matters, and
-  report what the log shows the page tried to write.
-
-When several auditors walk the same product at once, each needs its own
-browser (its own Playwright context or profile), with write-blocking on.
-Never share one browser between agents: they move each other's focus,
-scroll and open dialogs, and their findings stop meaning anything. `run.py`
-starts a fresh browser profile on every run, so its runs can go in parallel.
-
-## When auditing a UI
-
-Make no edits. An audit is a list of verdicts with evidence.
-
-A single pass finds a minority of problems, and coverage rises when
-independent passes are merged. If you can start subagents, give each relevant
-domain to a separate one (the `touchstone:ux-auditor` agent where it is
-installed, or any fresh agent told to
-follow this section for one domain file) and merge their reports. Give each
-its own browser with write-blocking on, as in "Walking a UI safely".
-Otherwise take the domains one at a time yourself.
-
-For each domain:
-
-1. **Scope.** State the screens and the user tasks being judged.
-2. **Applicability.** For each rule in the file, decide from `Applies when`
-   whether it applies. Record not-applicable rules by id; do not skip
-   silently.
-3. **Measure.** Run the checker. Attach its results to the rule ids it names.
-4. **Verdict per rule.** For each applicable rule, quote the evidence first
-   (a line of code with its location, a measured value, what you did and what
-   happened), then give `pass`, `fail` or `cannot tell`. No evidence means
-   `cannot tell`, never `pass`. Take severity from the rule record; do not
-   re-rate it. For rules whose evidence is judgment, decide twice, the second
-   time starting from the last rule; keep the verdict only if both agree,
-   otherwise `cannot tell`.
-5. **Walk.** For each task, go through it in the running UI. At every step
-   ask: is the control I need visible, would I recognize it as the right one,
-   and did the screen show that my action worked? Then walk it again with
-   its requests failing, slow and empty, using the fake network with writes
-   blocked. Record failures against the matching rule.
-6. **Open pass.** Separately, note anything that hurt the task and matched no
-   rule. Mark these as lower confidence. Do not aim for a number of findings.
-
-Report in this order:
-
-1. Failures, most severe first: rule id, the rule in a few words, location,
-   evidence, and the smallest fix.
-2. Failures in third-party markup, listed separately by library, with what
-   the product can do about each (see "Third-party markup").
-3. Cannot tell: rule id and what would be needed to decide.
-4. Counts: rules applicable, passed, failed, cannot tell, not applicable.
-5. Open-pass notes, labeled as such.
-
-Give no overall score and no summary judgment of quality.
+- auditing a running product, one domain per auditor, each with its own
+  browser and a time budget;
+- reviewing a change from its diff, and which rules code alone can settle;
+- walking safely: faking failures and blocking writes in the browser, and
+  measuring signed-in screens;
+- judging fixes again after making them;
+- merging parallel reports by defect;
+- the verdicts (`pass`, `fail`, `cannot tell: no evidence`, `cannot tell:
+  split`, `not run`) and the report format.
 
 ## Applying rules with sense
 
@@ -278,7 +239,14 @@ Give no overall score and no summary judgment of quality.
   project's position. If the codebase already follows the other position
   consistently, consistency wins; say so.
 - An existing design system or house convention outranks a minor rule. It
-  does not outrank a blocker.
+  never outranks a blocker.
+- Against a major rule, the convention does not win, but it changes how the
+  failure is reported. In new work, follow the rule. In an audit or review,
+  report the failure once as a convention finding: the convention, where it
+  is used, the rule and its severity. The fix belongs to the convention,
+  across the product, not to one screen. Code copied from an existing
+  pattern, such as a live region taken from another form, is judged the same
+  way.
 - If the user's instruction conflicts with a rule, follow the user and name
   the rule once.
 

@@ -26,6 +26,7 @@ Read this while building. The records below are for judging.
 - **FORM-016** Each form or panel uses one saving model, and its own controls show which one it is.
 - **FORM-017** The form asks only for what will be used.
 - **FORM-018** Field width reflects the expected length of the answer, and units and separators are supplied by the form.
+- **FORM-019** Hint text states the same limits that validation enforces.
 
 ## Records
 
@@ -48,7 +49,7 @@ Read this while building. The records below are for judging.
 - Passes when: Each field has visible label text next to it; the placeholder, if any, is not the only label.
 - Evidence: inspect the running page; scripted check `visible-label`
 - Severity: major. Support: consensus of published practice.
-- Exceptions: A single search field with a visible search button or icon.
+- Exceptions: A single search field with a visible search button or icon.; A compact filter control directly above the list or table it filters, which has an accessible name and whose shown value names what it filters ('All statuses', 'Any owner'). A bare value such as 'All' still fails.
 - Passing example: 'Full name' printed above the field.
 - Failing example: A field whose only name is aria-label or placeholder text.
 - Not applicable: A screen with no fields.
@@ -253,3 +254,15 @@ Read this while building. The records below are for judging.
 - Failing example: Every field is full width; the hint says 'enter weight including kg'.
 - Not applicable: Only free-text fields of open length.
 - Sources: bargas2010:7; hhs:13:8; hhs:13:16; sm86:1.4/11; sm86:1.4/21; sm86:1.4/3; govuk:components/text-input
+
+### FORM-019 Hint text states the same limits that validation enforces.
+
+- Why: A hint that says 8 characters when validation wants 12 makes people fail on purpose-built advice.
+- Applies when: A field has hint, help or format text and validation.
+- Passes when: Every limit the hint states (length, format, allowed characters, range) matches the validation in the code, and every limit validation enforces that a person could break is stated in the hint or the label.
+- Evidence: read the code
+- Severity: major. Support: consensus of published practice.
+- Passing example: Hint 'At least 12 characters' and validation minLength 12.
+- Failing example: Hint 'At least 8 characters' while the server rejects anything under 12.
+- Not applicable: A field with no hint text, or no validation.
+- Sources: sm86:1.4/20; govuk:components/text-input; govuk:components/error-message

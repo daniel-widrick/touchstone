@@ -55,3 +55,23 @@ engineer on the team.
   because it is the interface explaining itself.
 
 Rule: FORM-016, reworded so the unit is the form or panel.
+
+## 2026-11-17 compact filters, scope declarations, conventions against major rules
+
+From feedback after audits of two production products.
+
+- A compact filter control above the list or table it filters may go without
+  a visible label when it has an accessible name and its shown value names
+  what it filters ("All statuses"). A bare "All" still fails. Reason: the
+  label rule exists so people remember what a field is for and can review
+  what they entered; a filter that shows its dimension at all times does
+  both. Rule: FORM-002, exception.
+- A product may declare itself desktop-only or a dense operational tool in
+  its project instructions. Desktop-only lifts the phone-width rules but not
+  reflow at 400 percent zoom, which desktop users also meet. Dense allows 14px
+  running text, the size compact type sets for productive interfaces use.
+  Rules: RESP-001, RESP-003, RESP-004, RESP-005, VIS-001.
+- A house convention outranks a minor rule and never a blocker. Against a
+  major rule it does not win, but the failure is reported once as a finding
+  about the convention, because the fix belongs to the convention across the
+  product.

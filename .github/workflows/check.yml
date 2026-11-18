@@ -46,3 +46,11 @@ jobs:
             echo "$f.html: $n failing checks"
             test "$n" -eq 0
           done
+          python3 plugin/skills/touchstone/scripts/run.py fixtures/mechanical/overlap.html > /tmp/overlap.json
+          python3 - <<'PY'
+          import json
+          c = json.load(open("/tmp/overlap.json"))["checks"]
+          print("overlap.html: fixed-overlap", c["fixed-overlap"]["status"], c["fixed-overlap"]["count"], "| visible-label", c["visible-label"]["status"], c["visible-label"]["count"])
+          assert c["fixed-overlap"]["status"] == "review" and c["fixed-overlap"]["count"] >= 5
+          assert c["visible-label"]["status"] == "fail" and c["visible-label"]["count"] == 1
+          PY

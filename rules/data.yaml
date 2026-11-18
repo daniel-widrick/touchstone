@@ -231,3 +231,18 @@ rules:
       pass: "Filter chips reading 'Police', 'Fire' and 'Medical', each with its mark, directly above the map and the list that use those marks."
       fail: "Colored dots on a map with no key; a shield that means 'police' on one screen and 'verified' on another."
       na: "No product-specific marks or color codes."
+
+  - id: DATA-016
+    rule: "A value shown as current says when it was last updated, or keeps itself up to date."
+    why: "A screen left open keeps showing 'On shift now' or a live count long after it stopped being true, and people act on it."
+    applies_when: "The screen shows values that change while it is open: who is on shift, what is running, counts, statuses, anything labeled now, live or current."
+    pass_when: "Each such value either refreshes on its own while the screen is open (and changed values are briefly marked), or shows the time it was last updated next to it; a value that has gone stale says so."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:4.1/9", "sm86:2.7.3/2"]
+    counters: [B5.1]
+    examples:
+      pass: "'On shift now' with 'updated 2 min ago' beside it; a jobs list that refreshes every 30 seconds and flashes rows that changed."
+      fail: "'On shift now' that still names last night's crew on a page left open since then, with no time shown."
+      na: "Values that do not change while the screen is open, such as a saved invoice."

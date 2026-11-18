@@ -30,7 +30,7 @@ rules:
     support: practice-consensus
     sources: ["nng:form-design-placeholders", "govuk:components/text-input", "carbon:patterns/forms-pattern", "msux:top-violations#Controls > Prompts", "sm86:1.4/5"]
     counters: [B7.1]
-    exceptions: ["A single search field with a visible search button or icon."]
+    exceptions: ["A single search field with a visible search button or icon.", "A compact filter control directly above the list or table it filters, which has an accessible name and whose shown value names what it filters ('All statuses', 'Any owner'). A bare value such as 'All' still fails."]
     examples:
       pass: "'Full name' printed above the field."
       fail: "A field whose only name is aria-label or placeholder text."
@@ -288,3 +288,18 @@ rules:
       pass: "A five-character postcode field; 'Weight' with 'kg' after the field."
       fail: "Every field is full width; the hint says 'enter weight including kg'."
       na: "Only free-text fields of open length."
+
+  - id: FORM-019
+    rule: "Hint text states the same limits that validation enforces."
+    why: "A hint that says 8 characters when validation wants 12 makes people fail on purpose-built advice."
+    applies_when: "A field has hint, help or format text and validation."
+    pass_when: "Every limit the hint states (length, format, allowed characters, range) matches the validation in the code, and every limit validation enforces that a person could break is stated in the hint or the label."
+    evidence: static
+    severity: major
+    support: practice-consensus
+    sources: ["sm86:1.4/20", "govuk:components/text-input", "govuk:components/error-message"]
+    counters: [B7.2]
+    examples:
+      pass: "Hint 'At least 12 characters' and validation minLength 12."
+      fail: "Hint 'At least 8 characters' while the server rejects anything under 12."
+      na: "A field with no hint text, or no validation."

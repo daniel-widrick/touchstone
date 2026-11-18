@@ -38,11 +38,11 @@ Read this while building. The records below are for judging.
 - Passes when: Paragraphs and other running prose compute to at least 16px, and no other visible text is under 12px. Text hidden for screen readers only is exempt.
 - Evidence: measure a value on the running page; scripted check `text-size`
 - Severity: major. Support: some research support.
-- Exceptions: Legal small print that the product is required to show at a set size.
+- Exceptions: Legal small print that the product is required to show at a set size.; A dense operational tool declared as such in its project instructions (see the skill's scope declarations): running text may be 14px, as in compact type sets for productive interfaces. Nothing under 12px still applies.
 - Passing example: Body copy at 16px, table cells at 14px, timestamps at 12px.
 - Failing example: Paragraphs at 13px and helper text at 11px.
 - Not applicable: A screen with no text.
-- Sources: hhs:11:8; hallmark:typography.md#Body text rules; hallmark:custom-theme.md#C.3
+- Sources: hhs:11:8; hallmark:typography.md#Body text rules; hallmark:custom-theme.md#C.3; carbon:elements/typography/type-sets
 
 ### VIS-002 Lines of prose run to about 45 to 80 characters.
 

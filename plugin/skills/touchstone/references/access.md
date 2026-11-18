@@ -24,6 +24,7 @@ Read this while building. The records below are for judging.
 - **ACC-014** A control that shows or hides content exposes whether it is open.
 - **ACC-015** Movement is brief, can be stopped, and is reduced when the user asks for less motion.
 - **ACC-016** Anything done by dragging or by a gesture can also be done with a click or a key.
+- **ACC-017** Work that finishes in the background does not move focus.
 
 ## Records
 
@@ -219,3 +220,15 @@ Read this while building. The records below are for judging.
 - Failing example: A kanban board where cards can only be dragged.
 - Not applicable: No drag or gesture interactions.
 - Sources: wcag22:2.5.7; wcag22:2.5.1; apple:accessibility
+
+### ACC-017 Work that finishes in the background does not move focus.
+
+- Why: Focus pulled back to a popover the user already dismissed, or away from the field they are typing in, loses their place and their input.
+- Applies when: The screen starts work that finishes later: saving, loading, uploading, searching.
+- Passes when: When the work finishes, focus stays where the user left it; the outcome is announced through a live region. Focus moves only when the user's own action asked for it, such as opening a dialog or submitting a form with errors.
+- Evidence: do the step in the running UI and observe
+- Severity: major. Support: consensus of published practice.
+- Passing example: A save finishes while the user types in the next field; a live region says 'Saved' and the cursor stays put.
+- Failing example: A search result arrives and focus jumps back to a filter popover the user closed a moment ago.
+- Not applicable: Nothing on the screen finishes after the user's action returns.
+- Sources: wcag22:3.2.1; wcag22:3.2.2; wcag22:2.4.3; sm86:4.0/2

@@ -4,12 +4,17 @@
  * and empty states safely, including against shared or production data.
  *
  * Set window.__uxNet before this file runs, then run it in the page. It wraps
- * fetch, XMLHttpRequest and navigator.sendBeacon for this page only, so
- * several auditors can each use their own browser at once.
+ * fetch, XMLHttpRequest, navigator.sendBeacon and native form posts for this
+ * page only, so several auditors can each use their own browser at once.
+ *
+ * Limit: it lives in this page. A form posted into another window or frame,
+ * or a write made by a browser extension or a service worker, is not seen.
+ * run.py also blocks non-GET page navigations at the browser level.
  *
  *   window.__uxNet = {
- *     blockWrites: true,          // POST, PUT, PATCH and DELETE never leave the page;
- *                                 // they fail as if the network dropped
+ *     blockWrites: true,          // POST, PUT, PATCH and DELETE never leave the page,
+ *                                 // including native form posts; they fail as if
+ *                                 // the network dropped
  *     fail: "api/today|/search",  // regular expression: matching requests fail
  *     status: 503,                // with this HTTP status instead of a network error
  *     delayMs: 3000,              // every request waits this long first
@@ -86,6 +91,33 @@
         this.dispatchEvent(new Event(status ? 'load' : 'error'));
         this.dispatchEvent(new Event('loadend'));
       }, cfg.delayMs || 0);
+    };
+  }
+
+  // Native form posts. A plain <form method="post"> navigates without fetch or XHR, so it is
+  // caught at the submit event, after the page's own handlers have had their turn (one that
+  // calls preventDefault and sends with fetch is caught by the fetch wrapper instead), and
+  // form.submit(), which fires no event, is wrapped too.
+  const formMethod = (form, submitter) =>
+    ((submitter && submitter.getAttribute && submitter.getAttribute('formmethod')) || form.getAttribute('method') || 'GET').toUpperCase();
+  const formAction = (form, submitter) =>
+    (submitter && submitter.hasAttribute && submitter.hasAttribute('formaction') ? submitter.formAction : form.action) || location.href;
+  window.addEventListener('submit', (e) => {
+    if (e.defaultPrevented || !(e.target instanceof HTMLFormElement)) return;
+    const method = formMethod(e.target, e.submitter);
+    if (method === 'DIALOG') return;
+    const action = decide(method, formAction(e.target, e.submitter));
+    if (action === 'pass') return;
+    record(method, formAction(e.target, e.submitter), action + ' (form post)');
+    e.preventDefault();
+  });
+  if (window.HTMLFormElement) {
+    const realSubmit = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function () {
+      const method = formMethod(this);
+      const action = decide(method, formAction(this));
+      if (action === 'pass') return realSubmit.apply(this, arguments);
+      record(method, formAction(this), action + ' (form.submit)');
     };
   }
 

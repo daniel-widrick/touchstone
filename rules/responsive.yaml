@@ -14,7 +14,7 @@ rules:
     support: some-support
     sources: ["wcag22:1.4.10", "hhs:8:1", "hhs:6:8"]
     counters: [B10.1]
-    exceptions: ["Content that needs two dimensions, such as a map or a wide data table, inside a scrolling region of its own."]
+    exceptions: ["Content that needs two dimensions, such as a map, a wide data table or an instrument panel whose controls must stay in view together, inside a scrolling region of its own. Declaring a product desktop-only does not lift this rule, because it is also what a desktop user zoomed to 400 percent meets."]
     examples:
       pass: "A table wrapped in a container with overflow-x: auto."
       fail: "A fixed 1200px wrapper, or a toolbar whose buttons run off the right edge."
@@ -47,6 +47,7 @@ rules:
     support: practice-consensus
     sources: ["vercel:guidelines", "hhs:11:8"]
     counters: [B10.1]
+    exceptions: ["A product declared desktop-only in its project instructions (see the skill's scope declarations)."]
     examples:
       pass: "input { font-size: 16px }"
       fail: "input { font-size: 13px }"
@@ -63,6 +64,7 @@ rules:
     sources: ["parhi2006", "wcag22:2.5.5", "apple:accessibility", "android:guide/topics/ui/accessibility/apps"]
     counters: [B2.5]
     dissent: "WCAG AA requires only 24px; 44px is its AAA level and Apple's default."
+    exceptions: ["A product declared desktop-only in its project instructions (see the skill's scope declarations)."]
     examples:
       pass: "Buttons with min-height: 44px at phone widths."
       fail: "28px tall buttons in a mobile toolbar."
@@ -78,6 +80,7 @@ rules:
     support: practice-consensus
     sources: ["catalog:B10.1", "wcag22:1.4.10", "nng:modal-nonmodal-dialog"]
     counters: [B10.1]
+    exceptions: ["A product declared desktop-only in its project instructions (see the skill's scope declarations)."]
     examples:
       pass: "The sidebar becomes a menu button plus visible links to the two main sections; table rows become stacked label and value pairs."
       fail: "A dialog taller than the screen whose buttons cannot be reached."
@@ -89,6 +92,7 @@ rules:
     applies_when: "The screen has fixed or sticky elements."
     pass_when: "At 375x667 and at 1280x600, scrolling to the end shows all content clear of fixed elements, and fixed elements together take less than about a third of the height."
     evidence: walk
+    check: fixed-overlap
     severity: major
     support: practice-consensus
     sources: ["catalog:B10.2", "wcag22:2.4.11"]

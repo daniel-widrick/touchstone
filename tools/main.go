@@ -341,6 +341,27 @@ func build(root string, domains []Domain) error {
 			fmt.Fprintf(&brief, "- %s %s%s\n", r.ID, oneLine(r.Rule), mark)
 		}
 	}
+	// Which rules a code review can settle without a running page.
+	byKind := map[string][]string{}
+	for _, d := range domains {
+		for _, r := range d.Rules {
+			byKind[r.Evidence] = append(byKind[r.Evidence], r.ID)
+		}
+	}
+	brief.WriteString("\n## What a code review can settle\n\nFor reviewing a change from its diff, without a running page.\n\n")
+	for _, k := range []struct{ kinds, say string }{
+		{"static judgment", "From the code alone (read the source; judgment rules are judged twice)"},
+		{"dom", "From the markup, where the diff shows it plainly (a template or component, not markup built at run time); otherwise `not run`"},
+		{"measured", "Need a running page and the checker; `not run` in a code review"},
+		{"walk", "Need the steps done in a running page; in a code review, trace them through the code where the handlers are plain to follow (what happens on submit, on failure, on leaving), otherwise `not run`"},
+	} {
+		var ids []string
+		for _, kind := range strings.Fields(k.kinds) {
+			ids = append(ids, byKind[kind]...)
+		}
+		sort.Strings(ids)
+		fmt.Fprintf(&brief, "- %s: %s.\n", k.say, strings.Join(ids, ", "))
+	}
 	if err := os.WriteFile(filepath.Join(refs, "brief.md"), []byte(brief.String()), 0o644); err != nil {
 		return err
 	}

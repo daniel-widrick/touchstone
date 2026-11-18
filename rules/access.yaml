@@ -252,3 +252,18 @@ rules:
       pass: "Rows reorder by drag and by 'Move up' and 'Move down' in the row menu."
       fail: "A kanban board where cards can only be dragged."
       na: "No drag or gesture interactions."
+
+  - id: ACC-017
+    rule: "Work that finishes in the background does not move focus."
+    why: "Focus pulled back to a popover the user already dismissed, or away from the field they are typing in, loses their place and their input."
+    applies_when: "The screen starts work that finishes later: saving, loading, uploading, searching."
+    pass_when: "When the work finishes, focus stays where the user left it; the outcome is announced through a live region. Focus moves only when the user's own action asked for it, such as opening a dialog or submitting a form with errors."
+    evidence: walk
+    severity: major
+    support: practice-consensus
+    sources: ["wcag22:3.2.1", "wcag22:3.2.2", "wcag22:2.4.3", "sm86:4.0/2"]
+    counters: [B2.3]
+    examples:
+      pass: "A save finishes while the user types in the next field; a live region says 'Saved' and the cursor stays put."
+      fail: "A search result arrives and focus jumps back to a filter popover the user closed a moment ago."
+      na: "Nothing on the screen finishes after the user's action returns."

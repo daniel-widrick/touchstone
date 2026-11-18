@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<!-- Expect: fixed-overlap review on the toolbar buttons, the filters and the last row's link (toast and floating button); the sticky header is not reported. visible-label fails once, on the bare "All" filter; the "All statuses" filter passes as a compact filter. Its small row links also fail target-size. -->
+<meta name="color-scheme" content="light"><title>Audit log</title><style>
+body{margin:0;font:16px sans-serif} header{position:sticky;top:0;background:#fff;height:60px;border-bottom:1px solid #ccc}
+.toolbar{padding:8px} .toast{position:fixed;top:64px;left:0;width:420px;height:48px;background:#222;color:#fff}
+.fab{position:fixed;right:16px;bottom:16px;width:120px;height:56px;background:#036;color:#fff} li{height:40px}
+.filters{display:flex;gap:8px}
+</style></head><body><header><h1 style="margin:0">Audit log</h1></header><main>
+<div class="toolbar"><button>Export</button> <button>Refresh</button></div>
+<div class="toast" role="status">Saved</div>
+<div class="filters"><select aria-label="Status"><option>All statuses</option><option>Open</option></select>
+<select aria-label="Owner"><option>All</option><option>Me</option></select></div>
+<ul>
+<li>Event 1 <a href="#e1" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 2 <a href="#e2" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 3 <a href="#e3" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 4 <a href="#e4" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 5 <a href="#e5" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 6 <a href="#e6" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 7 <a href="#e7" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 8 <a href="#e8" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 9 <a href="#e9" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 10 <a href="#e10" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 11 <a href="#e11" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 12 <a href="#e12" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 13 <a href="#e13" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 14 <a href="#e14" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 15 <a href="#e15" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 16 <a href="#e16" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 17 <a href="#e17" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 18 <a href="#e18" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 19 <a href="#e19" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 20 <a href="#e20" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 21 <a href="#e21" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 22 <a href="#e22" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 23 <a href="#e23" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 24 <a href="#e24" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 25 <a href="#e25" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 26 <a href="#e26" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 27 <a href="#e27" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 28 <a href="#e28" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 29 <a href="#e29" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 30 <a href="#e30" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 31 <a href="#e31" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 32 <a href="#e32" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 33 <a href="#e33" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 34 <a href="#e34" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 35 <a href="#e35" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 36 <a href="#e36" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 37 <a href="#e37" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 38 <a href="#e38" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 39 <a href="#e39" style="float:right;margin-right:40px">Open</a></li>
+<li>Event 40 <a href="#e40" style="float:right;margin-right:40px">Open</a></li>
+</ul></main><button class="fab">New report</button></body></html>

@@ -8,9 +8,17 @@
  *   await window.uxCheck()                 run every check
  *   await window.uxCheck({ focus: false }) skip the check that moves focus
  *
- * Options: focus (false skips the focus check), singleTheme (true when the
- * product deliberately has one theme), settleMs (how long to wait for loading
- * indicators to clear before measuring; default 10000, 0 to skip).
+ * Options:
+ *   focus: false        skip the check that moves focus
+ *   singleTheme: true   the product deliberately has one theme
+ *   desktopOnly: true   the product is declared desktop-only (phone-width rules relax)
+ *   dense: true         a dense operational tool (running text may be 14px)
+ *   expectUrl: '...'    the address you meant to measure; warns if the page redirected
+ *   ignoreText: [...]   patterns leftover-text should skip, such as real seed names
+ *   settleMs: 10000     how long to wait for loading indicators to clear; 0 skips
+ *
+ * The result carries `warnings` when the page never settled, when it redirected
+ * away from expectUrl, or when it looks like a sign-in page.
  *
  * Before measuring it waits for the page to settle: no visible loading
  * indicator and no resource finishing for half a second (requests alone hold
@@ -30,10 +38,10 @@
 (() => {
   'use strict';
 
-  const VERSION = '0.2.3';
+  const VERSION = '0.3.0';
   const MAX_ITEMS = 12;
   // Which rules each check gives evidence for. The build tool writes this from rules/.
-  const RULE_MAP = /* RULE_MAP:begin */ {"accessible-name":["ACT-001"],"autocomplete":["FORM-011"],"callout-count":["COPY-002"],"contrast":["ACC-005"],"dead-button":["TASK-001"],"dead-link":["ACT-005"],"dialog-semantics":["NAV-010"],"disabled-submit":["FORM-013"],"fake-control":["ACT-004"],"focus-visible":["ACC-002"],"font-families":["VIS-004"],"font-sizes":["VIS-005"],"gradient-text":["VIS-010"],"heading-contrast":["VIS-006"],"heading-order":["ACC-009"],"headline-fit":["VIS-009"],"horizontal-scroll":["RESP-001"],"hover-only":["ACT-003","DATA-011"],"hype-words":["COPY-006"],"icon-only-control":["ACT-002"],"image-alt":["ACC-011"],"img-dimensions":["VIS-008"],"infinite-animation":["VIS-016"],"input-label":["FORM-001"],"input-type":["FORM-010"],"label-wrap":["VIS-018"],"landmarks":["ACC-010"],"leftover-text":["COPY-001","PAGE-004","STATE-007","TASK-002"],"line-height":["VIS-003"],"line-length":["VIS-002"],"nested-dialog":["NAV-009"],"page-lang":["ACC-012"],"page-title":["NAV-001"],"paste-blocked":["FORM-012"],"primary-button-count":["ACT-007"],"raw-error-text":["COPY-011"],"reduced-motion":["ACC-015"],"required-attr":["FORM-005"],"scroll-hidden":["VIS-017"],"small-input-font":["RESP-003"],"spacing-scale":["VIS-012"],"system-theme":["VIS-011"],"tabindex-positive":["ACC-003"],"table-headers":["DATA-006"],"target-size":["ACC-007"],"text-size":["VIS-001"],"text-style":["VIS-007"],"text-volume":["COPY-003","COPY-014"],"transition-duration":["VIS-015"],"transition-props":["VIS-014"],"vague-label":["COPY-007","COPY-008"],"visible-label":["FORM-002"],"zoom-disabled":["RESP-002"]} /* RULE_MAP:end */;
+  const RULE_MAP = /* RULE_MAP:begin */ {"accessible-name":["ACT-001"],"autocomplete":["FORM-011"],"callout-count":["COPY-002"],"contrast":["ACC-005"],"dead-button":["TASK-001"],"dead-link":["ACT-005"],"dialog-semantics":["NAV-010"],"disabled-submit":["FORM-013"],"fake-control":["ACT-004"],"fixed-overlap":["RESP-006"],"focus-visible":["ACC-002"],"font-families":["VIS-004"],"font-sizes":["VIS-005"],"gradient-text":["VIS-010"],"heading-contrast":["VIS-006"],"heading-order":["ACC-009"],"headline-fit":["VIS-009"],"horizontal-scroll":["RESP-001"],"hover-only":["ACT-003","DATA-011"],"hype-words":["COPY-006"],"icon-only-control":["ACT-002"],"image-alt":["ACC-011"],"img-dimensions":["VIS-008"],"infinite-animation":["VIS-016"],"input-label":["FORM-001"],"input-type":["FORM-010"],"label-wrap":["VIS-018"],"landmarks":["ACC-010"],"leftover-text":["COPY-001","PAGE-004","STATE-007","TASK-002"],"line-height":["VIS-003"],"line-length":["VIS-002"],"nested-dialog":["NAV-009"],"page-lang":["ACC-012"],"page-title":["NAV-001"],"paste-blocked":["FORM-012"],"primary-button-count":["ACT-007"],"raw-error-text":["COPY-011"],"reduced-motion":["ACC-015"],"required-attr":["FORM-005"],"scroll-hidden":["VIS-017"],"small-input-font":["RESP-003"],"spacing-scale":["VIS-012"],"system-theme":["VIS-011"],"tabindex-positive":["ACC-003"],"table-headers":["DATA-006"],"target-size":["ACC-007"],"text-size":["VIS-001"],"text-style":["VIS-007"],"text-volume":["COPY-003","COPY-014"],"transition-duration":["VIS-015"],"transition-props":["VIS-014"],"vague-label":["COPY-007","COPY-008"],"visible-label":["FORM-002"],"zoom-disabled":["RESP-002"]} /* RULE_MAP:end */;
 
   const checks = [];
   const check = (name, fn) => checks.push({ name, fn });
@@ -406,15 +414,30 @@
     return verdict(bad, fields.length);
   });
 
+  // A filter outside any form, named for assistive technology, whose shown value names what it
+  // filters ("All statuses" on a select named "Status") is the FORM-002 compact-filter exception.
+  const stems = (t) => (t.toLowerCase().match(/[a-z]{4,}/g) || []).map((w) => w.slice(0, 4));
+  function namedFilter(f) {
+    if (f.closest('form') && !f.closest('[role=toolbar], [role=search]')) return false;
+    const name = accName(f);
+    const shown = f.matches('select') ? (f.selectedOptions[0] ? f.selectedOptions[0].text : '') : (f.value || f.textContent || '');
+    if (!name || !shown) return false;
+    const a = stems(name);
+    return stems(shown).some((w) => a.includes(w));
+  }
+
   check('visible-label', () => {
     const fields = $$(FIELDS).filter(visible);
-    const bad = fields.filter((f) => {
+    const unlabeled = fields.filter((f) => {
       const labs = f.labels ? Array.from(f.labels) : [];
       const ids = (f.getAttribute('aria-labelledby') || '').split(/\s+/).filter(Boolean).map((id) => document.getElementById(id)).filter(Boolean);
       return ![...labs, ...ids].some((l) => visible(l) && text(l));
     });
+    const bad = unlabeled.filter((f) => !namedFilter(f));
+    const filters = unlabeled.length - bad.length;
     return verdict(bad.map((f) => item(f, 'no visible label text on the page')), fields.length,
-      'Fields whose only name is aria-label, title or a hidden label.');
+      'Fields whose only name is aria-label, title or a hidden label.' +
+      (filters ? ' ' + filters + ' filter control(s) outside a form show a value naming what they filter, the FORM-002 exception; confirm they sit above what they filter.' : ''));
   });
 
   check('input-type', () => {
@@ -474,7 +497,8 @@
     return verdict(bad, n, 'Only judged in forms that mark some fields as optional in their labels.');
   });
 
-  check('small-input-font', () => {
+  check('small-input-font', (opts) => {
+    if (opts.desktopOnly) return result('na', [], 'desktop-only product');
     if (window.innerWidth > 480) return result('na', [], 'only measured at phone widths (480px or less)');
     const fields = $$(FIELDS).filter(visible).filter((f) => !f.matches('[type=checkbox], [type=radio], [type=range]'));
     const bad = fields.filter((f) => parseFloat(style(f).fontSize) < 16);
@@ -539,12 +563,14 @@
     return verdict(tables.filter((t) => !t.querySelector('th')).map((t) => item(t, 'data table has no header cells')), tables.length);
   });
 
-  check('horizontal-scroll', () => {
+  check('horizontal-scroll', (opts) => {
     const de = document.documentElement;
     const extra = de.scrollWidth - de.clientWidth;
     const wide = extra > 1 ? $$('body *').filter(visible).filter((el) => el.getBoundingClientRect().right > de.clientWidth + 1).slice(0, 5) : [];
-    return result(extra > 1 ? 'fail' : 'pass', wide.map((el) => item(el, 'extends past the right edge')),
-      'Viewport ' + window.innerWidth + 'px wide' + (extra > 1 ? '; content is ' + extra + 'px wider.' : '.') + ' Run again at 320 and 375px.');
+    const status = extra <= 1 ? 'pass' : opts.desktopOnly ? 'review' : 'fail';
+    return result(status, wide.map((el) => item(el, 'extends past the right edge')),
+      'Viewport ' + window.innerWidth + 'px wide' + (extra > 1 ? '; content is ' + extra + 'px wider.' : '.') +
+      (opts.desktopOnly ? ' Desktop-only product: reflow still applies at 400% zoom, except for content that needs two dimensions (RESP-001).' : ' Run again at 320 and 375px.'));
   });
 
   check('dialog-semantics', () => {
@@ -573,6 +599,49 @@
     return result(open.length > 1 ? 'fail' : open.length ? 'pass' : 'na', open.length > 1 ? open.map((d) => item(d, 'open at the same time as another dialog')) : []);
   });
 
+  // Fixed and sticky elements over the controls beneath them (RESP-006). A control counts as
+  // covered only if it is still covered after being scrolled to the middle of the viewport, so
+  // a sticky header that content scrolls under is not reported, but a floating button over the
+  // last row, or a toast over a toolbar, is.
+  check('fixed-overlap', () => {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const layers = $$('body *').filter((el) => {
+      const p = style(el).position;
+      if ((p !== 'fixed' && p !== 'sticky') || !visible(el) || srOnly(el)) return false;
+      if (el.matches('dialog, [role=dialog], [role=alertdialog]') || el.closest('dialog[open], [role=dialog], [role=alertdialog]')) return false;
+      const r = el.getBoundingClientRect();
+      return !(r.width >= vw * 0.9 && r.height >= vh * 0.9); // a full-screen layer is the page
+    });
+    if (!layers.length) return result('na', []);
+    const top = layers.filter((l) => !layers.some((o) => o !== l && o.contains(l)));
+    const coveredBy = (el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom <= 0 || r.top >= vh) return null;
+      const x = Math.min(Math.max(r.left + r.width / 2, 0), vw - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), vh - 1);
+      const hit = document.elementFromPoint(x, y);
+      if (!hit || el.contains(hit) || hit.contains(el)) return null;
+      return top.find((l) => l.contains(hit) && !l.contains(el)) || null;
+    };
+    const x0 = window.scrollX, y0 = window.scrollY;
+    const bad = [];
+    try {
+      const controls = $$(CONTROLS).filter(visible).filter((el) => !top.some((l) => l.contains(el)));
+      for (const pos of [0, document.documentElement.scrollHeight]) {
+        window.scrollTo(x0, pos);
+        for (const el of controls) {
+          if (bad.some((b) => b.el === el) || !coveredBy(el)) continue;
+          const r = el.getBoundingClientRect();
+          window.scrollTo(x0, window.scrollY + r.top + r.height / 2 - vh / 2);
+          const layer = coveredBy(el);
+          if (layer) bad.push({ el, layer });
+          window.scrollTo(x0, pos);
+        }
+      }
+    } finally { window.scrollTo(x0, y0); }
+    return result(bad.length ? 'review' : 'pass', bad.map(({ el, layer }) => item(el, 'covered by fixed element ' + where(layer))),
+      'Controls a fixed or sticky element still covers when scrolled into the middle of the screen. Transient toasts are caught only if on screen when measured.');
+  });
+
   // ---------- checks: text ----------
 
   // Text on the page. Copy checks read everything a person or a screen reader meets;
@@ -589,7 +658,7 @@
     return out;
   }
 
-  check('leftover-text', () => {
+  check('leftover-text', (opts) => {
     const year = new Date().getFullYear();
     const pats = [
       [/lorem ipsum|dolor sit amet/i, 'placeholder text'],
@@ -597,15 +666,22 @@
       [/\b(TODO|FIXME|TBD|XXX)\b/, 'developer marker'],
       [/\b(your (company|name|logo|text) here|example (text|content)|sample (text|data|content)|placeholder (text|content)|mock data|dummy (data|text)|demo data)\b/i, 'placeholder or demo wording'],
       [/^(undefined|null|NaN|\[object Object\])$|\bundefined\b.*\bundefined\b|\bNaN\b/, 'a raw value that should not be shown'],
-      [/\b(john|jane) doe\b|\bacme (inc|corp|co)\b|\bfoo ?bar\b/i, 'stock sample name'],
     ];
-    const bad = [];
+    // Stock names are often real seed or test data, so they ask for review rather than fail.
+    const stock = /\b(john|jane) doe\b|\bacme (inc|corp|co)\b|\bfoo ?bar\b/i;
+    const ignore = (opts.ignoreText || []).map((x) => (x instanceof RegExp ? x : new RegExp(String(x), 'i')));
+    const bad = [], maybe = [];
     for (const [el, t] of textNodes()) {
-      for (const [re, what] of pats) if (re.test(t)) { bad.push({ at: where(el), text: t.slice(0, 60), note: what }); break; }
+      if (ignore.some((re) => re.test(t))) continue;
+      const hit = pats.find(([re]) => re.test(t));
+      if (hit) bad.push({ at: where(el), text: t.slice(0, 60), note: hit[1] });
+      else if (stock.test(t)) maybe.push({ at: where(el), text: t.slice(0, 60), note: 'stock sample name; fine if it is real data' });
       const c = t.match(/(?:©|\(c\)|copyright)\s*(?:\d{4}\s*-\s*)?(\d{4})/i);
       if (c && parseInt(c[1], 10) < year) bad.push({ at: where(el), text: t.slice(0, 60), note: 'copyright year is ' + c[1] });
     }
-    return result(bad.length ? 'fail' : 'pass', bad);
+    if (bad.length) return result('fail', bad.concat(maybe));
+    return result(maybe.length ? 'review' : 'pass', maybe,
+      maybe.length ? 'Stock sample names. Real seed users are fine; leftover samples are not. Pass ignoreText to skip known names.' : undefined);
   });
 
   check('raw-error-text', () => {
@@ -674,7 +750,8 @@
     .filter((el) => !el.closest('a, button, label, table, nav, [role=tab], [role=menu]') && !el.querySelector(PROSE) && text(el).length >= 60);
   const seconds = (v) => Math.max(0, ...String(v || '0s').split(',').map((t) => { t = t.trim(); return t.endsWith('ms') ? parseFloat(t) / 1000 : parseFloat(t) || 0; }));
 
-  check('text-size', () => {
+  check('text-size', (opts) => {
+    const proseMin = opts.dense ? 14 : 16;
     const blocks = new Set(prose());
     const seen = new Set();
     const bad = [];
@@ -684,7 +761,7 @@
       const size = px(style(el).fontSize);
       const block = el.closest(PROSE);
       if (size < 11.5) bad.push(item(el, size + 'px text; nothing should be under 12px'));
-      else if (block && blocks.has(block) && size < 15.5) bad.push(item(el, size + 'px running text; use 16px or more'));
+      else if (block && blocks.has(block) && size < proseMin - 0.5) bad.push(item(el, size + 'px running text; use ' + proseMin + 'px or more' + (opts.dense ? ' (dense tool)' : '')));
     }
     return verdict(bad, seen.size);
   });
@@ -942,11 +1019,21 @@
     // stop, up to settleMs (default 10 s; 0 skips the wait).
     const settled = opts.settleMs === 0 ? { settled: true, waitedMs: 0, skipped: true }
       : await settle(opts.settleMs || 10000, opts.quietMs || 500, opts.netCapMs);
+    const warnings = [];
+    if (!settled.settled) warnings.push('The page was still loading when measured; results may describe a loading state.');
+    const strip = (u) => String(u).replace(/#.*$/, '').replace(/\/$/, '');
+    if (opts.expectUrl && strip(opts.expectUrl) !== strip(location.href))
+      warnings.push('Measured ' + location.href + ', not the requested ' + opts.expectUrl + '; the page redirected.');
+    const password = $$('input[type=password]').some(visible);
+    if (password && /log ?in|sign ?in|signin|sso|auth|session|expired/i.test(location.href + ' ' + document.title))
+      warnings.push('This looks like a sign-in page. If you meant to measure a signed-in screen, the session has expired or was never set.');
     const out = {
-      tool: 'ux-check', version: VERSION, url: location.href,
+      tool: 'ux-check', version: VERSION, url: location.href, title: document.title,
       viewport: { width: window.innerWidth, height: window.innerHeight },
+      scope: { desktopOnly: !!opts.desktopOnly, dense: !!opts.dense, singleTheme: !!opts.singleTheme },
       settled,
-      warning: settled.settled ? undefined : 'The page was still loading when measured; results may describe a loading state.',
+      warnings: warnings.length ? warnings : undefined,
+      warning: warnings.length ? warnings.join(' ') : undefined,
       summary: { fail: [], review: [], pass: [], na: [], error: [] },
       checks: {}, rules: {},
     };
